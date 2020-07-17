@@ -1,0 +1,159 @@
+﻿<docs>
+    <Physics2Dx>
+        <is2Dnot3D>
+            <summary>Returns if Physics2Dx is currently operating in 2D instead of 3D.</summary>
+        </is2Dnot3D>
+        <Convert>
+            <summary>Converts the current Physics2Dx mode to the other.</summary>
+        </Convert>
+        <onConvert>
+            <summary>Invoked whenever the Physics2Dx mode is converted.</summary>
+        </onConvert>
+        <conversionTime>
+            <summary>The time it takes for the Physics2Dx mode to convert.</summary>
+        </conversionTime>
+        <waitForConversionTime>
+            <summary>Suspends the coroutine execution for the amount of conversionTime.</summary>
+        </waitForConversionTime>
+        <isConverting>
+            <summary>Returns if Physics2Dx is currently converting or not.</summary>
+        </isConverting>
+        <waitWhileConverting>
+            <summary>Suspends the coroutine execution until Physics2Dx has stopped converting.</summary>
+        </waitWhileConverting>
+        <splitConversionOverMultipleFrames>
+            <summary>If enabled, the conversion is split over multiple frames, but never longer than the conversionTime.</summary>
+        </splitConversionOverMultipleFrames>
+    </Physics2Dx>
+    <Modules>
+        <Module2Dx>
+            <ConvertInstances>
+                <summary>Converts every enabled Module2Dx to the specified Physics2Dx mode.</summary>
+            </ConvertInstances>
+            <conversionOrder>
+                <summary>Used to manage the order in which this module is converted, ascending.</summary>
+            </conversionOrder>
+            <batchSize>
+                <summary>Determines the maximum number of modules of this type that will be converted in a single frame.</summary>
+            </batchSize>
+            <Convert>
+                <summary>Converts this Module2Dx to the specified Physics2Dx mode.</summary>
+            </Convert>
+            <ConvertTo2D>
+                <summary>Converts this Module2Dx to its 2D form.</summary>
+            </ConvertTo2D>
+            <ConvertTo3D>
+                <summary>Converts this Module2Dx to its 3D form.</summary>
+            </ConvertTo3D>
+        </Module2Dx>
+        <Collider2Dx>
+            <colliders>
+                <summary>The colliders attached to this Collider2Dx.</summary>
+            </colliders>
+            <collider2Ds>
+                <summary>The collider2Ds attached to this Collider2Dx.</summary>
+            </collider2Ds>
+            <AddCollider>
+                <summary>Add a Collider and create an equivalent Collider2D.</summary>
+                <param name="toAdd">The Collider to copy from.</param>
+                <param name="ignore">The properties to ignore when copying.</param>
+            </AddCollider>
+            <DestroyCollider>
+                <summary>Destroy a Collider and its equivalent Collider2D.</summary>
+                <param name="index">The index of the Collider to destroy.</param>
+                <param name="collider">The Collider to destroy.</param>
+            </DestroyCollider>
+            <AddCollider2D>
+                <summary>Add a Collider2D and create an equivalent Collider.</summary>
+                <param name="toAdd">The Collider2D to copy from.</param>
+                <param name="ignore">The properties to ignore when copying.</param>
+            </AddCollider2D>
+            <DestroyCollider2D>
+                <summary>Destroy a Collider2D and its equivalent Collider.</summary>
+                <param name="index">The index of the Collider2D to destroy.</param>
+                <param name="collider2D">The Collider2D to destroy.</param>
+            </DestroyCollider2D>
+            <Update2DTransform>
+                <summary>Rotate the collider2DsCache transform to have a 2D relative rotation from the Collider2Dx.</summary>
+                <remarks>2D relative means the same up direction (y) as the Collider2Dx but with the forward direction (z) looking forward.</remarks>
+            </Update2DTransform>
+            <UpdateMappedColliders>
+                <summary>Update the mapped Colliders to remove any destroyed Colliders or recreate any destroyed Collider2Ds.</summary>
+            </UpdateMappedColliders>
+            <CacheColliders>
+                <summary>Iterate through all Colliders on the Collider2Dx and the collidersCache and cache them if they weren't already.</summary>
+            </CacheColliders>
+            <UpdateMappedCollider2Ds>
+                <summary>Update the mapped Collider2Ds to remove any destroyed Collider2Ds or recreate any destroyed Colliders.</summary>
+            </UpdateMappedCollider2Ds>
+            <CacheCollider2Ds>
+                <summary>Iterate through all Collider2Ds on the Collider2Dx and the collider2DsCache and cache them if they weren't already.</summary>
+            </CacheCollider2Ds>
+        </Collider2Dx>
+    </Modules>
+    <Converter2Dx>
+        <PhysicMaterial>
+            <summary>Returns the 2D equivalent of a physicMaterial.</summary>
+            <param name="physicMaterial">The physicMaterial to convert.</param>
+        </PhysicMaterial>
+        <PhysicsMaterial2D>
+            <summary>Returns the 3D equivalent of a physicsMaterial2D.</summary>
+            <param name="physicsMaterial2D">The physicsMaterial2D to convert.</param>
+        </PhysicsMaterial2D>
+        <Rigidbody>
+            <summary>Converts a Rigidbody to its 2D equivalent.</summary>
+            <param name="rigidbody">The Rigidbody to convert.</param>
+            <param name="rigidbody2D">The Rigidbody2D to convert to.</param>
+        </Rigidbody>
+        <Rigidbody2D>
+            <summary>Converts a Rigidbody2D to its 3D equivalent.</summary>
+            <param name="rigidbody2D">The Rigidbody2D to convert.</param>
+            <param name="rigidbody">The Rigidbody to convert to.</param>
+        </Rigidbody2D>
+        <Sphere>
+            <summary>Converts a SphereCollider to its 2D equivalent.</summary>
+            <param name="sphereCollider">The SphereCollider to convert.</param>
+            <param name="circleCollider2D">The CircleCollider2D to convert to.</param>
+        </Sphere>
+        <Circle2D>
+            <summary>Converts a CircleCollider2D to its 3D equivalent.</summary>
+            <param name="circleCollider2D">The CircleCollider2D to convert.</param>
+            <param name="sphereCollider">The SphereCollider to convert to.</param>
+        </Circle2D>
+        <Capsule>
+            <summary>Converts a CapsuleCollider to its 2D equivalent.</summary>
+            <param name="capsuleCollider">The CapsuleCollider to convert.</param>
+            <param name="capsuleCollider2D">The CapsuleCollider2D to convert to.</param>
+        </Capsule>
+        <Capsule2D>
+            <summary>Converts a CapsuleCollider2D to its 3D equivalent.</summary>
+            <param name="capsuleCollider2D">The CapsuleCollider2D to convert.</param>
+            <param name="capsuleCollider">The CapsuleCollider to convert to.</param>
+        </Capsule2D>
+        <Box>
+            <summary>Converts a BoxCollider to its 2D equivalent.</summary>
+            <param name="boxCollider">The BoxCollider to convert.</param>
+            <param name="boxCollider2D">The BoxCollider2D to convert to.</param>
+        </Box>
+        <Box2D>
+            <summary>Converts a BoxCollider2D to its 3D equivalent.</summary>
+            <param name="boxCollider2D">The BoxCollider2D to convert.</param>
+            <param name="boxCollider">The BoxCollider to convert to.</param>
+        </Box2D>
+        <Mesh>
+            <summary>Converts a MeshCollider to its 2D equivalent.</summary>
+            <param name="meshCollider">The MeshCollider to convert.</param>
+            <param name="polygonCollider2D">The PolygonCollider2D to convert to.</param>
+        </Mesh>
+        <Collider>
+            <summary>Converts a Collider to its 2D equivalent.</summary>
+            <param name="collider">The Collider to convert.</param>
+            <param name="collider2D">The Collider2D to convert to.</param>
+        </Collider>
+        <Collider2D>
+            <summary>Converts a Collider2D to its 3D equivalent.</summary>
+            <param name="collider2D">The Collider2D to convert to.</param>
+            <param name="collider">The Collider to convert.</param>
+        </Collider2D>
+    </Converter2Dx>
+</docs>
