@@ -38,7 +38,7 @@ namespace Physics2DxSystem.Utilities
             {
                 if(pinfo.CanWrite)
                 {
-                    if(pinfos.Any(e => e.Name == $"shared{char.ToUpper(pinfo.Name[0])}{pinfo.Name.Substring(1)}")) // Make sure that properties which have a "shared..." value are not copied to prevent leaking objects.
+                    if(pinfos.Any(e => e.Name == $"shared{char.ToUpper(pinfo.Name[0])}{pinfo.Name.Substring(1)}")) // Make sure that properties which have an equivalant "shared..." value are not copied to prevent leaking objects.
                     {
                         continue;
                     }
@@ -62,7 +62,7 @@ namespace Physics2DxSystem.Utilities
                      select field;
             foreach(var finfo in finfos)
             {
-                if(finfos.Any(e => e.Name == $"shared{char.ToUpper(finfo.Name[0])}{finfo.Name.Substring(1)}")) // Make sure that fields which have a "shared..." value are not copied to prevent leaking objects.
+                if(finfos.Any(e => e.Name == $"shared{char.ToUpper(finfo.Name[0])}{finfo.Name.Substring(1)}")) // Make sure that fields which have an equivalant "shared..." value are not copied to prevent leaking objects.
                 {
                     continue;
                 }

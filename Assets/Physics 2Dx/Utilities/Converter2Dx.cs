@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Physics2DxSystem.Utilities
 {
@@ -92,12 +93,12 @@ namespace Physics2DxSystem.Utilities
                 : 0f;
             rigidbody2D.hideFlags = rigidbody.hideFlags;
             rigidbody2D.interpolation = (RigidbodyInterpolation2D)rigidbody.interpolation;
-            rigidbody2D.mass = Mathf.Min(rigidbody.mass, 1000000);
+            rigidbody2D.mass = Mathf.Min(rigidbody.mass, 1000000f);
             rigidbody2D.sleepMode = RigidbodySleepMode2D.StartAwake;
             rigidbody2D.useAutoMass = false;
             rigidbody2D.velocity = rigidbody.velocity;
 
-            rigidbody2D.constraints = RigidbodyConstraintsToRigidbodyConstraints2D(rigidbody.constraints);
+            rigidbody2D.constraints = rigidbody.constraints.ToRigidbodyConstraints2D();
         }
 
         /// <include file='../Documentation.xml' path='docs/Convert2dx/Rigidbody2D/*'/>
@@ -106,46 +107,18 @@ namespace Physics2DxSystem.Utilities
             // Carry over the Rigidbody2D settings to its 3D equivalent.
             rigidbody.angularDrag = rigidbody2D.angularDrag;
             rigidbody.angularVelocity = Vector3.forward * rigidbody2D.angularVelocity * Mathf.Deg2Rad;
-            //rigidbody.centerOfMass = new Vector3(rigidbody2D.centerOfMass.x, rigidbody2D.centerOfMass.y, rigidbody.centerOfMass.z);
             rigidbody.drag = rigidbody2D.drag;
             rigidbody.hideFlags = rigidbody2D.hideFlags;
             rigidbody.interpolation = (RigidbodyInterpolation)rigidbody2D.interpolation;
             rigidbody.isKinematic = rigidbody2D.bodyType != RigidbodyType2D.Dynamic;
             rigidbody.mass = rigidbody2D.mass;
-            //rigidbody.position = new Vector3(rigidbody2D.position.x, rigidbody2D.position.y, rigidbody.position.z);
             rigidbody.useGravity = rigidbody2D.gravityScale > float.Epsilon;
             rigidbody.velocity = rigidbody2D.velocity;
 
-            // Carry over the constraints2D to their 3D equivalent.
-            if(rigidbody2D.constraints.HasFlag(RigidbodyConstraints2D.FreezePositionX))
-            {
-                rigidbody.constraints |= RigidbodyConstraints.FreezePositionX;
-            }
-            else if(rigidbody.constraints.HasFlag(RigidbodyConstraints.FreezePositionX))
-            {
-                rigidbody.constraints ^= RigidbodyConstraints.FreezePositionX;
-            }
-
-            if(rigidbody2D.constraints.HasFlag(RigidbodyConstraints2D.FreezePositionY))
-            {
-                rigidbody.constraints |= RigidbodyConstraints.FreezePositionY;
-            }
-            else if(rigidbody.constraints.HasFlag(RigidbodyConstraints.FreezePositionY))
-            {
-                rigidbody.constraints ^= RigidbodyConstraints.FreezePositionY;
-            }
-
-            if(rigidbody2D.constraints.HasFlag(RigidbodyConstraints2D.FreezeRotation))
-            {
-                rigidbody.constraints |= RigidbodyConstraints.FreezeRotationZ;
-            }
-            else if(rigidbody.constraints.HasFlag(RigidbodyConstraints.FreezeRotationZ))
-            {
-                rigidbody.constraints ^= RigidbodyConstraints.FreezeRotationZ;
-            }
+            rigidbody.constraints = rigidbody2D.constraints.ToRigidbodyConstraints(rigidbody.constraints);
         }
 
-        private static RigidbodyConstraints2D RigidbodyConstraintsToRigidbodyConstraints2D(RigidbodyConstraints constraints)
+        private static RigidbodyConstraints2D ToRigidbodyConstraints2D(this RigidbodyConstraints constraints)
         {
             RigidbodyConstraints2D constraints2D = RigidbodyConstraints2D.None;
 
@@ -165,6 +138,38 @@ namespace Physics2DxSystem.Utilities
             }
 
             return constraints2D;
+        }
+
+        private static RigidbodyConstraints ToRigidbodyConstraints(this RigidbodyConstraints2D constraints2D, RigidbodyConstraints constraints)
+        {
+            if(constraints2D.HasFlag(RigidbodyConstraints2D.FreezePositionX))
+            {
+                constraints |= RigidbodyConstraints.FreezePositionX;
+            }
+            else
+            {
+                constraints &= ~RigidbodyConstraints.FreezePositionX;
+            }
+
+            if(constraints2D.HasFlag(RigidbodyConstraints2D.FreezePositionY))
+            {
+                constraints |= RigidbodyConstraints.FreezePositionY;
+            }
+            else
+            {
+                constraints &= ~RigidbodyConstraints.FreezePositionY;
+            }
+
+            if(constraints2D.HasFlag(RigidbodyConstraints2D.FreezeRotation))
+            {
+                constraints |= RigidbodyConstraints.FreezeRotationZ;
+            }
+            else
+            {
+                constraints &= ~RigidbodyConstraints.FreezeRotationZ;
+            }
+
+            return constraints;
         }
         #endregion
 
@@ -198,7 +203,9 @@ namespace Physics2DxSystem.Utilities
         }
 
         /// <include file='../Documentation.xml' path='docs/Converter2Dx/Collider/*'/>
-        public static void ToCollider2D(this Collider collider, Collider2D collider2D)
+        public static void ToCollider2D(this Collider collider, Collider2D collider2D) => collider.ToCollider2D(collider2D, default);
+        /// <include file='../Documentation.xml' path='docs/Converter2Dx/Collider/*'/>
+        public static void ToCollider2D(this Collider collider, Collider2D collider2D, ConversionSettings conversionSettings)
         {
             switch(collider)
             {
@@ -208,6 +215,12 @@ namespace Physics2DxSystem.Utilities
                 case CapsuleCollider capsuleCollider when collider2D is CapsuleCollider2D capsuleCollider2D:
                     capsuleCollider.ToCapsuleCollider2D(capsuleCollider2D);
                     break;
+                case BoxCollider boxCollider when collider2D is PolygonCollider2D polygonCollider2D:
+
+                    break;
+                case MeshCollider meshCollider when collider2D is PolygonCollider2D polygonCollider2D:
+                    meshCollider.ToPolygonCollider2D(polygonCollider2D, conversionSettings.renderSize);
+                    break;
                 default:
                     collider.CopyGenericProperties(collider2D);
                     break;
@@ -215,7 +228,9 @@ namespace Physics2DxSystem.Utilities
         }
 
         /// <include file='../Documentation.xml' path='docs/Converter2Dx/Collider2D/*'/>
-        public static void ToCollider(this Collider2D collider2D, Collider collider)
+        public static void ToCollider(this Collider2D collider2D, Collider collider) => collider2D.ToCollider(collider, default);
+        /// <include file='../Documentation.xml' path='docs/Converter2Dx/Collider2D/*'/>
+        public static void ToCollider(this Collider2D collider2D, Collider collider, Conversion2DSettings conversion2DSettings)
         {
             switch(collider2D)
             {
@@ -224,6 +239,12 @@ namespace Physics2DxSystem.Utilities
                     break;
                 case CapsuleCollider2D capsuleCollider2D when collider is CapsuleCollider capsuleCollider:
                     capsuleCollider2D.ToCapsuleCollider(capsuleCollider);
+                    break;
+                case PolygonCollider2D polygonCollider2D when collider is BoxCollider boxCollider:
+
+                    break;
+                case PolygonCollider2D polygonCollider2D when collider is MeshCollider meshCollider:
+                    polygonCollider2D.ToMeshCollider(meshCollider, conversion2DSettings.polygonCollider2DConversionMethod);
                     break;
                 default:
                     collider2D.CopyGenericProperties(collider);
@@ -255,7 +276,7 @@ namespace Physics2DxSystem.Utilities
         public static void ToCapsuleCollider2D(this CapsuleCollider capsuleCollider, CapsuleCollider2D capsuleCollider2D)
         {
             capsuleCollider.CopyGenericProperties(capsuleCollider2D);
-            
+
             // Set the CapsuleCollider2D offset.
             capsuleCollider2D.offset = CenterToOffset(capsuleCollider.transform, capsuleCollider.center, capsuleCollider2D.transform);
 
@@ -343,6 +364,186 @@ namespace Physics2DxSystem.Utilities
 
             capsuleCollider.radius = diameter * 0.5f;
             capsuleCollider.height = height;
+        }
+
+        /// <include file='../Documentation.xml' path='docs/Converter2Dx/Box/*'/>
+        //public static void ToPolygonCollider2D(this BoxCollider boxCollider, PolygonCollider2D polygonCollider2D)
+        //{
+        //    boxCollider.CopyGenericProperties(polygonCollider2D);
+
+        //    polygonCollider2D.offset = CenterToOffset(boxCollider.transform, boxCollider.center, polygonCollider2D.transform);
+        //}
+
+        /// <include file='../Documentation.xml' path='docs/Converter2Dx/Box2D/*'/>
+        //public static void ToBoxCollider(this PolygonCollider2D polygonCollider2D, BoxCollider boxCollider)
+        //{
+        //    polygonCollider2D.CopyGenericProperties(boxCollider);
+
+        //    boxCollider.center = OffsetToCenter(polygonCollider2D.transform, polygonCollider2D.offset, boxCollider.transform, boxCollider.center);
+        //}
+
+        /// <include file='../Documentation.xml' path='docs/Converter2Dx/Mesh/*'/>
+        public static void ToPolygonCollider2D(this MeshCollider meshCollider, PolygonCollider2D polygonCollider2D) => meshCollider.ToPolygonCollider2D(polygonCollider2D, default);
+        /// <include file='../Documentation.xml' path='docs/Converter2Dx/Mesh/*'/>
+        public static void ToPolygonCollider2D(this MeshCollider meshCollider, PolygonCollider2D polygonCollider2D, MeshColliderConversionRenderSize renderSize)
+        {
+            meshCollider.CopyGenericProperties(polygonCollider2D);
+
+            // Setup the renderer and camera for the render shot.
+            if(!(renderFilter.sharedMesh = meshCollider.sharedMesh))
+            {
+                return;
+            }
+            renderFilter.transform.SetPositionAndRotation(Vector3.zero, Quaternion.Inverse(polygonCollider2D.transform.rotation) * meshCollider.transform.rotation);
+
+            var bounds = renderRenderer.bounds;
+            renderFilter.transform.position = -bounds.center + Vector3.forward * bounds.extents.z;
+
+            renderCamera.orthographicSize =
+                bounds.extents.x > bounds.extents.y
+                ? bounds.extents.x * renderCamera.aspect
+                : bounds.extents.y;
+            if(Mathf.Approximately(renderCamera.orthographicSize, 0))
+            {
+                return;
+            }
+            renderCamera.farClipPlane = Mathf.Max(bounds.size.z, 0.01f); // We assume the nearClipPlane to be 0, otherwise we would need to do renderCamera.nearClipPlane + 0.01f.
+
+            // Render the texture and read it to a Texture2D.
+            var activeRenderTexture = RenderTexture.active;
+            var renderTexture = RenderTexture.active = renderCamera.targetTexture = renderTextures[(int)renderSize];
+
+            renderCamera.gameObject.SetActive(true);
+            renderCamera.Render();
+
+            var texture2D = new Texture2D(renderTexture.width, renderTexture.height);
+            var rect = new Rect(0, 0, renderTexture.width, renderTexture.height);
+            texture2D.ReadPixels(rect, 0, 0, false);
+
+            renderFilter.sharedMesh = null;
+            renderCamera.gameObject.SetActive(false);
+            RenderTexture.active = activeRenderTexture;
+
+            // Create a sprite out of the texture2D and let it generate a physics shape.
+            var pixelsPerUnit = texture2D.width * 0.5f / renderCamera.orthographicSize; // We assume the texture2D is a square, otherwise we would need to do Mathf.Max(texture2D.width, texture2D.height).
+            Vector4 border = new Vector4(rect.xMin, rect.yMin, rect.xMax, rect.yMax);
+            var sprite = Sprite.Create(texture2D, rect, centerPivot, pixelsPerUnit, 0, SpriteMeshType.FullRect, border, true);
+
+            // Give the generated physics shape to the polygonCollider2D and offset it by the amount the renderer bounds and renderer transform were offset times half (not sure why times half).
+            if((polygonCollider2D.pathCount = sprite.GetPhysicsShapeCount()) > 0)
+            {
+                for(int i = 0; i < sprite.GetPhysicsShapeCount(); i++)
+                {
+                    sprite.GetPhysicsShape(i, points);
+                    polygonCollider2D.SetPath(i, points);
+                }
+            }
+            polygonCollider2D.offset = (bounds.center - renderFilter.transform.position) * 0.5f;
+        }
+
+        /// <include file='../Documentation.xml' path='docs/Converter2Dx/Polygon2D/*'/>
+        public static void ToMeshCollider(this PolygonCollider2D polygonCollider2D, MeshCollider meshCollider) => polygonCollider2D.ToMeshCollider(meshCollider, default);
+        /// <include file='../Documentation.xml' path='docs/Converter2Dx/Polygon2D/*'/>
+        public static void ToMeshCollider(this PolygonCollider2D polygonCollider2D, MeshCollider meshCollider, PolygonCollider2DConversionMethod conversionMethod)
+        {
+            polygonCollider2D.CopyGenericProperties(meshCollider);
+
+            if(polygonCollider2D.isActiveAndEnabled)
+            {
+                switch(conversionMethod)
+                {
+                    case PolygonCollider2DConversionMethod.CreateMeshAndDestroySharedMesh:
+                        Object.Destroy(meshCollider.sharedMesh);
+                        goto case PolygonCollider2DConversionMethod.CreateMesh;
+                    case PolygonCollider2DConversionMethod.CreateMesh:
+                        if(!polygonCollider2D.attachedRigidbody)
+                        {
+                            var rigidbody2D = polygonCollider2D.gameObject.AddComponent<Rigidbody2D>();
+                            meshCollider.sharedMesh = polygonCollider2D.CreateMesh(false, false);
+                            Object.DestroyImmediate(rigidbody2D);
+                        }
+                        else
+                        {
+                            meshCollider.sharedMesh = polygonCollider2D.CreateMesh(false, false);
+                        }
+
+                        if(meshCollider.transform.rotation != polygonCollider2D.transform.rotation)
+                        {
+                            // Rotate Vertices to the inverted position of the meshCollider's rotation so that they become flat.
+                            var vertices = new List<Vector3>();
+                            var inverse = Quaternion.Inverse(meshCollider.transform.rotation) * polygonCollider2D.transform.rotation;
+                            meshCollider.sharedMesh.GetVertices(vertices);
+                            for(int i = 0; i < vertices.Count; i++)
+                            {
+                                vertices[i] = inverse * vertices[i];
+                            }
+                            meshCollider.sharedMesh.SetVertices(vertices); // TODO: Optimize with advanced mesh functions.
+                            meshCollider.sharedMesh.RecalculateBounds();
+                        }
+
+                        break;
+                }
+            }
+        }
+
+        private static Camera renderCamera;
+        private static RenderTexture[] renderTextures;
+        private static MeshFilter renderFilter;
+        private static MeshRenderer renderRenderer;
+        private static List<Vector2> points;
+        private static readonly Vector2 centerPivot = new Vector2(0.5f, 0.5f);
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void InitColliderConversion()
+        {
+            var settings = Resources.Load<Physics2DxSettings>(nameof(Physics2DxSettings));
+
+            renderTextures = new RenderTexture[8]
+            {
+                new RenderTexture(32, 32, 0),
+                new RenderTexture(64, 64, 0),
+                new RenderTexture(256, 256, 0),
+                new RenderTexture(512, 512, 0),
+                new RenderTexture(1024, 1024, 0),
+                new RenderTexture(2048, 2048, 0),
+                new RenderTexture(4096, 4096, 0),
+                new RenderTexture(8192, 8192, 0),
+            };
+
+            // Create renderCamera GameObject.
+            var renderCameraGO = new GameObject(nameof(renderCamera));
+            renderCameraGO.SetActive(false);
+            Object.DontDestroyOnLoad(renderCameraGO);
+            if(Physics2Dx.slimHierarchy)
+            {
+                renderCameraGO.hideFlags |= HideFlags.HideInHierarchy;
+            }
+
+            // Create rendering GameObject.
+            var renderingGO = new GameObject(nameof(renderFilter));
+            renderingGO.transform.SetParent(renderCameraGO.transform, false);
+            renderingGO.layer = 31;
+
+            // Create renderCamera.
+            renderCamera = renderCameraGO.AddComponent<Camera>();
+            renderCamera.clearFlags = CameraClearFlags.SolidColor;
+            renderCamera.backgroundColor = Color.clear;
+            renderCamera.cullingMask = 1 << 31;
+            renderCamera.orthographic = true;
+            renderCamera.nearClipPlane = 0f;
+            renderCamera.renderingPath = RenderingPath.Forward;
+            renderCamera.useOcclusionCulling = 
+                renderCamera.allowHDR = 
+                renderCamera.allowMSAA = 
+                renderCamera.allowDynamicResolution = false;
+
+            // Create rendering Objects.
+            renderFilter = renderingGO.AddComponent<MeshFilter>();
+
+            renderRenderer = renderingGO.AddComponent<MeshRenderer>();
+            renderRenderer.receiveShadows = false;
+            renderRenderer.shadowCastingMode = ShadowCastingMode.Off;
+
+            points = new List<Vector2>();
         }
         #endregion
     }

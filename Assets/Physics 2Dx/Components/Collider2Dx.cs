@@ -78,11 +78,34 @@ namespace Physics2DxSystem
         }
         #endregion
 
-        [SerializeField] [Tooltip("Automatically updates the collider caches by managing dynamically added and removed colliders. Turning this off improves performance on conversion but the caches won't be updated. Use the Component2Dx's methods to add and destroy colliders instead.")] private bool autoUpdate = false;
-        [SerializeField] [Tooltip("Determines which Capsule2D direction the Converter2Dx supports.")] private CapsuleDirection2D capsuleDirection2D = default;
+#pragma warning disable CS0649
+        [Tooltip("Automatically updates the collider caches by managing dynamically added and removed colliders. Turning this off improves performance on conversion but the caches won't be updated. Use the Component2Dx's methods to add and destroy colliders instead.")] public bool autoUpdate = false;
+        [Tooltip("Determines which Capsule2D direction the Converter2Dx supports.")] public CapsuleDirection2D capsuleDirection2D;
+        [Header("Conversion Settings")]
+        public bool forcePolygonCollider2DConversionMethodCreateMeshOnAwake = true;
+        public ConversionSettings conversionSettings = new ConversionSettings { renderSize = MeshColliderConversionRenderSize._256 };
+        public Conversion2DSettings conversion2DSettings;
+        [Header("Caches")]
         [SerializeField] [Tooltip("The cache to store all the object's Colliders in.")] private Transform collidersCache;
         [SerializeField] [Tooltip("The cache to store all the object's Collider2Ds in.")] private Transform collider2DsCache;
+#pragma warning restore CS0649
 
+        private Vector3 upwardDirection
+        {
+            get
+            {
+                switch(capsuleDirection2D)
+                {
+                    case CapsuleDirection2D.Vertical:
+                        return transform.up;
+                    case CapsuleDirection2D.Horizontal:
+                        return zRotation90Deg * transform.right;
+                    default:
+                        return default;
+                }
+            }
+        }
+        
         #region Validation
         private void OnValidate()
         {
@@ -125,6 +148,12 @@ namespace Physics2DxSystem
         {
             base.Awake();
 
+            var tempConversionMethod = conversion2DSettings.polygonCollider2DConversionMethod;
+            if(forcePolygonCollider2DConversionMethodCreateMeshOnAwake)
+            {
+                conversion2DSettings.polygonCollider2DConversionMethod = PolygonCollider2DConversionMethod.CreateMesh;
+            }
+
             // Create the Colliders Cache if it is not created yet.
             if(!collidersCache)
             {
@@ -138,8 +167,13 @@ namespace Physics2DxSystem
                 // Search the collidersCache for any unmapped Colliders and map them.
                 foreach(var collider in collidersCache.GetComponents<Collider>())
                 {
+                    if(conversion2DSettings.polygonCollider2DConversionMethod == PolygonCollider2DConversionMethod.CreateMeshAndDestroySharedMesh && collider is MeshCollider meshCollider)
+                    {
+                        meshCollider.sharedMesh = Instantiate(meshCollider.sharedMesh);
+                    }
+
                     var newCollider2D = (Collider2D)collider2DsCache.gameObject.AddComponent(Collider2DType(collider));
-                    collider.ToCollider2D(newCollider2D);
+                    collider.ToCollider2D(newCollider2D, conversionSettings);
                     AddPair(collider, newCollider2D);
                 }
             }
@@ -161,7 +195,7 @@ namespace Physics2DxSystem
                     if(!collider2DPairs.ContainsKey(collider2D))
                     {
                         var newCollider = (Collider)collidersCache.gameObject.AddComponent(ColliderType(collider2D));
-                        collider2D.ToCollider(newCollider);
+                        collider2D.ToCollider(newCollider, conversion2DSettings);
                         AddPair(newCollider, collider2D);
                     }
                 }
@@ -183,7 +217,7 @@ namespace Physics2DxSystem
 
                 var newCollider2D = collider2DsCache.gameObject.AddComponent(collider2D, ignore);
                 var newCollider = (Collider)collidersCache.gameObject.AddComponent(ColliderType(newCollider2D));
-                newCollider2D.ToCollider(newCollider);
+                newCollider2D.ToCollider(newCollider, conversion2DSettings);
                 AddPair(newCollider, newCollider2D);
 
                 DestroyImmediate(collider2D);
@@ -195,9 +229,14 @@ namespace Physics2DxSystem
                 // Add Colliders from the Component2Dx to its caches and destroy them on the object itself.
                 foreach(var collider in GetComponents<Collider>())
                 {
+                    if(conversion2DSettings.polygonCollider2DConversionMethod == PolygonCollider2DConversionMethod.CreateMeshAndDestroySharedMesh && collider is MeshCollider meshCollider)
+                    {
+                        meshCollider.sharedMesh = Instantiate(meshCollider.sharedMesh);
+                    }
+
                     var newCollider = collidersCache.gameObject.AddComponent(collider);
                     var newCollider2D = (Collider2D)collider2DsCache.gameObject.AddComponent(Collider2DType(newCollider));
-                    newCollider.ToCollider2D(newCollider2D);
+                    newCollider.ToCollider2D(newCollider2D, conversionSettings);
                     AddPair(newCollider, newCollider2D);
 
                     DestroyImmediate(collider);
@@ -213,11 +252,14 @@ namespace Physics2DxSystem
             {
                 collider2DsCache.gameObject.SetActive(false);
             }
+
+            conversion2DSettings.polygonCollider2DConversionMethod = tempConversionMethod;
         }
 
         // Make sure the Caches are always at the same position, (2D) rotation and scale as the parent transform.
         private void LateUpdate()
         {
+            // TODO: Check to see if this gets called if the Collider2Dx transform changes or not.
             if(collidersCache.hasChanged && collidersCache.gameObject.activeInHierarchy)
             {
                 collidersCache.SetPositionAndRotation(transform.position, transform.rotation);
@@ -227,21 +269,7 @@ namespace Physics2DxSystem
 
             if(collider2DsCache.hasChanged && collider2DsCache.gameObject.activeInHierarchy)
             {
-                Vector3 upwardsRotation;
-                switch(capsuleDirection2D)
-                {
-                    case CapsuleDirection2D.Vertical:
-                        upwardsRotation = transform.up;
-                        break;
-                    case CapsuleDirection2D.Horizontal:
-                        upwardsRotation = zRotation90Deg * transform.right;
-                        break;
-                    default:
-                        upwardsRotation = default;
-                        break;
-                }
-
-                var newRotation = Quaternion.LookRotation(Vector3.forward, upwardsRotation);
+                var newRotation = Quaternion.LookRotation(Vector3.forward, upwardDirection);
                 collider2DsCache.SetPositionAndRotation(transform.position, newRotation);
                 collider2DsCache.localScale = Vector3.one;
                 collider2DsCache.hasChanged = false;
@@ -263,10 +291,16 @@ namespace Physics2DxSystem
         public (T collider, Collider2D collider2D) AddCollider<T>(T toAdd, params string[] ignore) where T : Collider
         {
             var newCollider = (T)collidersCache.gameObject.AddComponent((Collider)toAdd, ignore);
+
+            if(conversion2DSettings.polygonCollider2DConversionMethod == PolygonCollider2DConversionMethod.CreateMeshAndDestroySharedMesh && newCollider is MeshCollider meshCollider)
+            {
+                meshCollider.sharedMesh = Instantiate(meshCollider.sharedMesh);
+            }
+
             var newCollider2D = (Collider2D)collider2DsCache.gameObject.AddComponent(Collider2DType(newCollider));
             if(Physics2Dx.is2Dnot3D)
             {
-                newCollider.ToCollider2D(newCollider2D);
+                newCollider.ToCollider2D(newCollider2D, conversionSettings);
             }
             AddPair(newCollider, newCollider2D);
 
@@ -341,7 +375,7 @@ namespace Physics2DxSystem
             var newCollider = (Collider)collidersCache.gameObject.AddComponent(ColliderType(newCollider2D));
             if(!Physics2Dx.is2Dnot3D)
             {
-                newCollider2D.ToCollider(newCollider);
+                newCollider2D.ToCollider(newCollider, conversion2DSettings);
             }
             AddPair(newCollider, newCollider2D);
 
@@ -378,6 +412,7 @@ namespace Physics2DxSystem
                 case CapsuleCollider2D _:
                     return typeof(CapsuleCollider);
                 case PolygonCollider2D _:
+                    // Check if PolygonCollider2D is in the shape of a BoxCollider.
                     return typeof(MeshCollider);
                 default:
                     return typeof(Collider);
@@ -392,21 +427,7 @@ namespace Physics2DxSystem
         {
             if(transform.hasChanged)
             {
-                Vector3 upwardsRotation;
-                switch(capsuleDirection2D)
-                {
-                    case CapsuleDirection2D.Vertical:
-                        upwardsRotation = transform.up;
-                        break;
-                    case CapsuleDirection2D.Horizontal:
-                        upwardsRotation = zRotation90Deg * transform.right;
-                        break;
-                    default:
-                        upwardsRotation = default;
-                        break;
-                }
-
-                collider2DsCache.rotation = Quaternion.LookRotation(Vector3.forward, upwardsRotation);
+                collider2DsCache.rotation = Quaternion.LookRotation(Vector3.forward, upwardDirection);
                 collider2DsCache.hasChanged = transform.hasChanged = false;
             }
         }
@@ -446,10 +467,15 @@ namespace Physics2DxSystem
             {
                 if(!colliderPairs.ContainsKey(collider))
                 {
+                    if(conversion2DSettings.polygonCollider2DConversionMethod == PolygonCollider2DConversionMethod.CreateMeshAndDestroySharedMesh && collider is MeshCollider meshCollider)
+                    {
+                        meshCollider.sharedMesh = Instantiate(meshCollider.sharedMesh);
+                    }
+
                     var newCollider2D = (Collider2D)collider2DsCache.gameObject.AddComponent(Collider2DType(collider));
                     if(Physics2Dx.is2Dnot3D)
                     {
-                        collider.ToCollider2D(newCollider2D);
+                        collider.ToCollider2D(newCollider2D, conversionSettings);
                     }
                     AddPair(collider, newCollider2D);
                 }
@@ -465,8 +491,6 @@ namespace Physics2DxSystem
 
         public override void ConvertTo2D()
         {
-            collidersCache.gameObject.SetActive(false);
-
             // Update the Collider2Dx to be ready to convert to 2D.
             Update2DTransform();
             if(autoUpdate)
@@ -478,9 +502,10 @@ namespace Physics2DxSystem
             // Convert all Colliders to Collider2Ds.
             foreach(var colliderPair in colliderPairs)
             {
-                colliderPair.Key.ToCollider2D(colliderPair.Value);
+                colliderPair.Key.ToCollider2D(colliderPair.Value, conversionSettings);
             }
 
+            collidersCache.gameObject.SetActive(false);
             collider2DsCache.gameObject.SetActive(true);
         }
         #endregion
@@ -524,7 +549,7 @@ namespace Physics2DxSystem
                     var newCollider = (Collider)collidersCache.gameObject.AddComponent(ColliderType(collider2D));
                     if(!Physics2Dx.is2Dnot3D)
                     {
-                        collider2D.ToCollider(newCollider);
+                        collider2D.ToCollider(newCollider, conversion2DSettings);
                     }
                     AddPair(newCollider, collider2D);
                 }
@@ -540,8 +565,6 @@ namespace Physics2DxSystem
 
         public override void ConvertTo3D()
         {
-            collider2DsCache.gameObject.SetActive(false);
-
             // Update the Collider2Dx to be ready to convert to 3D.
             if(autoUpdate)
             {
@@ -552,9 +575,10 @@ namespace Physics2DxSystem
             // Convert all Collider2Ds to Colliders.
             foreach(var collider2DPair in collider2DPairs)
             {
-                collider2DPair.Key.ToCollider(collider2DPair.Value);
+                collider2DPair.Key.ToCollider(collider2DPair.Value, conversion2DSettings);
             }
 
+            collider2DsCache.gameObject.SetActive(false);
             collidersCache.gameObject.SetActive(true);
         }
         #endregion

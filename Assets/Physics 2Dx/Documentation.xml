@@ -75,7 +75,7 @@
             </DestroyCollider2D>
             <Update2DTransform>
                 <summary>Rotate the collider2DsCache transform to have a 2D relative rotation from the Collider2Dx.</summary>
-                <remarks>2D relative means the same up direction (y) as the Collider2Dx but with the forward direction (z) looking forward.</remarks>
+                <remarks>2D relative means the same up (y) or right (x) direction as the Collider2Dx but with the forward direction (z) looking forward.</remarks>
             </Update2DTransform>
             <UpdateMappedColliders>
                 <summary>Update the mapped Colliders to remove any destroyed Colliders or recreate any destroyed Collider2Ds.</summary>
@@ -145,6 +145,12 @@
             <param name="meshCollider">The MeshCollider to convert.</param>
             <param name="polygonCollider2D">The PolygonCollider2D to convert to.</param>
         </Mesh>
+        <Polygon2D>
+            <summary>Converts a PolygonCollider2D to its 3D equivalent.</summary>
+            <param name="polygonCollider2D">The PolygonCollider2D to convert.</param>
+            <param name="meshCollider">The MeshCollider to convert to.</param>
+            <param name="converstionOptions">Options used to determine how to convert the PolygonCollider2D.</param>
+        </Polygon2D>
         <Collider>
             <summary>Converts a Collider to its 2D equivalent.</summary>
             <param name="collider">The Collider to convert.</param>
