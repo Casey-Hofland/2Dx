@@ -78,6 +78,9 @@ namespace UnityEngine
             {
                 if(isConverting || _is2Dnot3D == value)
                 {
+#if UNITY_EDITOR
+                    Debug.LogWarning("Cannot convert Physics2Dx while Physics2Dx is converting.");
+#endif
                     return;
                 }
 
@@ -107,7 +110,7 @@ namespace UnityEngine
         public static OnConvert onAfterConvert { get; set; }
 
         /// <include file='./Documentation.xml' path='docs/Physics2Dx/waitForConversionTime/*' />
-        public static WaitForSecondsRealtime waitForConversionTime { get; private set; }
+        public static WaitForSecondsRealtime waitForConversionTime { get; } = new WaitForSecondsRealtime(0f);
         /// <include file='./Documentation.xml' path='docs/Physics2Dx/conversionTime/*' />
         public static float conversionTime
         {
@@ -150,7 +153,7 @@ namespace UnityEngine
 
             var settings = Resources.Load<Physics2DxSettings>(nameof(Physics2DxSettings));
             _is2Dnot3D = settings.is2Dnot3D;
-            waitForConversionTime = new WaitForSecondsRealtime(settings.conversionTime);
+            conversionTime = settings.conversionTime;
             splitConversionOverMultipleFrames = settings.splitConversionOverMultipleFrames;
             slimHierarchy = settings.slimHierarchy;
 

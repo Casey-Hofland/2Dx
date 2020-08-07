@@ -1,7 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.UIElements;
 
 namespace Physics2DxSystem.Utilities
 {
@@ -22,6 +22,7 @@ namespace Physics2DxSystem.Utilities
         public static PhysicsMaterial2D AsPhysicsMaterial2D(this PhysicMaterial physicMaterial)
         {
             if(!physicMaterial)
+
             {
                 return null;
             }
@@ -174,7 +175,7 @@ namespace Physics2DxSystem.Utilities
         #endregion
 
         #region Colliders
-        private static void CopyGenericProperties(this Collider collider, Collider2D collider2D)
+        private static void GenericPropertiesToCollider2D(this Collider collider, Collider2D collider2D)
         {
             collider2D.enabled = collider.enabled;
             collider2D.hideFlags = collider.hideFlags;
@@ -187,7 +188,7 @@ namespace Physics2DxSystem.Utilities
             return Quaternion.Inverse(transform2D.rotation) * transform.rotation * center;
         }
 
-        private static void CopyGenericProperties(this Collider2D collider2D, Collider collider)
+        private static void GenericPropertiesToCollider(this Collider2D collider2D, Collider collider)
         {
             collider.enabled = collider2D.enabled;
             collider.hideFlags = collider2D.hideFlags;
@@ -216,13 +217,13 @@ namespace Physics2DxSystem.Utilities
                     capsuleCollider.ToCapsuleCollider2D(capsuleCollider2D);
                     break;
                 case BoxCollider boxCollider when collider2D is PolygonCollider2D polygonCollider2D:
-
+                    boxCollider.ToPolygonCollider2D(polygonCollider2D);
                     break;
                 case MeshCollider meshCollider when collider2D is PolygonCollider2D polygonCollider2D:
                     meshCollider.ToPolygonCollider2D(polygonCollider2D, conversionSettings.renderSize);
                     break;
                 default:
-                    collider.CopyGenericProperties(collider2D);
+                    collider.GenericPropertiesToCollider2D(collider2D);
                     break;
             }
         }
@@ -241,13 +242,20 @@ namespace Physics2DxSystem.Utilities
                     capsuleCollider2D.ToCapsuleCollider(capsuleCollider);
                     break;
                 case PolygonCollider2D polygonCollider2D when collider is BoxCollider boxCollider:
-
+                    if(conversion2DSettings.toBoxColliderSafe)
+                    {
+                        polygonCollider2D.ToBoxColliderSafe(boxCollider);
+                    }
+                    else
+                    {
+                        polygonCollider2D.ToBoxCollider(boxCollider);
+                    }
                     break;
                 case PolygonCollider2D polygonCollider2D when collider is MeshCollider meshCollider:
                     polygonCollider2D.ToMeshCollider(meshCollider, conversion2DSettings.polygonCollider2DConversionMethod);
                     break;
                 default:
-                    collider2D.CopyGenericProperties(collider);
+                    collider2D.GenericPropertiesToCollider(collider);
                     break;
             }
         }
@@ -255,7 +263,7 @@ namespace Physics2DxSystem.Utilities
         /// <include file='../Documentation.xml' path='docs/Converter2Dx/Sphere/*'/>
         public static void ToCircleCollider2D(this SphereCollider sphereCollider, CircleCollider2D circleCollider2D)
         {
-            sphereCollider.CopyGenericProperties(circleCollider2D);
+            sphereCollider.GenericPropertiesToCollider2D(circleCollider2D);
 
             // Set the CircleCollider2D settings.
             circleCollider2D.offset = CenterToOffset(sphereCollider.transform, sphereCollider.center, circleCollider2D.transform);
@@ -265,7 +273,7 @@ namespace Physics2DxSystem.Utilities
         /// <include file='../Documentation.xml' path='docs/Converter2Dx/Circle2D/*'/>
         public static void ToSphereCollider(this CircleCollider2D circleCollider2D, SphereCollider sphereCollider)
         {
-            circleCollider2D.CopyGenericProperties(sphereCollider);
+            circleCollider2D.GenericPropertiesToCollider(sphereCollider);
 
             // Set the SphereCollider settings.
             sphereCollider.center = OffsetToCenter(circleCollider2D.transform, circleCollider2D.offset, sphereCollider.transform, sphereCollider.center);
@@ -275,7 +283,7 @@ namespace Physics2DxSystem.Utilities
         /// <include file='../Documentation.xml' path='docs/Converter2Dx/Capsule/*'/>
         public static void ToCapsuleCollider2D(this CapsuleCollider capsuleCollider, CapsuleCollider2D capsuleCollider2D)
         {
-            capsuleCollider.CopyGenericProperties(capsuleCollider2D);
+            capsuleCollider.GenericPropertiesToCollider2D(capsuleCollider2D);
 
             // Set the CapsuleCollider2D offset.
             capsuleCollider2D.offset = CenterToOffset(capsuleCollider.transform, capsuleCollider.center, capsuleCollider2D.transform);
@@ -293,7 +301,9 @@ namespace Physics2DxSystem.Utilities
                     capsuleCollider2D.direction = CapsuleDirection2D.Vertical;
                     break;
                 case 2:
+#if UNITY_EDITOR
                     Debug.LogWarning($"Capsule Collider direction Z-AXIS is unsupported for 2D conversion. Capsule Collider 2D size and direction won't be converted.");
+#endif
                     return;
                 default:
                     return;
@@ -320,7 +330,7 @@ namespace Physics2DxSystem.Utilities
         /// <include file='../Documentation.xml' path='docs/Converter2Dx/Capsule2D/*'/>
         public static void ToCapsuleCollider(this CapsuleCollider2D capsuleCollider2D, CapsuleCollider capsuleCollider)
         {
-            capsuleCollider2D.CopyGenericProperties(capsuleCollider);
+            capsuleCollider2D.GenericPropertiesToCollider(capsuleCollider);
 
             // Set the CapsuleCollider center.
             capsuleCollider.center = OffsetToCenter(capsuleCollider2D.transform, capsuleCollider2D.offset, capsuleCollider.transform, capsuleCollider.center);
@@ -328,7 +338,9 @@ namespace Physics2DxSystem.Utilities
             // Determine if the CapsuleCollider can be converted to.
             if(capsuleCollider.direction == 2)
             {
+#if UNITY_EDITOR
                 Debug.LogWarning($"Capsule Collider direction Z-AXIS is unsupported for 3D conversion. Capsule Collider radius, height and direction won't be converted.");
+#endif
                 return;
             }
 
@@ -367,27 +379,157 @@ namespace Physics2DxSystem.Utilities
         }
 
         /// <include file='../Documentation.xml' path='docs/Converter2Dx/Box/*'/>
-        //public static void ToPolygonCollider2D(this BoxCollider boxCollider, PolygonCollider2D polygonCollider2D)
-        //{
-        //    boxCollider.CopyGenericProperties(polygonCollider2D);
+        public static void ToPolygonCollider2D(this BoxCollider boxCollider, PolygonCollider2D polygonCollider2D)
+        {
+            boxCollider.GenericPropertiesToCollider2D(polygonCollider2D);
 
-        //    polygonCollider2D.offset = CenterToOffset(boxCollider.transform, boxCollider.center, polygonCollider2D.transform);
-        //}
+            var relativeRotation = Quaternion.Inverse(polygonCollider2D.transform.rotation) * boxCollider.transform.rotation;
+            polygonCollider2D.offset = relativeRotation * boxCollider.center;
+
+            // Get the Vector2 equivelent distances the points need to move in to form a Box cutout.
+            Vector2 relativeRight = relativeRotation * Vector3.right * Mathf.Abs(boxCollider.size.x);
+            Vector2 relativeUp = relativeRotation * Vector3.up * Mathf.Abs(boxCollider.size.y);
+            Vector2 relativeForward = relativeRotation * Vector3.forward * Mathf.Abs(boxCollider.size.z);
+
+            polygonCollider2D.pathCount = 1;
+
+            // Check if this Box is directly facing the front from any angle.
+            if(relativeRight == Vector2.zero)
+            {
+                boxPoints4[0] = (relativeForward + relativeUp) * 0.5f;
+                boxPoints4[1] = boxPoints4[0] - relativeForward;
+                boxPoints4[2] = boxPoints4[1] - relativeUp;
+                boxPoints4[3] = boxPoints4[2] + relativeForward;
+
+                polygonCollider2D.SetPath(0, boxPoints4);
+            }
+            else if(relativeUp == Vector2.zero)
+            {
+                boxPoints4[0] = (relativeForward + relativeRight) * 0.5f;
+                boxPoints4[1] = boxPoints4[0] - relativeForward;
+                boxPoints4[2] = boxPoints4[1] - relativeRight;
+                boxPoints4[3] = boxPoints4[2] + relativeForward;
+
+                polygonCollider2D.SetPath(0, boxPoints4);
+            }
+            else if(relativeForward == Vector2.zero)
+            {
+                boxPoints4[0] = (relativeRight + relativeUp) * 0.5f;
+                boxPoints4[1] = boxPoints4[0] - relativeRight;
+                boxPoints4[2] = boxPoints4[1] - relativeUp;
+                boxPoints4[3] = boxPoints4[2] + relativeRight;
+
+                polygonCollider2D.SetPath(0, boxPoints4);
+            }
+            else
+            {
+                // Get 4 corner points that aren't next to each other (see optimization below).
+                boxPoints4[0] = (relativeRight + relativeUp + relativeForward) * 0.5f;
+                boxPoints4[1] = boxPoints4[0] - relativeRight - relativeUp;
+                boxPoints4[2] = boxPoints4[0] - relativeRight - relativeForward;
+                boxPoints4[3] = boxPoints4[0] - relativeUp - relativeForward;
+
+                // Find the corner point that overlaps the cutout (not on the edge).
+                var minSqrMagnitude = boxPoints4[0].sqrMagnitude;
+                var overlappingPointIndex = 0;
+                for(int i = 1; i < 4; i++)
+                {
+                    if(boxPoints4[i].sqrMagnitude < minSqrMagnitude)
+                    {
+                        minSqrMagnitude = boxPoints4[i].sqrMagnitude;
+                        overlappingPointIndex = i;
+                    }
+                }
+
+                // Rearrange the corner points based on which index is overlapping. We always want our cutout to have point 0 to 1 move in the x, point 1 to 2 move in the y, and point 2 to 3 move in the z direction.
+                // Since no corner points are next to each other, we can fill the other half of our cutout by flipping each value to the other side (e.g. boxPoints[5] = -boxPoints[2]).
+                if(overlappingPointIndex < 2)
+                {
+                    boxPoints6[3] = -(boxPoints6[0] = boxPoints4[overlappingPointIndex + 2]);
+                    if(overlappingPointIndex % 2 == 0)
+                    {
+                        boxPoints6[5] = -(boxPoints6[2] = boxPoints4[overlappingPointIndex + 3]);
+                        boxPoints6[1] = -(boxPoints6[4] = boxPoints4[overlappingPointIndex + 1]);
+                    }
+                    else
+                    {
+                        boxPoints6[5] = -(boxPoints6[2] = boxPoints4[overlappingPointIndex + 1]);
+                        boxPoints6[1] = -(boxPoints6[4] = boxPoints4[overlappingPointIndex - 1]);
+                    }
+                }
+                else
+                {
+                    boxPoints6[3] = -(boxPoints6[0] = boxPoints4[overlappingPointIndex - 2]);
+                    if(overlappingPointIndex % 2 == 0)
+                    {
+                        boxPoints6[5] = -(boxPoints6[2] = boxPoints4[overlappingPointIndex - 1]);
+                        boxPoints6[1] = -(boxPoints6[4] = boxPoints4[overlappingPointIndex + 1]);
+                    }
+                    else
+                    {
+                        boxPoints6[5] = -(boxPoints6[2] = boxPoints4[overlappingPointIndex - 3]);
+                        boxPoints6[1] = -(boxPoints6[4] = boxPoints4[overlappingPointIndex - 1]);
+                    }
+                }
+
+                polygonCollider2D.SetPath(0, boxPoints6);
+            }
+        }
 
         /// <include file='../Documentation.xml' path='docs/Converter2Dx/Box2D/*'/>
-        //public static void ToBoxCollider(this PolygonCollider2D polygonCollider2D, BoxCollider boxCollider)
-        //{
-        //    polygonCollider2D.CopyGenericProperties(boxCollider);
+        public static void ToBoxCollider(this PolygonCollider2D polygonCollider2D, BoxCollider boxCollider)
+        {
+            polygonCollider2D.GenericPropertiesToCollider(boxCollider);
 
-        //    boxCollider.center = OffsetToCenter(polygonCollider2D.transform, polygonCollider2D.offset, boxCollider.transform, boxCollider.center);
-        //}
+            boxCollider.center = OffsetToCenter(polygonCollider2D.transform, polygonCollider2D.offset, boxCollider.transform, boxCollider.center);
 
-        /// <include file='../Documentation.xml' path='docs/Converter2Dx/Mesh/*'/>
-        public static void ToPolygonCollider2D(this MeshCollider meshCollider, PolygonCollider2D polygonCollider2D) => meshCollider.ToPolygonCollider2D(polygonCollider2D, default);
+            Vector2 relativeRight = boxCollider.transform.right;
+            Vector2 relativeUp = boxCollider.transform.up;
+            Vector2 relativeForward = boxCollider.transform.forward;
+
+            if(relativeRight == Vector2.zero)
+            {
+                var newSize = boxCollider.size;
+                newSize.z = Mathf.Sqrt((polygonCollider2D.points[0] - polygonCollider2D.points[1]).sqrMagnitude / relativeForward.sqrMagnitude);
+                newSize.y = Mathf.Sqrt((polygonCollider2D.points[1] - polygonCollider2D.points[2]).sqrMagnitude / relativeUp.sqrMagnitude);
+                boxCollider.size = newSize;
+            }
+            else if(relativeUp == Vector2.zero)
+            {
+                var newSize = boxCollider.size;
+                newSize.z = Mathf.Sqrt((polygonCollider2D.points[0] - polygonCollider2D.points[1]).sqrMagnitude / relativeForward.sqrMagnitude);
+                newSize.x = Mathf.Sqrt((polygonCollider2D.points[1] - polygonCollider2D.points[2]).sqrMagnitude / relativeRight.sqrMagnitude);
+                boxCollider.size = newSize;
+            }
+            else if(relativeForward == Vector2.zero)
+            {
+                var newSize = boxCollider.size;
+                newSize.x = Mathf.Sqrt((polygonCollider2D.points[0] - polygonCollider2D.points[1]).sqrMagnitude / relativeRight.sqrMagnitude);
+                newSize.y = Mathf.Sqrt((polygonCollider2D.points[1] - polygonCollider2D.points[2]).sqrMagnitude / relativeUp.sqrMagnitude);
+                boxCollider.size = newSize;
+            }
+            else
+            {
+                boxCollider.size = new Vector3(
+                    Mathf.Sqrt((polygonCollider2D.points[0] - polygonCollider2D.points[1]).sqrMagnitude / relativeRight.sqrMagnitude),
+                    Mathf.Sqrt((polygonCollider2D.points[1] - polygonCollider2D.points[2]).sqrMagnitude / relativeUp.sqrMagnitude),
+                    Mathf.Sqrt((polygonCollider2D.points[2] - polygonCollider2D.points[3]).sqrMagnitude / relativeForward.sqrMagnitude));
+            }
+        }
+
+        /// <include file='../Documentation.xml' path='docs/Converter2Dx/Box2DSafe/*'/>
+        public static void ToBoxColliderSafe(this PolygonCollider2D polygonCollider2D, BoxCollider boxCollider)
+        {
+            if(polygonCollider2D.IsBoxCollider(boxCollider.transform.rotation))
+            {
+                polygonCollider2D.ToBoxCollider(boxCollider);
+            }
+        }
+
         /// <include file='../Documentation.xml' path='docs/Converter2Dx/Mesh/*'/>
         public static void ToPolygonCollider2D(this MeshCollider meshCollider, PolygonCollider2D polygonCollider2D, MeshColliderConversionRenderSize renderSize)
         {
-            meshCollider.CopyGenericProperties(polygonCollider2D);
+            meshCollider.GenericPropertiesToCollider2D(polygonCollider2D);
 
             // Setup the renderer and camera for the render shot.
             if(!(renderFilter.sharedMesh = meshCollider.sharedMesh))
@@ -446,7 +588,7 @@ namespace Physics2DxSystem.Utilities
         /// <include file='../Documentation.xml' path='docs/Converter2Dx/Polygon2D/*'/>
         public static void ToMeshCollider(this PolygonCollider2D polygonCollider2D, MeshCollider meshCollider, PolygonCollider2DConversionMethod conversionMethod)
         {
-            polygonCollider2D.CopyGenericProperties(meshCollider);
+            polygonCollider2D.GenericPropertiesToCollider(meshCollider);
 
             if(polygonCollider2D.isActiveAndEnabled)
             {
@@ -456,6 +598,9 @@ namespace Physics2DxSystem.Utilities
                         Object.Destroy(meshCollider.sharedMesh);
                         goto case PolygonCollider2DConversionMethod.CreateMesh;
                     case PolygonCollider2DConversionMethod.CreateMesh:
+                        Debug.LogWarning("Mesh Creation might not work correctly with irregularly scaled objects!");
+
+                        // TODO: Create mesh by hand.
                         if(!polygonCollider2D.attachedRigidbody)
                         {
                             var rigidbody2D = polygonCollider2D.gameObject.AddComponent<Rigidbody2D>();
@@ -471,27 +616,31 @@ namespace Physics2DxSystem.Utilities
                         {
                             // Rotate Vertices to the inverted position of the meshCollider's rotation so that they become flat.
                             var vertices = new List<Vector3>();
-                            var inverse = Quaternion.Inverse(meshCollider.transform.rotation) * polygonCollider2D.transform.rotation;
+                            var relativeRotation = Quaternion.Inverse(meshCollider.transform.rotation) * polygonCollider2D.transform.rotation;
+                            var relativeScale = new Vector3(1 / polygonCollider2D.transform.lossyScale.x, 1 / polygonCollider2D.transform.lossyScale.y, 1 / polygonCollider2D.transform.lossyScale.z);
+
                             meshCollider.sharedMesh.GetVertices(vertices);
                             for(int i = 0; i < vertices.Count; i++)
                             {
-                                vertices[i] = inverse * vertices[i];
+                                vertices[i] = Vector3.Scale(relativeRotation * vertices[i], relativeScale);
                             }
                             meshCollider.sharedMesh.SetVertices(vertices); // TODO: Optimize with advanced mesh functions.
                             meshCollider.sharedMesh.RecalculateBounds();
                         }
-
                         break;
                 }
             }
         }
 
-        private static Camera renderCamera;
+        private static Vector2[] boxPoints6 = new Vector2[6];
+        private static Vector2[] boxPoints4 = new Vector2[4];
+        private static readonly Vector2 centerPivot = new Vector2(0.5f, 0.5f);
+
         private static RenderTexture[] renderTextures;
+        private static Camera renderCamera;
         private static MeshFilter renderFilter;
         private static MeshRenderer renderRenderer;
         private static List<Vector2> points;
-        private static readonly Vector2 centerPivot = new Vector2(0.5f, 0.5f);
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void InitColliderConversion()
         {

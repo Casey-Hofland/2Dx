@@ -82,9 +82,11 @@ namespace Physics2DxSystem
         [Tooltip("Automatically updates the collider caches by managing dynamically added and removed colliders. Turning this off improves performance on conversion but the caches won't be updated. Use the Component2Dx's methods to add and destroy colliders instead.")] public bool autoUpdate = false;
         [Tooltip("Determines which Capsule2D direction the Converter2Dx supports.")] public CapsuleDirection2D capsuleDirection2D;
         [Header("Conversion Settings")]
-        public bool forcePolygonCollider2DConversionMethodCreateMeshOnAwake = true;
         public ConversionSettings conversionSettings = new ConversionSettings { renderSize = MeshColliderConversionRenderSize._256 };
         public Conversion2DSettings conversion2DSettings;
+        [Header("Ignore Conversion")]
+        [Tooltip("The Colliders to ignore for conversion. Bypassed by AddCollider.")] public Collider[] ignoreConversion;
+        [Tooltip("The Collider2Ds to ignore for conversion. Bypassed by AddCollider.")] public Collider2D[] ignoreConversion2D;
         [Header("Caches")]
         [SerializeField] [Tooltip("The cache to store all the object's Colliders in.")] private Transform collidersCache;
         [SerializeField] [Tooltip("The cache to store all the object's Collider2Ds in.")] private Transform collider2DsCache;
@@ -148,12 +150,6 @@ namespace Physics2DxSystem
         {
             base.Awake();
 
-            var tempConversionMethod = conversion2DSettings.polygonCollider2DConversionMethod;
-            if(forcePolygonCollider2DConversionMethodCreateMeshOnAwake)
-            {
-                conversion2DSettings.polygonCollider2DConversionMethod = PolygonCollider2DConversionMethod.CreateMesh;
-            }
-
             // Create the Colliders Cache if it is not created yet.
             if(!collidersCache)
             {
@@ -167,14 +163,17 @@ namespace Physics2DxSystem
                 // Search the collidersCache for any unmapped Colliders and map them.
                 foreach(var collider in collidersCache.GetComponents<Collider>())
                 {
-                    if(conversion2DSettings.polygonCollider2DConversionMethod == PolygonCollider2DConversionMethod.CreateMeshAndDestroySharedMesh && collider is MeshCollider meshCollider)
+                    if(Array.IndexOf(ignoreConversion, collider) == -1)
                     {
-                        meshCollider.sharedMesh = Instantiate(meshCollider.sharedMesh);
-                    }
+                        if(conversion2DSettings.polygonCollider2DConversionMethod == PolygonCollider2DConversionMethod.CreateMeshAndDestroySharedMesh && collider is MeshCollider meshCollider)
+                        {
+                            meshCollider.sharedMesh = Instantiate(meshCollider.sharedMesh);
+                        }
 
-                    var newCollider2D = (Collider2D)collider2DsCache.gameObject.AddComponent(Collider2DType(collider));
-                    collider.ToCollider2D(newCollider2D, conversionSettings);
-                    AddPair(collider, newCollider2D);
+                        var newCollider2D = (Collider2D)collider2DsCache.gameObject.AddComponent(Collider2DType(collider));
+                        collider.ToCollider2D(newCollider2D, conversionSettings);
+                        AddPair(collider, newCollider2D);
+                    }
                 }
             }
 
@@ -192,11 +191,24 @@ namespace Physics2DxSystem
                 // Search the collider2DsCache for any unmapped Collider2Ds and map them.
                 foreach(var collider2D in collider2DsCache.GetComponents<Collider2D>())
                 {
-                    if(!collider2DPairs.ContainsKey(collider2D))
+                    if(!collider2DPairs.ContainsKey(collider2D) && Array.IndexOf(ignoreConversion2D, collider2D) == -1)
                     {
-                        var newCollider = (Collider)collidersCache.gameObject.AddComponent(ColliderType(collider2D));
-                        collider2D.ToCollider(newCollider, conversion2DSettings);
-                        AddPair(newCollider, collider2D);
+                        if(collider2D is BoxCollider2D boxCollider2D)
+                        {
+                            var polygonCollider2D = collider2DsCache.gameObject.AddComponent<PolygonCollider2D>();
+                            boxCollider2D.ToPolygonCollider2D(polygonCollider2D);
+                            DestroyImmediate(boxCollider2D);
+
+                            var boxCollider = collidersCache.gameObject.AddComponent<BoxCollider>();
+                            polygonCollider2D.ToBoxCollider(boxCollider);
+                            AddPair(boxCollider, polygonCollider2D);
+                        }
+                        else
+                        {
+                            var newCollider = (Collider)collidersCache.gameObject.AddComponent(ColliderType(collider2D));
+                            collider2D.ToCollider(newCollider, conversion2DSettings);
+                            AddPair(newCollider, collider2D);
+                        }
                     }
                 }
             }
@@ -211,16 +223,32 @@ namespace Physics2DxSystem
                         ? new[] { "density", "usedByComposite" } : new[] { "usedByComposite" };
                 }
 
-                var ignore = collider2D is BoxCollider2D || collider2D is PolygonCollider2D
+                if(Array.IndexOf(ignoreConversion2D, collider2D) == -1)
+                {
+                    var ignore = collider2D is BoxCollider2D || collider2D is PolygonCollider2D
                     ? new ArraySegment<string>(_ignore, 0, _ignore.Length - 1).Array
                     : _ignore;
 
-                var newCollider2D = collider2DsCache.gameObject.AddComponent(collider2D, ignore);
-                var newCollider = (Collider)collidersCache.gameObject.AddComponent(ColliderType(newCollider2D));
-                newCollider2D.ToCollider(newCollider, conversion2DSettings);
-                AddPair(newCollider, newCollider2D);
+                    if(collider2D is BoxCollider2D boxCollider2D)
+                    {
+                        var polygonCollider2D = collider2DsCache.gameObject.AddComponent<PolygonCollider2D>();
+                        boxCollider2D.ToPolygonCollider2D(polygonCollider2D);
+                        DestroyImmediate(boxCollider2D);
 
-                DestroyImmediate(collider2D);
+                        var boxCollider = collidersCache.gameObject.AddComponent<BoxCollider>();
+                        polygonCollider2D.ToBoxCollider(boxCollider);
+                        AddPair(boxCollider, polygonCollider2D);
+                    }
+                    else
+                    {
+                        var newCollider2D = collider2DsCache.gameObject.AddComponent(collider2D, ignore);
+                        var newCollider = (Collider)collidersCache.gameObject.AddComponent(ColliderType(newCollider2D));
+                        newCollider2D.ToCollider(newCollider, conversion2DSettings);
+                        AddPair(newCollider, newCollider2D);
+
+                        DestroyImmediate(collider2D);
+                    }
+                }
             }
 
             // If there was any Collider2D on the object, it will be disallowed to have Colliders and we can skip searching for them.
@@ -229,17 +257,20 @@ namespace Physics2DxSystem
                 // Add Colliders from the Component2Dx to its caches and destroy them on the object itself.
                 foreach(var collider in GetComponents<Collider>())
                 {
-                    if(conversion2DSettings.polygonCollider2DConversionMethod == PolygonCollider2DConversionMethod.CreateMeshAndDestroySharedMesh && collider is MeshCollider meshCollider)
+                    if(Array.IndexOf(ignoreConversion, collider) == -1)
                     {
-                        meshCollider.sharedMesh = Instantiate(meshCollider.sharedMesh);
+                        if(conversion2DSettings.polygonCollider2DConversionMethod == PolygonCollider2DConversionMethod.CreateMeshAndDestroySharedMesh && collider is MeshCollider meshCollider)
+                        {
+                            meshCollider.sharedMesh = Instantiate(meshCollider.sharedMesh);
+                        }
+
+                        var newCollider = collidersCache.gameObject.AddComponent(collider);
+                        var newCollider2D = (Collider2D)collider2DsCache.gameObject.AddComponent(Collider2DType(newCollider));
+                        newCollider.ToCollider2D(newCollider2D, conversionSettings);
+                        AddPair(newCollider, newCollider2D);
+
+                        DestroyImmediate(collider);
                     }
-
-                    var newCollider = collidersCache.gameObject.AddComponent(collider);
-                    var newCollider2D = (Collider2D)collider2DsCache.gameObject.AddComponent(Collider2DType(newCollider));
-                    newCollider.ToCollider2D(newCollider2D, conversionSettings);
-                    AddPair(newCollider, newCollider2D);
-
-                    DestroyImmediate(collider);
                 }
             }
 
@@ -252,8 +283,6 @@ namespace Physics2DxSystem
             {
                 collider2DsCache.gameObject.SetActive(false);
             }
-
-            conversion2DSettings.polygonCollider2DConversionMethod = tempConversionMethod;
         }
 
         // Make sure the Caches are always at the same position, (2D) rotation and scale as the parent transform.
@@ -347,17 +376,29 @@ namespace Physics2DxSystem
 
         #region Collider2D Accessors
         /// <include file='../Documentation.xml' path='docs/Modules/Collider2Dx/AddCollider2D/*'/>
-        public (T collider2D, Collider collider) AddCollider2D<T>() where T : Collider2D
+        public (Collider2D collider2D, Collider collider) AddCollider2D<T>() where T : Collider2D
         {
-            var newCollider2D = collider2DsCache.gameObject.AddComponent<T>();
-            var newCollider = (Collider)collidersCache.gameObject.AddComponent(ColliderType(newCollider2D));
-            AddPair(newCollider, newCollider2D);
+            if(typeof(T) == typeof(BoxCollider2D))
+            {
+                var polygonCollider2D = collider2DsCache.gameObject.AddComponent<PolygonCollider2D>();
+                polygonCollider2D.CreateBoxCollider();
+                var boxCollider = collidersCache.gameObject.AddComponent<BoxCollider>();
 
-            return (newCollider2D, newCollider);
+                AddPair(boxCollider, polygonCollider2D);
+                return (polygonCollider2D, boxCollider);
+            }
+            else
+            {
+                var newCollider2D = collider2DsCache.gameObject.AddComponent<T>();
+                var newCollider = (Collider)collidersCache.gameObject.AddComponent(ColliderType(newCollider2D));
+
+                AddPair(newCollider, newCollider2D);
+                return (newCollider2D, newCollider);
+            }
         }
 
         /// <include file='../Documentation.xml' path='docs/Modules/Collider2Dx/AddCollider2D/*'/>
-        public (T collider2D, Collider collider) AddCollider2D<T>(T toAdd, params string[] ignore) where T : Collider2D
+        public (Collider2D collider2D, Collider collider) AddCollider2D<T>(T toAdd, params string[] ignore) where T : Collider2D
         {
             var attachedRigidbody = collider2DsCache.GetComponentInParent<Rigidbody2D>();
             if(!attachedRigidbody || !attachedRigidbody.useAutoMass)
@@ -371,15 +412,33 @@ namespace Physics2DxSystem
                 ignore[ignore.Length - 1] = "usedByComposite";
             }
 
-            var newCollider2D = (T)collider2DsCache.gameObject.AddComponent((Collider2D)toAdd, ignore);
-            var newCollider = (Collider)collidersCache.gameObject.AddComponent(ColliderType(newCollider2D));
-            if(!Physics2Dx.is2Dnot3D)
+            if(toAdd is BoxCollider2D boxCollider2D)
             {
-                newCollider2D.ToCollider(newCollider, conversion2DSettings);
-            }
-            AddPair(newCollider, newCollider2D);
+                var polygonCollider2D = collider2DsCache.gameObject.AddComponent<PolygonCollider2D>();
+                boxCollider2D.ToPolygonCollider2D(polygonCollider2D);
+                var boxCollider = collidersCache.gameObject.AddComponent<BoxCollider>();
 
-            return (newCollider2D, newCollider);
+                if(!Physics2Dx.is2Dnot3D)
+                {
+                    polygonCollider2D.ToBoxCollider(boxCollider);
+                }
+
+                AddPair(boxCollider, polygonCollider2D);
+                return (polygonCollider2D, boxCollider);
+            }
+            else
+            {
+                var newCollider2D = collider2DsCache.gameObject.AddComponent((Collider2D)toAdd, ignore);
+                var newCollider = (Collider)collidersCache.gameObject.AddComponent(ColliderType(newCollider2D));
+
+                if(!Physics2Dx.is2Dnot3D)
+                {
+                    newCollider2D.ToCollider(newCollider, conversion2DSettings);
+                }
+
+                AddPair(newCollider, newCollider2D);
+                return (newCollider2D, newCollider);
+            }
         }
 
         public Collider2D GetCollider2DAt(int index) => collider2Ds.Count > index ? collider2Ds[index] : null;
@@ -411,9 +470,8 @@ namespace Physics2DxSystem
                     return typeof(SphereCollider);
                 case CapsuleCollider2D _:
                     return typeof(CapsuleCollider);
-                case PolygonCollider2D _:
-                    // Check if PolygonCollider2D is in the shape of a BoxCollider.
-                    return typeof(MeshCollider);
+                case PolygonCollider2D polygonCollider2D:
+                    return polygonCollider2D.IsBoxCollider(collidersCache.rotation) ? typeof(BoxCollider) : typeof(MeshCollider);
                 default:
                     return typeof(Collider);
             }
@@ -425,11 +483,19 @@ namespace Physics2DxSystem
         [ContextMenu(nameof(Update2DTransform))]
         public void Update2DTransform()
         {
-            if(transform.hasChanged)
+#if UNITY_EDITOR
+            if(!Application.isPlaying)
             {
-                collider2DsCache.rotation = Quaternion.LookRotation(Vector3.forward, upwardDirection);
-                collider2DsCache.hasChanged = transform.hasChanged = false;
+                if(!collider2DsCache)
+                {
+                    Debug.LogWarning($"There is no {nameof(collider2DsCache)} assigned.");
+                    return;
+                }
+                UnityEditor.Undo.RecordObject(collider2DsCache, nameof(Update2DTransform));
             }
+#endif
+            collider2DsCache.rotation = Quaternion.LookRotation(Vector3.forward, upwardDirection);
+            collider2DsCache.hasChanged = false;
         }
 
         /// <include file='../Documentation.xml' path='docs/Modules/Collider2Dx/UpdateMappedColliders/*'/>
@@ -465,7 +531,7 @@ namespace Physics2DxSystem
             // Search the collidersCache for any unmapped Colliders and map them.
             foreach(var collider in collidersCache.GetComponents<Collider>())
             {
-                if(!colliderPairs.ContainsKey(collider))
+                if(!colliderPairs.ContainsKey(collider) && Array.IndexOf(ignoreConversion, collider) == -1)
                 {
                     if(conversion2DSettings.polygonCollider2DConversionMethod == PolygonCollider2DConversionMethod.CreateMeshAndDestroySharedMesh && collider is MeshCollider meshCollider)
                     {
@@ -492,7 +558,12 @@ namespace Physics2DxSystem
         public override void ConvertTo2D()
         {
             // Update the Collider2Dx to be ready to convert to 2D.
-            Update2DTransform();
+            if(transform.hasChanged)
+            {
+                Update2DTransform();
+                transform.hasChanged = false;
+            }
+
             if(autoUpdate)
             {
                 UpdateMappedColliders();
@@ -544,14 +615,30 @@ namespace Physics2DxSystem
             // Search the collider2DsCache for any unmapped Collider2Ds and map them.
             foreach(var collider2D in collider2DsCache.GetComponents<Collider2D>())
             {
-                if(!collider2DPairs.ContainsKey(collider2D))
+                if(!collider2DPairs.ContainsKey(collider2D) && Array.IndexOf(ignoreConversion2D, collider2D) == -1)
                 {
-                    var newCollider = (Collider)collidersCache.gameObject.AddComponent(ColliderType(collider2D));
-                    if(!Physics2Dx.is2Dnot3D)
+                    if(collider2D is BoxCollider2D boxCollider2D)
                     {
-                        collider2D.ToCollider(newCollider, conversion2DSettings);
+                        var polygonCollider2D = collider2DsCache.gameObject.AddComponent<PolygonCollider2D>();
+                        boxCollider2D.ToPolygonCollider2D(polygonCollider2D);
+                        DestroyImmediate(boxCollider2D);
+
+                        var boxCollider = collidersCache.gameObject.AddComponent<BoxCollider>();
+                        if(!Physics2Dx.is2Dnot3D)
+                        {
+                            polygonCollider2D.ToBoxCollider(boxCollider);
+                        }
+                        AddPair(boxCollider, polygonCollider2D);
                     }
-                    AddPair(newCollider, collider2D);
+                    else
+                    {
+                        var newCollider = (Collider)collidersCache.gameObject.AddComponent(ColliderType(collider2D));
+                        if(!Physics2Dx.is2Dnot3D)
+                        {
+                            collider2D.ToCollider(newCollider, conversion2DSettings);
+                        }
+                        AddPair(newCollider, collider2D);
+                    }
                 }
             }
 

@@ -1,6 +1,6 @@
 ﻿namespace Physics2DxSystem.Utilities
 {
-    /// <summary>Conversion options that are available with PolygonCollider2D.</summary>
+    /// <summary>Conversion methods for converting PolygonCollider2D to MeshCollider.</summary>
     public enum PolygonCollider2DConversionMethod
     {
         /// <summary>The mesh will remain as it is.</summary>
