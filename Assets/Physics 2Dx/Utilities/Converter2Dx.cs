@@ -585,49 +585,72 @@ namespace Physics2DxSystem.Utilities
         /// <include file='../Documentation.xml' path='docs/Converter2Dx/Polygon2D/*'/>
         public static void ToMeshCollider(this PolygonCollider2D polygonCollider2D, MeshCollider meshCollider) => polygonCollider2D.ToMeshCollider(meshCollider, default);
         /// <include file='../Documentation.xml' path='docs/Converter2Dx/Polygon2D/*'/>
-        public static void ToMeshCollider(this PolygonCollider2D polygonCollider2D, MeshCollider meshCollider, PolygonCollider2DConversionMethod conversionMethod)
+        public static void ToMeshCollider(this PolygonCollider2D polygonCollider2D, MeshCollider meshCollider, PolygonCollider2DConversionOptions conversionOptions)
         {
             polygonCollider2D.GenericPropertiesToCollider(meshCollider);
 
-            if(polygonCollider2D.isActiveAndEnabled)
+            if(conversionOptions.HasFlag(PolygonCollider2DConversionOptions.DestroySharedMesh))
             {
-                switch(conversionMethod)
+#if UNITY_EDITOR
+                if(Application.isPlaying)
                 {
-                    case PolygonCollider2DConversionMethod.CreateMeshAndDestroySharedMesh:
-                        Object.Destroy(meshCollider.sharedMesh);
-                        goto case PolygonCollider2DConversionMethod.CreateMesh;
-                    case PolygonCollider2DConversionMethod.CreateMesh:
-                        Debug.LogWarning("Mesh Creation might not work correctly with irregularly scaled objects!");
-
-                        // TODO: Create mesh by hand.
-                        if(!polygonCollider2D.attachedRigidbody)
-                        {
-                            var rigidbody2D = polygonCollider2D.gameObject.AddComponent<Rigidbody2D>();
-                            meshCollider.sharedMesh = polygonCollider2D.CreateMesh(false, false);
-                            Object.DestroyImmediate(rigidbody2D);
-                        }
-                        else
-                        {
-                            meshCollider.sharedMesh = polygonCollider2D.CreateMesh(false, false);
-                        }
-
-                        if(meshCollider.transform.rotation != polygonCollider2D.transform.rotation)
-                        {
-                            // Rotate Vertices to the inverted position of the meshCollider's rotation so that they become flat.
-                            var vertices = new List<Vector3>();
-                            var relativeRotation = Quaternion.Inverse(meshCollider.transform.rotation) * polygonCollider2D.transform.rotation;
-                            var relativeScale = new Vector3(1 / polygonCollider2D.transform.lossyScale.x, 1 / polygonCollider2D.transform.lossyScale.y, 1 / polygonCollider2D.transform.lossyScale.z);
-
-                            meshCollider.sharedMesh.GetVertices(vertices);
-                            for(int i = 0; i < vertices.Count; i++)
-                            {
-                                vertices[i] = Vector3.Scale(relativeRotation * vertices[i], relativeScale);
-                            }
-                            meshCollider.sharedMesh.SetVertices(vertices); // TODO: Optimize with advanced mesh functions.
-                            meshCollider.sharedMesh.RecalculateBounds();
-                        }
-                        break;
+                    Object.Destroy(meshCollider.sharedMesh);
                 }
+                else
+                {
+                    Object.DestroyImmediate(meshCollider.sharedMesh);
+                }
+#else
+                Object.Destroy(meshCollider.sharedMesh);
+#endif
+            }
+
+            if(conversionOptions.HasFlag(PolygonCollider2DConversionOptions.CreateMesh))
+            {
+                // Copy the polygonCollider2D paths to the polygonCollider2D dummy.
+                var pathCount = polygonColliderMeshCreator.pathCount = polygonCollider2D.pathCount;
+                for(int i = 0; i < pathCount; i++)
+                {
+                    polygonCollider2D.GetPath(i, points);
+                    polygonColliderMeshCreator.SetPath(i, points);
+                }
+                polygonColliderMeshCreator.offset = polygonCollider2D.offset;
+
+                // Let the polygonCollider2D dummy create a mesh, free from translation, rotation and scale.
+                polygonColliderMeshCreator.gameObject.SetActive(true);
+                var polygonMesh = polygonColliderMeshCreator.CreateMesh(false, false);
+                polygonColliderMeshCreator.gameObject.SetActive(false);
+
+                if(meshCollider.transform.rotation != polygonCollider2D.transform.rotation)
+                {
+                    // Rotate the vertices of the mesh to the inverted position of the meshCollider's rotation so that all look forward (0, 0, 1).
+                    var vertices = new List<Vector3>();
+                    var relativeRotation = Quaternion.Inverse(meshCollider.transform.rotation) * polygonCollider2D.transform.rotation;
+
+                    polygonMesh.GetVertices(vertices);
+                    for(int i = 0; i < vertices.Count; i++)
+                    {
+                        vertices[i] = relativeRotation * vertices[i];
+                    }
+                    polygonMesh.SetVertices(vertices);
+                    polygonMesh.RecalculateBounds();
+                }
+
+                if(conversionOptions.HasFlag(PolygonCollider2DConversionOptions.CreateBackfaces))
+                {
+                    // Create a duplicate of the triangles in reverse order in order to create backfacing collision for the collider.
+                    var triangles = polygonMesh.triangles;
+                    var trianglesLength = triangles.Length;
+
+                    var newTriangles = new int[trianglesLength * 2];
+                    triangles.CopyTo(newTriangles, 0);
+                    triangles.CopyTo(newTriangles, trianglesLength);
+                    System.Array.Reverse(newTriangles, trianglesLength, trianglesLength);
+
+                    polygonMesh.SetTriangles(newTriangles, 0, false);
+                }
+
+                meshCollider.sharedMesh = polygonMesh;
             }
         }
 
@@ -640,6 +663,7 @@ namespace Physics2DxSystem.Utilities
         private static MeshFilter renderFilter;
         private static MeshRenderer renderRenderer;
         private static List<Vector2> points;
+        private static PolygonCollider2D polygonColliderMeshCreator;
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void InitColliderConversion()
         {
@@ -692,8 +716,18 @@ namespace Physics2DxSystem.Utilities
             renderRenderer.shadowCastingMode = ShadowCastingMode.Off;
 
             points = new List<Vector2>();
+
+            // Create the polygonCollider2D dummy.
+            var polygonColliderMeshCreatorGO = new GameObject(nameof(polygonColliderMeshCreator));
+            polygonColliderMeshCreatorGO.SetActive(false);
+            Object.DontDestroyOnLoad(polygonColliderMeshCreatorGO);
+            polygonColliderMeshCreator = polygonColliderMeshCreatorGO.AddComponent<PolygonCollider2D>();
+            if(Physics2Dx.slimHierarchy)
+            {
+                polygonColliderMeshCreatorGO.hideFlags |= HideFlags.HideInHierarchy;
+            }
         }
-        #endregion
+#endregion
     }
 }
 
