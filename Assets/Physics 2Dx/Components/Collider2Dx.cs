@@ -82,7 +82,7 @@ namespace Physics2DxSystem
         [Tooltip("Automatically updates the collider caches by managing dynamically added and removed colliders. Turning this off improves performance on conversion but the caches won't be updated. Use the Component2Dx's methods to add and destroy colliders instead.")] public bool autoUpdate = false;
         [Tooltip("Determines which Capsule2D direction the Converter2Dx supports.")] public CapsuleDirection2D capsuleDirection2D;
         [Header("Conversion Settings")]
-        public ConversionSettings conversionSettings = new ConversionSettings { renderSize = MeshColliderConversionRenderSize._256 };
+        public ConversionSettings conversionSettings = new ConversionSettings { renderSize = MeshColliderConversionRenderSize._256, tolerance = 0.05f };
         public Conversion2DSettings conversion2DSettings = new Conversion2DSettings { };
         [Header("Ignore Conversion")]
         [Tooltip("The Colliders to ignore for conversion. Bypassed by AddCollider.")] public Collider[] ignoreConversion;

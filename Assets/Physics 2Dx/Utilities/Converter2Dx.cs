@@ -219,7 +219,7 @@ namespace Physics2DxSystem.Utilities
                     boxCollider.ToPolygonCollider2D(polygonCollider2D);
                     break;
                 case MeshCollider meshCollider when collider2D is PolygonCollider2D polygonCollider2D:
-                    meshCollider.ToPolygonCollider2D(polygonCollider2D, conversionSettings.renderSize);
+                    meshCollider.ToPolygonCollider2D(polygonCollider2D, conversionSettings.renderSize, conversionSettings.tolerance);
                     break;
                 default:
                     collider.GenericPropertiesToCollider2D(collider2D);
@@ -526,7 +526,9 @@ namespace Physics2DxSystem.Utilities
         }
 
         /// <include file='../Documentation.xml' path='docs/Converter2Dx/Mesh/*'/>
-        public static void ToPolygonCollider2D(this MeshCollider meshCollider, PolygonCollider2D polygonCollider2D, MeshColliderConversionRenderSize renderSize)
+        public static void ToPolygonCollider2D(this MeshCollider meshCollider, PolygonCollider2D polygonCollider2D) => meshCollider.ToPolygonCollider2D(polygonCollider2D, MeshColliderConversionRenderSize._256, 0.05f);
+        /// <include file='../Documentation.xml' path='docs/Converter2Dx/Mesh/*'/>
+        public static void ToPolygonCollider2D(this MeshCollider meshCollider, PolygonCollider2D polygonCollider2D, MeshColliderConversionRenderSize renderSize, float tolerance)
         {
             meshCollider.GenericPropertiesToCollider2D(polygonCollider2D);
 
@@ -573,10 +575,21 @@ namespace Physics2DxSystem.Utilities
             // Give the generated physics shape to the polygonCollider2D and offset it by minus the renderer transform.
             if((polygonCollider2D.pathCount = sprite.GetPhysicsShapeCount()) > 0)
             {
-                for(int i = 0; i < polygonCollider2D.pathCount; i++)
+                if(tolerance > 0)
                 {
-                    sprite.GetPhysicsShape(i, points);
-                    polygonCollider2D.SetPath(i, points);
+                    for(int i = 0; i < polygonCollider2D.pathCount; i++)
+                    {
+                        sprite.GetPhysicsShape(i, points);
+                        polygonCollider2D.SetPath(i, DouglasPeuckerReduction.Reduce(points, tolerance));
+                    }
+                }
+                else
+                {
+                    for(int i = 0; i < polygonCollider2D.pathCount; i++)
+                    {
+                        sprite.GetPhysicsShape(i, points);
+                        polygonCollider2D.SetPath(i, points);
+                    }
                 }
             }
             polygonCollider2D.offset = -renderFilter.transform.position;
