@@ -83,7 +83,7 @@ namespace Physics2DxSystem
         [Tooltip("Determines which Capsule2D direction the Converter2Dx supports.")] public CapsuleDirection2D capsuleDirection2D;
         [Header("Conversion Settings")]
         public ConversionSettings conversionSettings = new ConversionSettings { renderSize = MeshColliderConversionRenderSize._256 };
-        public Conversion2DSettings conversion2DSettings;
+        public Conversion2DSettings conversion2DSettings = new Conversion2DSettings { };
         [Header("Ignore Conversion")]
         [Tooltip("The Colliders to ignore for conversion. Bypassed by AddCollider.")] public Collider[] ignoreConversion;
         [Tooltip("The Collider2Ds to ignore for conversion. Bypassed by AddCollider.")] public Collider2D[] ignoreConversion2D;
@@ -165,7 +165,7 @@ namespace Physics2DxSystem
                 {
                     if(Array.IndexOf(ignoreConversion, collider) == -1)
                     {
-                        if(conversion2DSettings.polygonCollider2DConversionMethod == PolygonCollider2DConversionMethod.CreateMeshAndDestroySharedMesh && collider is MeshCollider meshCollider)
+                        if(conversion2DSettings.polygonCollider2DConversionOptions.HasFlag(PolygonCollider2DConversionOptions.DestroySharedMesh) && collider is MeshCollider meshCollider)
                         {
                             meshCollider.sharedMesh = Instantiate(meshCollider.sharedMesh);
                         }
@@ -259,7 +259,7 @@ namespace Physics2DxSystem
                 {
                     if(Array.IndexOf(ignoreConversion, collider) == -1)
                     {
-                        if(conversion2DSettings.polygonCollider2DConversionMethod == PolygonCollider2DConversionMethod.CreateMeshAndDestroySharedMesh && collider is MeshCollider meshCollider)
+                        if(conversion2DSettings.polygonCollider2DConversionOptions.HasFlag(PolygonCollider2DConversionOptions.DestroySharedMesh) && collider is MeshCollider meshCollider)
                         {
                             meshCollider.sharedMesh = Instantiate(meshCollider.sharedMesh);
                         }
@@ -321,7 +321,7 @@ namespace Physics2DxSystem
         {
             var newCollider = (T)collidersCache.gameObject.AddComponent((Collider)toAdd, ignore);
 
-            if(conversion2DSettings.polygonCollider2DConversionMethod == PolygonCollider2DConversionMethod.CreateMeshAndDestroySharedMesh && newCollider is MeshCollider meshCollider)
+            if(conversion2DSettings.polygonCollider2DConversionOptions.HasFlag(PolygonCollider2DConversionOptions.DestroySharedMesh) && newCollider is MeshCollider meshCollider)
             {
                 meshCollider.sharedMesh = Instantiate(meshCollider.sharedMesh);
             }
@@ -533,7 +533,7 @@ namespace Physics2DxSystem
             {
                 if(!colliderPairs.ContainsKey(collider) && Array.IndexOf(ignoreConversion, collider) == -1)
                 {
-                    if(conversion2DSettings.polygonCollider2DConversionMethod == PolygonCollider2DConversionMethod.CreateMeshAndDestroySharedMesh && collider is MeshCollider meshCollider)
+                    if(conversion2DSettings.polygonCollider2DConversionOptions.HasFlag(PolygonCollider2DConversionOptions.DestroySharedMesh) && collider is MeshCollider meshCollider)
                     {
                         meshCollider.sharedMesh = Instantiate(meshCollider.sharedMesh);
                     }

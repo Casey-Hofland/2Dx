@@ -153,6 +153,7 @@ namespace UnityEngine
 
             var settings = Resources.Load<Physics2DxSettings>(nameof(Physics2DxSettings));
             _is2Dnot3D = settings.is2Dnot3D;
+            isConverting = false;
             conversionTime = settings.conversionTime;
             splitConversionOverMultipleFrames = settings.splitConversionOverMultipleFrames;
             slimHierarchy = settings.slimHierarchy;

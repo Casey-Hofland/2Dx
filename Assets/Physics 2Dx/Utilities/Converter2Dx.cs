@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.UIElements;
 
 namespace Physics2DxSystem.Utilities
 {
@@ -252,7 +251,7 @@ namespace Physics2DxSystem.Utilities
                     }
                     break;
                 case PolygonCollider2D polygonCollider2D when collider is MeshCollider meshCollider:
-                    polygonCollider2D.ToMeshCollider(meshCollider, conversion2DSettings.polygonCollider2DConversionMethod);
+                    polygonCollider2D.ToMeshCollider(meshCollider, conversion2DSettings.polygonCollider2DConversionOptions);
                     break;
                 default:
                     collider2D.GenericPropertiesToCollider(collider);
@@ -536,10 +535,11 @@ namespace Physics2DxSystem.Utilities
             {
                 return;
             }
-            renderFilter.transform.SetPositionAndRotation(Vector3.zero, Quaternion.Inverse(polygonCollider2D.transform.rotation) * meshCollider.transform.rotation);
 
+            // Position the transform so the bounds' center is at (0, 0, 0).
+            renderFilter.transform.rotation = Quaternion.Inverse(polygonCollider2D.transform.rotation) * meshCollider.transform.rotation;
             var bounds = renderRenderer.bounds;
-            renderFilter.transform.position = -bounds.center + Vector3.forward * bounds.extents.z;
+            renderFilter.transform.position -= bounds.center - Vector3.forward * bounds.extents.z;
 
             renderCamera.orthographicSize =
                 bounds.extents.x > bounds.extents.y
@@ -562,7 +562,6 @@ namespace Physics2DxSystem.Utilities
             var rect = new Rect(0, 0, renderTexture.width, renderTexture.height);
             texture2D.ReadPixels(rect, 0, 0, false);
 
-            renderFilter.sharedMesh = null;
             renderCamera.gameObject.SetActive(false);
             RenderTexture.active = activeRenderTexture;
 
@@ -571,16 +570,16 @@ namespace Physics2DxSystem.Utilities
             Vector4 border = new Vector4(rect.xMin, rect.yMin, rect.xMax, rect.yMax);
             var sprite = Sprite.Create(texture2D, rect, centerPivot, pixelsPerUnit, 0, SpriteMeshType.FullRect, border, true);
 
-            // Give the generated physics shape to the polygonCollider2D and offset it by the amount the renderer bounds and renderer transform were offset times half (not sure why times half).
+            // Give the generated physics shape to the polygonCollider2D and offset it by minus the renderer transform.
             if((polygonCollider2D.pathCount = sprite.GetPhysicsShapeCount()) > 0)
             {
-                for(int i = 0; i < sprite.GetPhysicsShapeCount(); i++)
+                for(int i = 0; i < polygonCollider2D.pathCount; i++)
                 {
                     sprite.GetPhysicsShape(i, points);
                     polygonCollider2D.SetPath(i, points);
                 }
             }
-            polygonCollider2D.offset = (bounds.center - renderFilter.transform.position) * 0.5f;
+            polygonCollider2D.offset = -renderFilter.transform.position;
         }
 
         /// <include file='../Documentation.xml' path='docs/Converter2Dx/Polygon2D/*'/>
