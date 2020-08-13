@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:Label text="Physics 2Dx" name="title" class="title">
+        <Style src="title.uss" />
+    </ui:Label>
+    <ui:Toggle label="Is 2D not 3D" binding-path="is2Dnot3D">
+        <Style src="title.uss" />
+    </ui:Toggle>
+    <uie:FloatField label="Conversion Time" binding-path="conversionTime">
+        <Style src="title.uss" />
+    </uie:FloatField>
+    <ui:Toggle label="Split Conversion" binding-path="splitConversion">
+        <Style src="title.uss" />
+    </ui:Toggle>
+    <ui:Toggle label="Slim Hierarchy" binding-path="slimHierarchy">
+        <Style src="title.uss" />
+    </ui:Toggle>
+    <ui:ListView focusable="True" name="conversionOrder">
+        <Style src="title.uss" />
+    </ui:ListView>
+</ui:UXML>

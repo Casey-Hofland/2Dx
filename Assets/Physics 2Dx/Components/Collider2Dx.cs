@@ -9,7 +9,8 @@ namespace Physics2DxSystem
 {
     [AddComponentMenu(Physics2Dx.componentMenu + "Collider 2Dx")]
     [DisallowMultipleComponent]
-    public sealed class Collider2Dx : Module2Dx
+    [Obsolete("This class is inheriting the deprecated Module2DxOld class.", false)]
+    public sealed class Collider2Dx : Module2DxOld
     {
         private static readonly Quaternion zRotation90Deg = new Quaternion(0f, 0f, 0.7071068f, 0.7071068f);
 

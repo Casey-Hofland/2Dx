@@ -5,7 +5,7 @@ namespace Physics2DxSystem
 {
     [AddComponentMenu(Physics2Dx.componentMenu + "Rigidbody 2Dx")]
     [DisallowMultipleComponent]
-    public sealed class Rigidbody2Dx : Module2Dx
+    public sealed class Rigidbody2Dx : Module2DxOld
     {
         public override int conversionOrder => -50;
         public override uint batchSize => 64;

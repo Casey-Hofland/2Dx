@@ -1,6 +1,7 @@
 ﻿using Physics2DxSystem;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace UnityEngine
 {
@@ -87,11 +88,11 @@ namespace UnityEngine
                 StartCoroutine(UpdateIsConverting(value));
                 if(splitConversionOverMultipleFrames)
                 {
-                    StartCoroutine(Module2Dx.ConvertInstancesAsCoroutine(value));
+                    StartCoroutine(ConvertModule2DxesRoutine(value));
                 }
                 else
                 {
-                    Module2Dx.ConvertInstances(value);
+                    ConvertModule2Dxes(value);
                 }
             }
         }
@@ -142,6 +143,148 @@ namespace UnityEngine
         public static bool splitConversionOverMultipleFrames { get; set; }
         #endregion
 
+        #region Module2Dx Instances Conversion
+        internal static void AddModule2DxInstance(Module2Dx module2Dx)
+        {
+            if(!splitConversionOverMultipleFrames || StartCoroutine(AddToConversionList()) == null)
+            {
+                var order = module2DxTypeOrder[module2Dx.GetType()];
+                orderedModule2Dxes[order].Add(module2Dx);
+            }
+
+            IEnumerator AddToConversionList()
+            {
+                yield return waitWhileConverting;
+
+                var order = module2DxTypeOrder[module2Dx.GetType()];
+                orderedModule2Dxes[order].Add(module2Dx);
+            }
+        }
+
+        internal static void RemoveModule2DxInstance(Module2Dx module2Dx)
+        {
+            if(!splitConversionOverMultipleFrames || StartCoroutine(RemoveFromConversionList()) == null)
+            {
+                var order = module2DxTypeOrder[module2Dx.GetType()];
+                orderedModule2Dxes[order].Remove(module2Dx);
+            }
+
+            IEnumerator RemoveFromConversionList()
+            {
+                yield return waitWhileConverting;
+
+                var order = module2DxTypeOrder[module2Dx.GetType()];
+                orderedModule2Dxes[order].Remove(module2Dx);
+            }
+        }
+
+        private static Dictionary<Type, int> module2DxTypeOrder = new Dictionary<Type, int>();
+        private static SortedList<int, HashSet<Module2Dx>> orderedModule2Dxes = new SortedList<int, HashSet<Module2Dx>>();
+        private static Dictionary<int, uint> orderedBatchSizes3D = new Dictionary<int, uint>();
+        private static Dictionary<int, uint> orderedBatchSizes2D = new Dictionary<int, uint>();
+
+        private static IEnumerator ConvertModule2DxesRoutine(bool to2Dnot3D)
+        {
+            uint currentBatchSize = 0;
+            if(to2Dnot3D)
+            {
+                foreach(var orderModule2Dxes in orderedModule2Dxes)
+                {
+                    if(isConverting)
+                    {
+                        var newBatchSize = orderedBatchSizes2D[orderModule2Dxes.Key];
+                        if(currentBatchSize >= newBatchSize)
+                        {
+                            yield return null;
+                            currentBatchSize = 0;
+                        }
+
+                        foreach(var module2Dx in orderModule2Dxes.Value)
+                        {
+                            module2Dx.ConvertTo2D();
+                            currentBatchSize++;
+                            if(currentBatchSize == newBatchSize)
+                            {
+                                if(isConverting)
+                                {
+                                    yield return null;
+                                    currentBatchSize = 0;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach(var module2Dx in orderModule2Dxes.Value)
+                        {
+                            module2Dx.ConvertTo2D();
+                        }
+                    }
+                }
+            }
+            else
+            {
+                foreach(var orderModule2Dxes in orderedModule2Dxes)
+                {
+                    if(isConverting)
+                    {
+                        var newBatchSize = orderedBatchSizes3D[orderModule2Dxes.Key];
+                        if(currentBatchSize >= newBatchSize)
+                        {
+                            yield return null;
+                            currentBatchSize = 0;
+                        }
+
+                        foreach(var module2Dx in orderModule2Dxes.Value)
+                        {
+                            module2Dx.ConvertTo3D();
+                            currentBatchSize++;
+                            if(currentBatchSize == newBatchSize)
+                            {
+                                if(isConverting)
+                                {
+                                    yield return null;
+                                    currentBatchSize = 0;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach(var module2Dx in orderModule2Dxes.Value)
+                        {
+                            module2Dx.ConvertTo3D();
+                        }
+                    }
+                }
+            }
+        }
+
+        private static void ConvertModule2Dxes(bool to2Dnot3D)
+        {
+            if(to2Dnot3D)
+            {
+                foreach(var module2Dxes in orderedModule2Dxes.Values)
+                {
+                    foreach(var module2Dx in module2Dxes)
+                    {
+                        module2Dx.ConvertTo2D();
+                    }
+                }
+            }
+            else
+            {
+                foreach(var module2Dxes in orderedModule2Dxes.Values)
+                {
+                    foreach(var module2Dx in module2Dxes)
+                    {
+                        module2Dx.ConvertTo3D();
+                    }
+                }
+            }
+        }
+        #endregion
+
         #region Debugging
         public static bool slimHierarchy { get; private set; }
         #endregion
@@ -155,8 +298,20 @@ namespace UnityEngine
             _is2Dnot3D = settings.is2Dnot3D;
             isConverting = false;
             conversionTime = settings.conversionTime;
-            splitConversionOverMultipleFrames = settings.splitConversionOverMultipleFrames;
+            splitConversionOverMultipleFrames = settings.splitConversion;
             slimHierarchy = settings.slimHierarchy;
+
+            module2DxTypeOrder = new Dictionary<Type, int>();
+            orderedModule2Dxes = new SortedList<int, HashSet<Module2Dx>>();
+            orderedBatchSizes3D = new Dictionary<int, uint>();
+            orderedBatchSizes2D = new Dictionary<int, uint>();
+            foreach(var module2DxSettings in settings.module2DxesSettings)
+            {
+                module2DxTypeOrder.Add(module2DxSettings.type, module2DxSettings.order);
+                orderedModule2Dxes.Add(module2DxSettings.order, new HashSet<Module2Dx>());
+                orderedBatchSizes3D.Add(module2DxSettings.order, module2DxSettings.batchSize3D);
+                orderedBatchSizes2D.Add(module2DxSettings.order, module2DxSettings.batchSize2D);
+            }
 
             var coroutineHandlerGO = new GameObject(nameof(coroutineHandler));
             Object.DontDestroyOnLoad(coroutineHandlerGO);
