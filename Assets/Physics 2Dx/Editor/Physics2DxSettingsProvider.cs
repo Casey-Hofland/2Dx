@@ -1,13 +1,11 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using UnityEditor;
-using UnityEngine;
 using System.Linq;
-using UnityEngine.UIElements;
-using System;
-using UnityEditor.UIElements;
-using UnityEditorInternal;
 using System.Reflection;
+using UnityEditor;
+using UnityEditorInternal;
+using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Physics2DxSystem.Editor
 {
@@ -73,6 +71,7 @@ namespace Physics2DxSystem.Editor
                     }
 
                     AssetDatabase.CreateAsset(_instance, assetPath);
+                    _instance.Reset();
                     AssetDatabase.SaveAssets();
                 }
 
@@ -99,36 +98,6 @@ namespace Physics2DxSystem.Editor
         private ReorderableList reorderableList;
 
         public Physics2DxSettingsProvider(string path, SettingsScope scopes, IEnumerable<string> keywords = null) : base(path, scopes, keywords) { }
-        
-        //public override void OnActivate(string searchContext, VisualElement rootElement)
-        //{
-        //    customSettings = GetSerializedObject();
-
-        //    var visualTreeAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Physics 2Dx/Editor/Physics2DxSettingsProvider.uxml");
-        //    visualTreeAsset.CloneTree(rootElement);
-
-        //    rootElement.Bind(customSettings);
-
-        //    var conversionOrder = rootElement.Q<ListView>("conversionOrder", "unity-list-view");
-
-        //    var list = new List<string>()
-        //    {
-        //        "Lol",
-        //        "Dope",
-        //        "Cool",
-        //    };
-
-        //    conversionOrder.makeItem = () => new Label();
-        //    conversionOrder.bindItem = (element, index) => (element as Label).text = list[index];
-        //    conversionOrder.itemsSource = list;
-
-        //    conversionOrder.pickingMode = PickingMode.Position;
-        //    conversionOrder.selectionType = SelectionType.Single;
-
-        //    conversionOrder.onItemChosen += obj => Debug.Log(obj);
-
-        //    conversionOrder.style.flexGrow = 1f;
-        //}
 
         public override void OnActivate(string searchContext, VisualElement rootElement)
         {
@@ -140,6 +109,12 @@ namespace Physics2DxSystem.Editor
             slimHierarchy = customSettings.FindProperty(nameof(slimHierarchy));
             module2DxesSettings = customSettings.FindProperty(nameof(module2DxesSettings));
 
+            CreateReorderableList();
+        }
+
+        private void CreateReorderableList()
+        {
+            // Get types and delete duplicates or null values.
             var module2DxesTypes = new HashSet<Type>();
             for(int i = module2DxesSettings.arraySize - 1; i >= 0; i--)
             {
@@ -156,45 +131,88 @@ namespace Physics2DxSystem.Editor
                 }
             }
 
+            // Get all Module2Dx types in the project.
             var module2DxTypes = from assembly in AppDomain.CurrentDomain.GetAssemblies()
-                                 where assembly != typeof(Physics2Dx).Assembly
                                  from type in GetLoadableTypes(assembly)
                                  where type.IsSubclassOf(typeof(Module2Dx))
                                  where !type.IsAbstract
                                  select type;
 
+            // Populate the SerializedProperty array.
             foreach(var module2DxType in module2DxTypes)
             {
                 if(!module2DxesTypes.Contains(module2DxType))
                 {
+                    var arraySize = module2DxesSettings.arraySize;
                     module2DxesSettings.arraySize++;
-                    var module2DxSettings = module2DxesSettings.GetArrayElementAtIndex(module2DxesSettings.arraySize - 1);
+                    var module2DxSettings = module2DxesSettings.GetArrayElementAtIndex(arraySize);
                     module2DxSettings.FindPropertyRelative("typeName").stringValue = module2DxType.AssemblyQualifiedName;
-                    module2DxSettings.FindPropertyRelative("order").intValue = 0;
-                    module2DxSettings.FindPropertyRelative("batchSize3D").intValue = 100;
-                    module2DxSettings.FindPropertyRelative("batchSize2D").intValue = 100;
+                    var batchSize3D = module2DxSettings.FindPropertyRelative("batchSize3D");
+                    var batchSize2D = module2DxSettings.FindPropertyRelative("batchSize2D");
+
+                    int index;
+                    switch(module2DxType.Name)
+                    {
+                        case nameof(Transform2Dx):
+                            batchSize3D.intValue = batchSize2D.intValue = 1000;
+                            module2DxesSettings.MoveArrayElement(arraySize, Math.Min(0, arraySize));
+                            break;
+                        case nameof(SphereConverter):
+                            batchSize3D.intValue = batchSize2D.intValue = 100;
+                            index = FindIndex(module2DxesSettings, element => element.FindPropertyRelative("typeName").stringValue == typeof(Transform2Dx).AssemblyQualifiedName) + 1;
+                            module2DxesSettings.MoveArrayElement(arraySize, Math.Min(index, arraySize));
+                            break;
+                        case nameof(CapsuleConverter):
+                            batchSize3D.intValue = batchSize2D.intValue = 100;
+                            index = FindIndex(module2DxesSettings, element => element.FindPropertyRelative("typeName").stringValue == typeof(SphereConverter).AssemblyQualifiedName) + 1;
+                            module2DxesSettings.MoveArrayElement(arraySize, Math.Min(index, arraySize));
+                            break;
+                        case nameof(BoxConverter):
+                            batchSize3D.intValue = batchSize2D.intValue = 50;
+                            index = FindIndex(module2DxesSettings, element => element.FindPropertyRelative("typeName").stringValue == typeof(CapsuleConverter).AssemblyQualifiedName) + 1;
+                            module2DxesSettings.MoveArrayElement(arraySize, Math.Min(index, arraySize));
+                            break;
+                        case nameof(MeshConverter):
+                            batchSize3D.intValue = batchSize2D.intValue = 20;
+                            index = FindIndex(module2DxesSettings, element => element.FindPropertyRelative("typeName").stringValue == typeof(BoxConverter).AssemblyQualifiedName) + 1;
+                            module2DxesSettings.MoveArrayElement(arraySize, Math.Min(index, arraySize));
+                            break;
+                        default:
+                            batchSize3D.intValue = batchSize2D.intValue = 100;
+                            break;
+                    }
                 }
             }
-
             customSettings.ApplyModifiedProperties();
 
-            reorderableList = new ReorderableList(customSettings, module2DxesSettings, false, true, false, false)
+            // Create the Reorderable List.
+            reorderableList = new ReorderableList(customSettings, module2DxesSettings, true, true, false, false)
             {
                 drawHeaderCallback = DrawListHeader,
                 drawElementCallback = DrawListElement,
+                onSelectCallback = SelectList,
             };
+        }
+
+        private int FindIndex(SerializedProperty serializedProperty, Func<SerializedProperty, bool> predicate)
+        {
+            for(int i = 0; i < serializedProperty.arraySize; i++)
+            {
+                var element = serializedProperty.GetArrayElementAtIndex(i);
+                if(predicate.Invoke(element))
+                {
+                    return i;
+                }
+            }
+
+            return -1;
         }
 
         private static IEnumerable<Type> GetLoadableTypes(Assembly assembly)
         {
-            if(assembly == null)
-            {
-                return null;
-            }
-
             try
             {
-                return assembly.GetTypes();
+                return assembly?.GetTypes();
             }
             catch(ReflectionTypeLoadException e)
             {
@@ -204,23 +222,16 @@ namespace Physics2DxSystem.Editor
 
         private void DrawListHeader(Rect rect)
         {
-            var typeRect = new Rect(rect.x, rect.y, 140, rect.height);
-            var orderRect = new Rect(rect.x + 140, rect.y, 60, rect.height);
-            var batchSize3DRect = new Rect(rect.x + 205, rect.y, 90, rect.height);
-            var batchSize2DRect = new Rect(rect.x + 300, rect.y, 90, rect.height);
-
-            EditorGUI.LabelField(typeRect, "Module2Dx Type");
-            EditorGUI.LabelField(orderRect, "Order");
-            EditorGUI.LabelField(batchSize3DRect, "Batch Size 3D");
-            EditorGUI.LabelField(batchSize2DRect, "Batch Size 2D");
+            EditorGUI.LabelField(rect, "Conversion Order");
         }
 
         private void DrawListElement(Rect rect, int index, bool isActive, bool isFocused)
         {
             var element = reorderableList.serializedProperty.GetArrayElementAtIndex(index);
-
-            EditorGUI.BeginChangeCheck();
             EditorGUI.PropertyField(rect, element);
+
+            /*
+            EditorGUI.BeginChangeCheck();
             if(EditorGUI.EndChangeCheck())
             {
                 var sortedIndexes = new SortedList<int, Module2DxSettings>(module2DxesSettings.arraySize);
@@ -275,6 +286,18 @@ namespace Physics2DxSystem.Editor
                 }
                 customSettings.ApplyModifiedProperties();
             }
+            */
+        }
+
+        private void SelectList(ReorderableList reorderableList)
+        {
+            var selectedElement = reorderableList.serializedProperty.GetArrayElementAtIndex(reorderableList.index);
+
+            var type = Type.GetType(selectedElement.FindPropertyRelative("typeName").stringValue);
+            if(type.Assembly == typeof(Physics2Dx).Assembly)
+            {
+                reorderableList.draggable = false;
+            }
         }
 
         public override void OnGUI(string searchContext)
@@ -286,7 +309,19 @@ namespace Physics2DxSystem.Editor
             EditorGUILayout.PropertyField(splitConversion);
             EditorGUILayout.PropertyField(slimHierarchy);
 
+            if(Event.current.type == EventType.MouseUp)
+            {
+                reorderableList.draggable = true;
+            }
+
             reorderableList.DoLayoutList();
+
+            if(GUILayout.Button("Reset"))
+            {
+                var physics2DxSettings = (Physics2DxSettings)customSettings.targetObject;
+                physics2DxSettings.Reset();
+                EditorApplication.delayCall += CreateReorderableList;
+            }
 
             customSettings.ApplyModifiedProperties();
         }

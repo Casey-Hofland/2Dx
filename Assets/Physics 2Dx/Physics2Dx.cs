@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 
 namespace UnityEngine
 {
@@ -144,20 +145,26 @@ namespace UnityEngine
         #endregion
 
         #region Module2Dx Instances Conversion
+        private static int module2DxesLength;
+        private static Dictionary<Type, int> module2DxTypeIndex = new Dictionary<Type, int>();
+        private static HashSet<Module2Dx>[] orderedModule2Dxes = Array.Empty<HashSet<Module2Dx>>();
+        private static uint[] orderedBatchSizes3D = Array.Empty<uint>();
+        private static uint[] orderedBatchSizes2D = Array.Empty<uint>();
+
         internal static void AddModule2DxInstance(Module2Dx module2Dx)
         {
             if(!splitConversionOverMultipleFrames || StartCoroutine(AddToConversionList()) == null)
             {
-                var order = module2DxTypeOrder[module2Dx.GetType()];
-                orderedModule2Dxes[order].Add(module2Dx);
+                var index = module2DxTypeIndex[module2Dx.GetType()];
+                orderedModule2Dxes[index].Add(module2Dx);
             }
 
             IEnumerator AddToConversionList()
             {
                 yield return waitWhileConverting;
 
-                var order = module2DxTypeOrder[module2Dx.GetType()];
-                orderedModule2Dxes[order].Add(module2Dx);
+                var index = module2DxTypeIndex[module2Dx.GetType()];
+                orderedModule2Dxes[index].Add(module2Dx);
             }
         }
 
@@ -165,41 +172,38 @@ namespace UnityEngine
         {
             if(!splitConversionOverMultipleFrames || StartCoroutine(RemoveFromConversionList()) == null)
             {
-                var order = module2DxTypeOrder[module2Dx.GetType()];
-                orderedModule2Dxes[order].Remove(module2Dx);
+                var index = module2DxTypeIndex[module2Dx.GetType()];
+                orderedModule2Dxes[index].Remove(module2Dx);
             }
 
             IEnumerator RemoveFromConversionList()
             {
                 yield return waitWhileConverting;
 
-                var order = module2DxTypeOrder[module2Dx.GetType()];
-                orderedModule2Dxes[order].Remove(module2Dx);
+                var index = module2DxTypeIndex[module2Dx.GetType()];
+                orderedModule2Dxes[index].Remove(module2Dx);
             }
         }
-
-        private static Dictionary<Type, int> module2DxTypeOrder = new Dictionary<Type, int>();
-        private static SortedList<int, HashSet<Module2Dx>> orderedModule2Dxes = new SortedList<int, HashSet<Module2Dx>>();
-        private static Dictionary<int, uint> orderedBatchSizes3D = new Dictionary<int, uint>();
-        private static Dictionary<int, uint> orderedBatchSizes2D = new Dictionary<int, uint>();
 
         private static IEnumerator ConvertModule2DxesRoutine(bool to2Dnot3D)
         {
             uint currentBatchSize = 0;
             if(to2Dnot3D)
             {
-                foreach(var orderModule2Dxes in orderedModule2Dxes)
+                for(int i = 0; i < module2DxesLength; i++)
                 {
+                    var module2Dxes = orderedModule2Dxes[i];
+
                     if(isConverting)
                     {
-                        var newBatchSize = orderedBatchSizes2D[orderModule2Dxes.Key];
+                        var newBatchSize = orderedBatchSizes2D[i];
                         if(currentBatchSize >= newBatchSize)
                         {
                             yield return null;
                             currentBatchSize = 0;
                         }
 
-                        foreach(var module2Dx in orderModule2Dxes.Value)
+                        foreach(var module2Dx in module2Dxes)
                         {
                             module2Dx.ConvertTo2D();
                             currentBatchSize++;
@@ -215,7 +219,7 @@ namespace UnityEngine
                     }
                     else
                     {
-                        foreach(var module2Dx in orderModule2Dxes.Value)
+                        foreach(var module2Dx in module2Dxes)
                         {
                             module2Dx.ConvertTo2D();
                         }
@@ -224,18 +228,20 @@ namespace UnityEngine
             }
             else
             {
-                foreach(var orderModule2Dxes in orderedModule2Dxes)
+                for(int i = 0; i < module2DxesLength; i++)
                 {
+                    var module2Dxes = orderedModule2Dxes[i];
+
                     if(isConverting)
                     {
-                        var newBatchSize = orderedBatchSizes3D[orderModule2Dxes.Key];
+                        var newBatchSize = orderedBatchSizes3D[i];
                         if(currentBatchSize >= newBatchSize)
                         {
                             yield return null;
                             currentBatchSize = 0;
                         }
 
-                        foreach(var module2Dx in orderModule2Dxes.Value)
+                        foreach(var module2Dx in module2Dxes)
                         {
                             module2Dx.ConvertTo3D();
                             currentBatchSize++;
@@ -251,7 +257,7 @@ namespace UnityEngine
                     }
                     else
                     {
-                        foreach(var module2Dx in orderModule2Dxes.Value)
+                        foreach(var module2Dx in module2Dxes)
                         {
                             module2Dx.ConvertTo3D();
                         }
@@ -264,7 +270,7 @@ namespace UnityEngine
         {
             if(to2Dnot3D)
             {
-                foreach(var module2Dxes in orderedModule2Dxes.Values)
+                foreach(var module2Dxes in orderedModule2Dxes)
                 {
                     foreach(var module2Dx in module2Dxes)
                     {
@@ -274,7 +280,7 @@ namespace UnityEngine
             }
             else
             {
-                foreach(var module2Dxes in orderedModule2Dxes.Values)
+                foreach(var module2Dxes in orderedModule2Dxes)
                 {
                     foreach(var module2Dx in module2Dxes)
                     {
@@ -301,16 +307,18 @@ namespace UnityEngine
             splitConversionOverMultipleFrames = settings.splitConversion;
             slimHierarchy = settings.slimHierarchy;
 
-            module2DxTypeOrder = new Dictionary<Type, int>();
-            orderedModule2Dxes = new SortedList<int, HashSet<Module2Dx>>();
-            orderedBatchSizes3D = new Dictionary<int, uint>();
-            orderedBatchSizes2D = new Dictionary<int, uint>();
-            foreach(var module2DxSettings in settings.module2DxesSettings)
+            module2DxesLength = settings.module2DxesSettings.Length;
+            module2DxTypeIndex = new Dictionary<Type, int>();
+            orderedModule2Dxes = new HashSet<Module2Dx>[module2DxesLength];
+            orderedBatchSizes3D = new uint[module2DxesLength];
+            orderedBatchSizes2D = new uint[module2DxesLength];
+            for(int i = 0; i < module2DxesLength; i++)
             {
-                module2DxTypeOrder.Add(module2DxSettings.type, module2DxSettings.order);
-                orderedModule2Dxes.Add(module2DxSettings.order, new HashSet<Module2Dx>());
-                orderedBatchSizes3D.Add(module2DxSettings.order, module2DxSettings.batchSize3D);
-                orderedBatchSizes2D.Add(module2DxSettings.order, module2DxSettings.batchSize2D);
+                var module2DxSettings = settings.module2DxesSettings[i];
+                module2DxTypeIndex.Add(module2DxSettings.type, i);
+                orderedModule2Dxes[i] = new HashSet<Module2Dx>();
+                orderedBatchSizes3D[i] = module2DxSettings.batchSize3D;
+                orderedBatchSizes2D[i] = module2DxSettings.batchSize2D;
             }
 
             var coroutineHandlerGO = new GameObject(nameof(coroutineHandler));
