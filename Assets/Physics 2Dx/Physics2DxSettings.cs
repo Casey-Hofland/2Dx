@@ -14,8 +14,11 @@ namespace Physics2DxSystem
         [Tooltip("The order in which Module2Dxes are converted and in how large of a batch.")]
         public Module2DxSettings[] module2DxesSettings = new Module2DxSettings[]
         {
-            new Module2DxSettings { order = -1000, type = typeof(Transform2Dx), batchSize3D = 1000, batchSize2D = 1000 },
-            new Module2DxSettings { order = -100, type = typeof(SphereCollider2Dx), batchSize3D = 100, batchSize2D = 100 },
+            new Module2DxSettings { order = -1000, type = typeof(Transform2Dx), batchSize3D = 0, batchSize2D = 0 },
+            new Module2DxSettings { order = -100, type = typeof(SphereConverter), batchSize3D = 0, batchSize2D = 0 },
+            new Module2DxSettings { order = -99, type = typeof(CapsuleConverter), batchSize3D = 0, batchSize2D = 0 },
+            new Module2DxSettings { order = -98, type = typeof(BoxConverter), batchSize3D = 0, batchSize2D = 0 },
+            new Module2DxSettings { order = -97, type = typeof(MeshConverter), batchSize3D = 0, batchSize2D = 0 },
         };
 
         public void Reset()
@@ -26,8 +29,11 @@ namespace Physics2DxSystem
             slimHierarchy = true;
             module2DxesSettings = new Module2DxSettings[]
             {
-                new Module2DxSettings { order = -1000, type = typeof(Transform2Dx), batchSize3D = 1000, batchSize2D = 1000 },
-                new Module2DxSettings { order = -100, type = typeof(SphereCollider2Dx), batchSize3D = 100, batchSize2D = 100 },
+                new Module2DxSettings { order = -1000, type = typeof(Transform2Dx), batchSize3D = 0, batchSize2D = 0 },
+                new Module2DxSettings { order = -100, type = typeof(SphereConverter), batchSize3D = 0, batchSize2D = 0 },
+                new Module2DxSettings { order = -99, type = typeof(CapsuleConverter), batchSize3D = 0, batchSize2D = 0 },
+                new Module2DxSettings { order = -98, type = typeof(BoxConverter), batchSize3D = 0, batchSize2D = 0 },
+                new Module2DxSettings { order = -97, type = typeof(MeshConverter), batchSize3D = 0, batchSize2D = 0 },
             };
         }
     }
