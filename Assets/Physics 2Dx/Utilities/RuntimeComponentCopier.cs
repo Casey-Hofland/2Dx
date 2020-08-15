@@ -8,6 +8,7 @@ using UnityEngine;
 
 namespace Physics2DxSystem.Utilities
 {
+    [Obsolete("The Runtime Component Copier will be replaced with custom Copier functions. This will eliminate the need for reflection to copy components and thereby gain performance on copying.", false)]
     public static class RuntimeComponentCopier
     {
         private const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Default | BindingFlags.DeclaredOnly;
@@ -17,6 +18,7 @@ namespace Physics2DxSystem.Utilities
         /// <param name="other">The Component to copy from.</param>
         /// <param name="ignore">The properties to ignore when copying.</param>
         /// <returns>The new Component.</returns>
+        [Obsolete("The Runtime Component Copier will be replaced with custom Copier functions. This will eliminate the need for reflection to copy components and thereby gain performance on copying.", false)]
         public static T GetCopyOf<T>(this Component comp, T other, params string[] ignore) where T : Component
         {
             Type type = comp.GetType();
@@ -77,6 +79,7 @@ namespace Physics2DxSystem.Utilities
         /// <param name="toAdd">The Component to copy from.</param>
         /// <param name="ignore">The properties to ignore when copying.</param>
         /// <returns>The new Component.</returns>
+        [Obsolete("The Runtime Component Copier will be replaced with custom Copier functions. This will eliminate the need for reflection to copy components and thereby gain performance on copying.", false)]
         public static T AddComponent<T>(this GameObject go, T toAdd, params string[] ignore) where T : Component
         {
             return go.AddComponent(toAdd.GetType()).GetCopyOf(toAdd, ignore);

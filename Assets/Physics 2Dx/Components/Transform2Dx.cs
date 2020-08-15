@@ -221,22 +221,33 @@ namespace Physics2DxSystem
             {
                 if(transform3D.hasChanged)
                 {
-                    transform3D.SetPositionAndRotation(transform.position, transform.rotation);
-                    transform3D.localScale = Vector3.one;
-                    transform3D.hasChanged = false;
+                    UpdateTransform3D();
                 }
 
                 if(transform2D.hasChanged)
                 {
-                    transform2D.SetPositionAndRotation(transform.position, Quaternion.LookRotation(Vector3.forward, upwardDirection));
-                    transform2D.localScale = Vector3.one;
-                    transform2D.hasChanged = false;
+                    UpdateTransform2D();
                 }
             }
             else
             {
-                transform2D.rotation = Quaternion.LookRotation(Vector3.forward, upwardDirection);
-                transform.hasChanged = transform2D.hasChanged = transform3D.hasChanged = false;
+                UpdateTransform3D();
+                UpdateTransform2D();
+                transform.hasChanged = false;
+            }
+
+            void UpdateTransform3D()
+            {
+                transform3D.SetPositionAndRotation(transform.position, transform.rotation);
+                transform3D.localScale = Vector3.one;
+                transform3D.hasChanged = false;
+            }
+
+            void UpdateTransform2D()
+            {
+                transform2D.SetPositionAndRotation(transform.position, Quaternion.LookRotation(Vector3.forward, upwardDirection));
+                transform2D.localScale = Vector3.one;
+                transform2D.hasChanged = false;
             }
         }
 

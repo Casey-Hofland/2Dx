@@ -178,7 +178,6 @@ namespace Physics2DxSystem.Utilities
         {
             collider2D.enabled = collider.enabled;
             collider2D.hideFlags = collider.hideFlags;
-            collider2D.isTrigger = collider.isTrigger;
             collider2D.sharedMaterial = collider.sharedMaterial.AsPhysicsMaterial2D();
         }
 
@@ -191,7 +190,6 @@ namespace Physics2DxSystem.Utilities
         {
             collider.enabled = collider2D.enabled;
             collider.hideFlags = collider2D.hideFlags;
-            collider.isTrigger = collider2D.isTrigger;
             collider.sharedMaterial = collider2D.sharedMaterial.AsPhysicMaterial();
         }
 
@@ -265,6 +263,7 @@ namespace Physics2DxSystem.Utilities
             sphereCollider.GenericPropertiesToCollider2D(circleCollider2D);
 
             // Set the CircleCollider2D settings.
+            circleCollider2D.isTrigger = sphereCollider.isTrigger;
             circleCollider2D.offset = CenterToOffset(sphereCollider.transform, sphereCollider.center, circleCollider2D.transform);
             circleCollider2D.radius = sphereCollider.radius;
         }
@@ -275,6 +274,7 @@ namespace Physics2DxSystem.Utilities
             circleCollider2D.GenericPropertiesToCollider(sphereCollider);
 
             // Set the SphereCollider settings.
+            sphereCollider.isTrigger = circleCollider2D.isTrigger;
             sphereCollider.center = OffsetToCenter(circleCollider2D.transform, circleCollider2D.offset, sphereCollider.transform, sphereCollider.center);
             sphereCollider.radius = circleCollider2D.radius;
         }
@@ -284,7 +284,8 @@ namespace Physics2DxSystem.Utilities
         {
             capsuleCollider.GenericPropertiesToCollider2D(capsuleCollider2D);
 
-            // Set the CapsuleCollider2D offset.
+            // Set the CapsuleCollider2D settings.
+            capsuleCollider2D.isTrigger = capsuleCollider.isTrigger;
             capsuleCollider2D.offset = CenterToOffset(capsuleCollider.transform, capsuleCollider.center, capsuleCollider2D.transform);
 
             // Determine if and in what direction to convert the CapsuleCollider2D size and direction.
@@ -331,7 +332,8 @@ namespace Physics2DxSystem.Utilities
         {
             capsuleCollider2D.GenericPropertiesToCollider(capsuleCollider);
 
-            // Set the CapsuleCollider center.
+            // Set the CapsuleCollider settings.
+            capsuleCollider.isTrigger = capsuleCollider2D.isTrigger;
             capsuleCollider.center = OffsetToCenter(capsuleCollider2D.transform, capsuleCollider2D.offset, capsuleCollider.transform, capsuleCollider.center);
 
             // Determine if the CapsuleCollider can be converted to.
@@ -381,6 +383,8 @@ namespace Physics2DxSystem.Utilities
         public static void ToPolygonCollider2D(this BoxCollider boxCollider, PolygonCollider2D polygonCollider2D)
         {
             boxCollider.GenericPropertiesToCollider2D(polygonCollider2D);
+
+            polygonCollider2D.isTrigger = boxCollider.isTrigger;
 
             var relativeRotation = Quaternion.Inverse(polygonCollider2D.transform.rotation) * boxCollider.transform.rotation;
             polygonCollider2D.offset = relativeRotation * boxCollider.center;
@@ -480,6 +484,7 @@ namespace Physics2DxSystem.Utilities
         {
             polygonCollider2D.GenericPropertiesToCollider(boxCollider);
 
+            boxCollider.isTrigger = polygonCollider2D.isTrigger;
             boxCollider.center = OffsetToCenter(polygonCollider2D.transform, polygonCollider2D.offset, boxCollider.transform, boxCollider.center);
 
             Vector2 relativeRight = boxCollider.transform.right;
@@ -532,9 +537,16 @@ namespace Physics2DxSystem.Utilities
         {
             meshCollider.GenericPropertiesToCollider2D(polygonCollider2D);
 
+            if(meshCollider.convex)
+            {
+                polygonCollider2D.isTrigger = meshCollider.isTrigger;
+            }
+
             // Setup the renderer and camera for the render shot.
             if(!(renderFilter.sharedMesh = meshCollider.sharedMesh))
             {
+                polygonCollider2D.pathCount = 0;
+                polygonCollider2D.offset = Vector2.zero;
                 return;
             }
 
@@ -601,6 +613,11 @@ namespace Physics2DxSystem.Utilities
         public static void ToMeshCollider(this PolygonCollider2D polygonCollider2D, MeshCollider meshCollider, PolygonCollider2DConversionOptions conversionOptions)
         {
             polygonCollider2D.GenericPropertiesToCollider(meshCollider);
+
+            if(meshCollider.convex)
+            {
+                meshCollider.isTrigger = polygonCollider2D.isTrigger;
+            }
 
             if(conversionOptions.HasFlag(PolygonCollider2DConversionOptions.DestroySharedMesh))
             {
