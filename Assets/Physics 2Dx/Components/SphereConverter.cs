@@ -5,7 +5,7 @@ namespace Physics2DxSystem
 {
     [AddComponentMenu(Physics2Dx.componentMenu + "Sphere Converter")]
     [DisallowMultipleComponent]
-    public sealed class SphereConverter : ColliderModule2Dx<SphereCollider, CircleCollider2D>
+    public sealed class SphereConverter : Collider2Dx<SphereCollider, CircleCollider2D>
     {
         protected override void ColliderToCollider(SphereCollider collider, SphereCollider other)
         {

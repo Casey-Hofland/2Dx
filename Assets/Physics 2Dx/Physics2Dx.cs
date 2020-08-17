@@ -2,11 +2,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 
 namespace UnityEngine
 {
-    public class Physics2Dx
+    public static class Physics2Dx
     {
         internal const string componentMenu = "Physics 2Dx/";
 
@@ -71,14 +70,14 @@ namespace UnityEngine
         #endregion
 
         #region Conversion
-        private static bool _is2Dnot3D = false;
+        private static bool _is2DNot3D = false;
         /// <include file='./Documentation.xml' path='docs/Physics2Dx/is2Dnot3D/*' />
-        public static bool is2Dnot3D
+        public static bool is2DNot3D
         {
-            get => _is2Dnot3D;
+            get => _is2DNot3D;
             set
             {
-                if(isConverting || _is2Dnot3D == value)
+                if(isConverting || _is2DNot3D == value)
                 {
 #if UNITY_EDITOR
                     Debug.LogWarning("Cannot convert Physics2Dx while Physics2Dx is converting.");
@@ -101,7 +100,7 @@ namespace UnityEngine
         /// <include file='./Documentation.xml' path='docs/Physics2Dx/Convert/*' />
         public static void Convert()
         {
-            is2Dnot3D = !is2Dnot3D;
+            is2DNot3D = !is2DNot3D;
         }
 
         /// <include file='./Documentation.xml' path='docs/Physics2Dx/onConvert/*' />
@@ -136,7 +135,7 @@ namespace UnityEngine
             yield return waitForConversionTime;
             isConverting = false;
 
-            _is2Dnot3D = to2Dnot3D;
+            _is2DNot3D = to2Dnot3D;
             onAfterConvert?.Invoke(to2Dnot3D);
         }
 
@@ -151,7 +150,8 @@ namespace UnityEngine
         private static uint[] orderedBatchSizes3D = Array.Empty<uint>();
         private static uint[] orderedBatchSizes2D = Array.Empty<uint>();
 
-        internal static void AddModule2DxInstance(Module2Dx module2Dx)
+        /// <include file='./Documentation.xml' path='docs/Physics2Dx/AddModule2DxInstance/*' />
+        public static void AddModule2DxInstance(Module2Dx module2Dx)
         {
             if(!splitConversionOverMultipleFrames || StartCoroutine(AddToConversionList()) == null)
             {
@@ -168,7 +168,8 @@ namespace UnityEngine
             }
         }
 
-        internal static void RemoveModule2DxInstance(Module2Dx module2Dx)
+        /// <include file='./Documentation.xml' path='docs/Physics2Dx/RemoveModule2DxInstance/*' />
+        public static void RemoveModule2DxInstance(Module2Dx module2Dx)
         {
             if(!splitConversionOverMultipleFrames || StartCoroutine(RemoveFromConversionList()) == null)
             {
@@ -185,10 +186,11 @@ namespace UnityEngine
             }
         }
 
-        private static IEnumerator ConvertModule2DxesRoutine(bool to2Dnot3D)
+        /// <include file='./Documentation.xml' path='docs/Physics2Dx/ConvertModule2Dxes/*' />
+        public static IEnumerator ConvertModule2DxesRoutine(bool to2DNot3D)
         {
             uint currentBatchSize = 0;
-            if(to2Dnot3D)
+            if(to2DNot3D)
             {
                 for(int i = 0; i < module2DxesLength; i++)
                 {
@@ -266,9 +268,10 @@ namespace UnityEngine
             }
         }
 
-        private static void ConvertModule2Dxes(bool to2Dnot3D)
+        /// <include file='./Documentation.xml' path='docs/Physics2Dx/ConvertModule2Dxes/*' />
+        public static void ConvertModule2Dxes(bool to2DNot3D)
         {
-            if(to2Dnot3D)
+            if(to2DNot3D)
             {
                 foreach(var module2Dxes in orderedModule2Dxes)
                 {
@@ -300,8 +303,8 @@ namespace UnityEngine
         {
             onBeforeConvert = onAfterConvert = default;
 
-            var settings = Resources.Load<Physics2DxSettings>(nameof(Physics2DxSettings));
-            _is2Dnot3D = settings.is2Dnot3D;
+            var settings = Resources.Load<Settings>(nameof(Settings));
+            _is2DNot3D = settings.is2DNot3D;
             isConverting = false;
             conversionTime = settings.conversionTime;
             splitConversionOverMultipleFrames = settings.splitConversion;

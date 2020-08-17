@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
+[assembly: InternalsVisibleTo("Physics2Dx.Editor")]
 namespace Physics2DxSystem
 {
     [Serializable]
-    public struct Module2DxSettings : ISerializationCallbackReceiver
+    internal struct Module2DxSettings : ISerializationCallbackReceiver
     {
         public Type type;
 

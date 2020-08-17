@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Physics2DxSystem
 {
     [RequireComponent(typeof(Transform2Dx))]
-    public abstract class ColliderModule2Dx<C, C2D> : Module2Dx where C : Collider where C2D : Collider2D
+    public abstract class Collider2Dx<C, C2D> : Module2Dx where C : Collider where C2D : Collider2D
     {
         #region Required Components
         private Transform2Dx _transform2Dx;
@@ -16,10 +16,10 @@ namespace Physics2DxSystem
         #region Properties
         [Tooltip("Automatically update the tracked colliders by looking for dynamically added and removed colliders. To improve performance, turn this setting off and use the Add / Remove methods of this Component instead.")] public bool autoUpdate = true;
         [Tooltip("The Colliders to ignore for conversion.")] public C[] ignoredColliders;
-        [Tooltip("The Collider2Ds to ignore for conversion.")] public C2D[] ignoredCollider2Ds;
+        [Tooltip("The Collider2Ds to ignore for conversion.")] public C2D[] ignoredColliders2D;
 
         public bool IgnoreCollider(C collider) => Array.IndexOf(ignoredColliders, collider) != -1;
-        public bool IgnoreCollider2D(C2D collider2D) => Array.IndexOf(ignoredCollider2Ds, collider2D) != -1;
+        public bool IgnoreCollider2D(C2D collider2D) => Array.IndexOf(ignoredColliders2D, collider2D) != -1;
         #endregion
         
         #region Tracked Colliders
@@ -44,21 +44,26 @@ namespace Physics2DxSystem
         public int GetColliderIndex(C collider) => trackedColliders.IndexOf(collider);
         public int GetCollider2DIndex(C2D collider2D) => trackedCollider2Ds.IndexOf(collider2D);
 
+        /// <include file='../Documentation.xml' path='docs/Collider2Dx/GetPairedCollider2D/*' />
         public C2D GetPairedCollider2D(C collider)
         {
             var index = GetColliderIndex(collider);
             return index != -1 ? GetCollider2DAt(index) : null;
         }
 
+        /// <include file='../Documentation.xml' path='docs/Collider2Dx/GetPairedCollider/*' />
         public C GetPairedCollider(C2D collider2D)
         {
             var index = GetCollider2DIndex(collider2D);
             return index != -1 ? GetColliderAt(index) : null;
         }
 
+        /// <include file='../Documentation.xml' path='docs/Collider2Dx/ColliderToCollider/*' />
         protected abstract void ColliderToCollider(C collider, C other);
+        /// <include file='../Documentation.xml' path='docs/Collider2Dx/Collider2DToCollider2D/*' />
         protected abstract void Collider2DToCollider2D(C2D collider2D, C2D other);
 
+        /// <include file='../Documentation.xml' path='docs/Collider2Dx/AddCollider/*' />
         public C AddCollider()
         {
             var collider = transform2Dx.gameObject3D.AddComponent<C>();
@@ -68,6 +73,7 @@ namespace Physics2DxSystem
             return collider;
         }
 
+        /// <include file='../Documentation.xml' path='docs/Collider2Dx/AddCollider2D/*' />
         public C2D AddCollider2D()
         {
             var collider2D = transform2Dx.gameObject2D.AddComponent<C2D>();
@@ -77,12 +83,13 @@ namespace Physics2DxSystem
             return collider2D;
         }
 
-        public C AddCollider(C toAdd)
+        /// <include file='../Documentation.xml' path='docs/Collider2Dx/AddCollider/*' />
+        public C AddCollider(C copyOf)
         {
             var collider = AddCollider();
 
-            ColliderToCollider(toAdd, collider);
-            if(Physics2Dx.is2Dnot3D)
+            ColliderToCollider(copyOf, collider);
+            if(Physics2Dx.is2DNot3D)
             {
                 var collider2D = trackedCollider2Ds[trackedCollider2Ds.Count - 1];
                 ColliderToCollider2D(collider, collider2D);
@@ -91,12 +98,13 @@ namespace Physics2DxSystem
             return collider;
         }
 
-        public C2D AddCollider2D(C2D toAdd)
+        /// <include file='../Documentation.xml' path='docs/Collider2Dx/AddCollider2D/*' />
+        public C2D AddCollider2D(C2D copyOf)
         {
             var collider2D = AddCollider2D();
 
-            Collider2DToCollider2D(toAdd, collider2D);
-            if(!Physics2Dx.is2Dnot3D)
+            Collider2DToCollider2D(copyOf, collider2D);
+            if(!Physics2Dx.is2DNot3D)
             {
                 var collider = trackedColliders[trackedColliders.Count - 1];
                 Collider2DToCollider(collider2D, collider);
@@ -105,10 +113,13 @@ namespace Physics2DxSystem
             return collider2D;
         }
 
-        public void DestroyPairedColliders(C collider) => DestroyCollidersAt(GetColliderIndex(collider));
-        public void DestroyPairedColliders(C2D collider2D) => DestroyCollidersAt(GetCollider2DIndex(collider2D));
+        /// <include file='../Documentation.xml' path='docs/Collider2Dx/DestroyPairedColliders/*' />
+        public void DestroyPairedColliders(C collider) => DestroyPairedCollidersAt(GetColliderIndex(collider));
+        /// <include file='../Documentation.xml' path='docs/Collider2Dx/DestroyPairedColliders/*' />
+        public void DestroyPairedColliders(C2D collider2D) => DestroyPairedCollidersAt(GetCollider2DIndex(collider2D));
 
-        public void DestroyCollidersAt(int index)
+        /// <include file='../Documentation.xml' path='docs/Collider2Dx/DestroyPairedColliders/*' />
+        public void DestroyPairedCollidersAt(int index)
         {
             Destroy(trackedColliders[index]);
             Destroy(trackedCollider2Ds[index]);
@@ -126,7 +137,7 @@ namespace Physics2DxSystem
 
             var tempAutoUpdate = autoUpdate;
             autoUpdate = false;
-            if(Physics2Dx.is2Dnot3D)
+            if(Physics2Dx.is2DNot3D)
             {
                 ConvertTo3D();
             }
@@ -139,6 +150,7 @@ namespace Physics2DxSystem
         #endregion
 
         #region Collider Updating
+        /// <include file='../Documentation.xml' path='docs/Collider2Dx/UpdateColliders/*' />
         public void UpdateColliders()
         {
             C collider;
@@ -163,6 +175,7 @@ namespace Physics2DxSystem
             }
         }
 
+        /// <include file='../Documentation.xml' path='docs/Collider2Dx/UpdateCollider2Ds/*' />
         public void UpdateCollider2Ds()
         {
             C2D collider2D;
@@ -187,6 +200,7 @@ namespace Physics2DxSystem
             }
         }
 
+        /// <include file='../Documentation.xml' path='docs/Collider2Dx/CacheColliders/*' />
         public virtual void CacheColliders()
         {
             foreach(var collider in transform2Dx.gameObject3D.GetComponents<C>())
@@ -194,7 +208,7 @@ namespace Physics2DxSystem
                 if(!trackedColliders.Contains(collider) && !IgnoreCollider(collider))
                 {
                     var collider2D = transform2Dx.gameObject2D.AddComponent<C2D>();
-                    if(Physics2Dx.is2Dnot3D)
+                    if(Physics2Dx.is2DNot3D)
                     {
                         ColliderToCollider2D(collider, collider2D);
                     }
@@ -213,6 +227,7 @@ namespace Physics2DxSystem
             }
         }
 
+        /// <include file='../Documentation.xml' path='docs/Collider2Dx/CacheCollider2Ds/*' />
         public virtual void CacheCollider2Ds()
         {
             foreach(var collider2D in transform2Dx.gameObject2D.GetComponents<C2D>())
@@ -220,7 +235,7 @@ namespace Physics2DxSystem
                 if(!trackedCollider2Ds.Contains(collider2D) && !IgnoreCollider2D(collider2D))
                 {
                     var collider = transform2Dx.gameObject3D.AddComponent<C>();
-                    if(!Physics2Dx.is2Dnot3D)
+                    if(!Physics2Dx.is2DNot3D)
                     {
                         Collider2DToCollider(collider2D, collider);
                     }
@@ -241,7 +256,9 @@ namespace Physics2DxSystem
         #endregion
 
         #region Conversion
+        /// <include file='../Documentation.xml' path='docs/Collider2Dx/ColliderToCollider2D/*' />
         protected abstract void ColliderToCollider2D(C collider, C2D collider2D);
+        /// <include file='../Documentation.xml' path='docs/Collider2Dx/Collider2DToCollider/*' />
         protected abstract void Collider2DToCollider(C2D collider2D, C collider);
 
         public override void ConvertTo2D()

@@ -6,20 +6,21 @@ namespace Physics2DxSystem
 {
     [AddComponentMenu(Physics2Dx.componentMenu + "Box Converter")]
     [DisallowMultipleComponent]
-    public sealed class BoxConverter : ColliderModule2Dx<BoxCollider, PolygonCollider2D>
+    public sealed class BoxConverter : Collider2Dx<BoxCollider, PolygonCollider2D>
     {
         private void OnValidate()
         {
-            Debug.LogWarning($"Note that BoxCollider2Dx is still untested!");
+            Debug.LogWarning($"Note that {nameof(BoxConverter)} is still untested!");
         }
 
         [Tooltip("The BoxCollider2Ds to ignore for conversion.")] public BoxCollider2D[] ignoredBoxCollider2Ds;
 
         [Header("Convert to 3D")]
-        [Tooltip("If enabled, PolygonCollider2D to BoxCollider will first go through a safety check to make sure the PolygonCollider2D is in an appropriate BoxCollider shape.")] public bool toBoxColliderSafe = true;
+        [Tooltip("If enabled, PolygonCollider2D to BoxCollider will go through a safety check to make sure the PolygonCollider2D is in an appropriate BoxCollider shape.")] public bool toBoxColliderSafe = true;
 
         public bool IgnoreBoxCollider2D(BoxCollider2D boxCollider2D) => Array.IndexOf(ignoredBoxCollider2Ds, boxCollider2D) != -1;
 
+        /// <include file='../Documentation.xml' path='docs/BoxConverter/AddBoxCollider2D/*' />
         public PolygonCollider2D AddBoxCollider2D()
         {
             var polygonCollider2D = AddCollider2D();
@@ -28,12 +29,13 @@ namespace Physics2DxSystem
             return polygonCollider2D;
         }
 
-        public PolygonCollider2D AddBoxCollider2D(BoxCollider2D toAdd)
+        /// <include file='../Documentation.xml' path='docs/BoxConverter/AddBoxCollider2D/*' />
+        public PolygonCollider2D AddBoxCollider2D(BoxCollider2D copyOf)
         {
             var polygonCollider2D = AddCollider2D();
 
-            toAdd.ToPolygonCollider2D(polygonCollider2D);
-            if(!Physics2Dx.is2Dnot3D)
+            copyOf.ToPolygonCollider2D(polygonCollider2D);
+            if(!Physics2Dx.is2DNot3D)
             {
                 var collider = GetColliderAt(collidersCount - 1);
                 Collider2DToCollider(polygonCollider2D, collider);
@@ -42,6 +44,7 @@ namespace Physics2DxSystem
             return polygonCollider2D;
         }
 
+        /// <include file='../Documentation.xml' path='docs/BoxConverter/CacheCollider2Ds/*' />
         public override void CacheCollider2Ds()
         {
             foreach(var boxCollider2D in transform2Dx.gameObject2D.GetComponents<BoxCollider2D>())

@@ -5,7 +5,7 @@ namespace Physics2DxSystem
 {
     [AddComponentMenu(Physics2Dx.componentMenu + "Capsule Converter")]
     [DisallowMultipleComponent]
-    public sealed class CapsuleConverter : ColliderModule2Dx<CapsuleCollider, CapsuleCollider2D>
+    public sealed class CapsuleConverter : Collider2Dx<CapsuleCollider, CapsuleCollider2D>
     {
         protected override void ColliderToCollider(CapsuleCollider collider, CapsuleCollider other)
         {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Physics2DxSystem.Utilities
+namespace Physics2DxSystem
 {
     /// <summary>Conversion options for converting PolygonCollider2D to MeshCollider.</summary>
     [Flags]

@@ -10,7 +10,7 @@ namespace Physics2DxSystem
     [AddComponentMenu(Physics2Dx.componentMenu + "Collider 2Dx")]
     [DisallowMultipleComponent]
     [Obsolete("This class is inheriting the deprecated Module2DxOld class.", false)]
-    public sealed class Collider2Dx : Module2DxOld
+    public sealed class Collider2DxOld : Module2DxOld
     {
         private static readonly Quaternion zRotation90Deg = new Quaternion(0f, 0f, 0.7071068f, 0.7071068f);
 
@@ -116,12 +116,12 @@ namespace Physics2DxSystem
             if(collidersCache && collidersCache.parent != transform)
             {
                 collidersCache = null;
-                Debug.LogError($"{nameof(collidersCache)} parent has to be the {nameof(Collider2Dx)}'s transform.");
+                Debug.LogError($"{nameof(collidersCache)} parent has to be the {nameof(Collider2DxOld)}'s transform.");
             }
             if(collider2DsCache && collider2DsCache.parent != transform)
             {
                 collider2DsCache = null;
-                Debug.LogError($"{nameof(collider2DsCache)} parent has to be the {nameof(Collider2Dx)}'s transform.");
+                Debug.LogError($"{nameof(collider2DsCache)} parent has to be the {nameof(Collider2DxOld)}'s transform.");
             }
             if(collidersCache && collider2DsCache && collidersCache == collider2DsCache)
             {
@@ -276,7 +276,7 @@ namespace Physics2DxSystem
             }
 
             // Deactivate the cache that is currently unused.
-            if(Physics2Dx.is2Dnot3D)
+            if(Physics2Dx.is2DNot3D)
             {
                 collidersCache.gameObject.SetActive(false);
             }
@@ -328,7 +328,7 @@ namespace Physics2DxSystem
             }
 
             var newCollider2D = (Collider2D)collider2DsCache.gameObject.AddComponent(Collider2DType(newCollider));
-            if(Physics2Dx.is2Dnot3D)
+            if(Physics2Dx.is2DNot3D)
             {
                 newCollider.ToCollider2D(newCollider2D, conversionSettings);
             }
@@ -419,7 +419,7 @@ namespace Physics2DxSystem
                 boxCollider2D.ToPolygonCollider2D(polygonCollider2D);
                 var boxCollider = collidersCache.gameObject.AddComponent<BoxCollider>();
 
-                if(!Physics2Dx.is2Dnot3D)
+                if(!Physics2Dx.is2DNot3D)
                 {
                     polygonCollider2D.ToBoxCollider(boxCollider);
                 }
@@ -432,7 +432,7 @@ namespace Physics2DxSystem
                 var newCollider2D = collider2DsCache.gameObject.AddComponent((Collider2D)toAdd, ignore);
                 var newCollider = (Collider)collidersCache.gameObject.AddComponent(ColliderType(newCollider2D));
 
-                if(!Physics2Dx.is2Dnot3D)
+                if(!Physics2Dx.is2DNot3D)
                 {
                     newCollider2D.ToCollider(newCollider, conversion2DSettings);
                 }
@@ -540,7 +540,7 @@ namespace Physics2DxSystem
                     }
 
                     var newCollider2D = (Collider2D)collider2DsCache.gameObject.AddComponent(Collider2DType(collider));
-                    if(Physics2Dx.is2Dnot3D)
+                    if(Physics2Dx.is2DNot3D)
                     {
                         collider.ToCollider2D(newCollider2D, conversionSettings);
                     }
@@ -625,7 +625,7 @@ namespace Physics2DxSystem
                         DestroyImmediate(boxCollider2D);
 
                         var boxCollider = collidersCache.gameObject.AddComponent<BoxCollider>();
-                        if(!Physics2Dx.is2Dnot3D)
+                        if(!Physics2Dx.is2DNot3D)
                         {
                             polygonCollider2D.ToBoxCollider(boxCollider);
                         }
@@ -634,7 +634,7 @@ namespace Physics2DxSystem
                     else
                     {
                         var newCollider = (Collider)collidersCache.gameObject.AddComponent(ColliderType(collider2D));
-                        if(!Physics2Dx.is2Dnot3D)
+                        if(!Physics2Dx.is2DNot3D)
                         {
                             collider2D.ToCollider(newCollider, conversion2DSettings);
                         }

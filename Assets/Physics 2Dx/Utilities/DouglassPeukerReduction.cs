@@ -8,6 +8,7 @@ namespace Physics2DxSystem.Utilities
 		// c# implementation of the Ramer-Douglas-Peucker-Algorithm by Craig Selbert slightly adapted for Unity Vector Types
 		//http://www.codeproject.com/Articles/18936/A-Csharp-Implementation-of-Douglas-Peucker-Line-Ap
 
+		/// <summary>Uses the Douglas Peucker algorithm to reduce a number of points.</summary>
 		public static Vector2[] Reduce(List<Vector2> points, float tolerance)
 		{
 			if(points == null || points.Count < 3 || tolerance <= 0)
@@ -66,13 +67,19 @@ namespace Physics2DxSystem.Utilities
 			}
 		}
 
+		/// <summary>The distance of a point from a line made from point1 and point2.</summary>
 		public static float PerpendicularDistance(Vector2 point1, Vector2 point2, Vector2 point)
 		{
+			// Area of the triangle.
 			float area = Mathf.Abs(.5f * (point1.x * point2.y + point2.x *
 				point.y + point.x * point1.y - point2.x * point1.y - point.x *
 				point2.y - point1.x * point.y));
+
+			// Base of the triangle.
 			float bottom = Mathf.Sqrt(Mathf.Pow(point1.x - point2.x, 2f) +
 				Mathf.Pow(point1.y - point2.y, 2f));
+
+			// Solve for height.
 			float height = area / bottom * 2f;
 
 			return height;

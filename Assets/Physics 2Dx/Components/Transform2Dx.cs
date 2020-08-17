@@ -15,19 +15,13 @@ namespace Physics2DxSystem
         #region Properties
         private static readonly Quaternion zRotation90Deg = new Quaternion(0f, 0f, 0.7071068f, 0.7071068f);
 
-        [Tooltip("Determines the upwards look rotation the transform2D will look in.")] [SerializeField] private CapsuleDirection2D _direction2D;
+        [Tooltip("Determines the axis to align in 2D space. If Horizontal, X axis will be aligned, and if vertical, the Y axis.")] [SerializeField] private CapsuleDirection2D direction2D;
 
         public GameObject gameObject3D { get; private set; }
         public Transform transform3D => gameObject3D.transform;
 
         public GameObject gameObject2D { get; private set; }
         public Transform transform2D => gameObject2D.transform;
-
-        public CapsuleDirection2D direction2D
-        {
-            get => _direction2D;
-            set => _direction2D = value;
-        }
 
         private Vector3 upwardDirection
         {
@@ -89,12 +83,6 @@ namespace Physics2DxSystem
 
         public void OnAfterDeserialize()
         {
-            if(isDuplicate)
-            {
-                UnityEditor.EditorApplication.delayCall += OnDuplicate;
-                UnityEditor.EditorApplication.delayCall += Reset;
-            }
-
             if(_gameObject3D)
             {
                 gameObject3D = _gameObject3D;
@@ -102,6 +90,12 @@ namespace Physics2DxSystem
             if(_gameObject2D)
             {
                 gameObject2D = _gameObject2D;
+            }
+
+            if(isDuplicate)
+            {
+                UnityEditor.EditorApplication.delayCall += OnDuplicate;
+                UnityEditor.EditorApplication.delayCall += Reset;
             }
         }
        
@@ -287,6 +281,5 @@ namespace Physics2DxSystem
             gameObject3D.SetActive(true);
         }
         #endregion
-
     }
 }

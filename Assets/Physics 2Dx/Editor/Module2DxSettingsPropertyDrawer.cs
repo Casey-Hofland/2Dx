@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Physics2DxSystem.Editor
 {
     [CustomPropertyDrawer(typeof(Module2DxSettings))]
-    public class Module2DxSettingsPropertyDrawer : PropertyDrawer
+    internal class Module2DxSettingsPropertyDrawer : PropertyDrawer
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {

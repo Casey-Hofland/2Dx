@@ -9,7 +9,7 @@ using UnityEngine.UIElements;
 
 namespace Physics2DxSystem.Editor
 {
-    public class Physics2DxSettingsProvider : SettingsProvider
+    internal class SettingsProvider : UnityEditor.SettingsProvider
     {
         private const string customPath = "Project/Physics 2Dx";
 
@@ -25,7 +25,7 @@ namespace Physics2DxSystem.Editor
                 }
 
                 // Find the directory this script resides in.
-                var typeName = nameof(Physics2DxSettings);
+                var typeName = nameof(Settings);
                 var guids = AssetDatabase.FindAssets($"{typeName} t:script");
                 var directory = (from guid in guids
                                  let guidPath = AssetDatabase.GUIDToAssetPath(guid)
@@ -41,16 +41,16 @@ namespace Physics2DxSystem.Editor
             }
         }
 
-        private static Physics2DxSettings _instance;
-        private static Physics2DxSettings instance
+        private static Settings _instance;
+        private static Settings instance
         {
             get
             {
                 if(
-                    (!_instance && !(_instance = AssetDatabase.LoadAssetAtPath<Physics2DxSettings>(assetPath))) ||
+                    (!_instance && !(_instance = AssetDatabase.LoadAssetAtPath<Settings>(assetPath))) ||
                     (_instance && AssetDatabase.GetAssetPath(_instance) != assetPath))
                 {
-                    _instance = ScriptableObject.CreateInstance<Physics2DxSettings>();
+                    _instance = ScriptableObject.CreateInstance<Settings>();
 
                     var directory = assetPath.Remove(assetPath.LastIndexOf('/'));
                     if(!AssetDatabase.IsValidFolder(directory))
@@ -90,20 +90,20 @@ namespace Physics2DxSystem.Editor
         #endregion
 
         private SerializedObject customSettings;
-        private SerializedProperty is2Dnot3D;
+        private SerializedProperty is2DNot3D;
         private SerializedProperty conversionTime;
         private SerializedProperty splitConversion;
         private SerializedProperty slimHierarchy;
         private SerializedProperty module2DxesSettings;
         private ReorderableList reorderableList;
 
-        public Physics2DxSettingsProvider(string path, SettingsScope scopes, IEnumerable<string> keywords = null) : base(path, scopes, keywords) { }
+        public SettingsProvider(string path, SettingsScope scopes, IEnumerable<string> keywords = null) : base(path, scopes, keywords) { }
 
         public override void OnActivate(string searchContext, VisualElement rootElement)
         {
             customSettings = GetSerializedObject();
 
-            is2Dnot3D = customSettings.FindProperty(nameof(is2Dnot3D));
+            is2DNot3D = customSettings.FindProperty(nameof(is2DNot3D));
             conversionTime = customSettings.FindProperty(nameof(conversionTime));
             splitConversion = customSettings.FindProperty(nameof(splitConversion));
             slimHierarchy = customSettings.FindProperty(nameof(slimHierarchy));
@@ -222,71 +222,19 @@ namespace Physics2DxSystem.Editor
 
         private void DrawListHeader(Rect rect)
         {
-            EditorGUI.LabelField(rect, "Conversion Order");
+            GUIContent header = new GUIContent
+            {
+                text = "Conversion Order",
+                tooltip = "The order in which Module2Dxes are converted and in how large of a batch.",
+            };
+
+            EditorGUI.LabelField(rect, header);
         }
 
         private void DrawListElement(Rect rect, int index, bool isActive, bool isFocused)
         {
             var element = reorderableList.serializedProperty.GetArrayElementAtIndex(index);
             EditorGUI.PropertyField(rect, element);
-
-            /*
-            EditorGUI.BeginChangeCheck();
-            if(EditorGUI.EndChangeCheck())
-            {
-                var sortedIndexes = new SortedList<int, Module2DxSettings>(module2DxesSettings.arraySize);
-                for(int i = 0; i < module2DxesSettings.arraySize; i++)
-                {
-                    var module2DxSettings = module2DxesSettings.GetArrayElementAtIndex(i);
-                    var order = module2DxSettings.FindPropertyRelative("order").intValue;
-                    var type = Type.GetType(module2DxSettings.FindPropertyRelative("typeName").stringValue);
-
-                    if(type.Assembly != typeof(Physics2Dx).Assembly)
-                    {
-                        while(sortedIndexes.ContainsKey(order))
-                        {
-                            order++;
-                        }
-                    }
-                    else
-                    {
-                        if(sortedIndexes.ContainsKey(order))
-                        {
-                            var sortedModule2Dx = sortedIndexes[order];
-                            sortedIndexes.Remove(order);
-                            do
-                            {
-                                sortedModule2Dx.order++;
-                            } while(sortedIndexes.ContainsKey(sortedModule2Dx.order));
-                            sortedIndexes.Add(sortedModule2Dx.order, sortedModule2Dx);
-                        }
-                    }
-
-                    var module2DxSettingsCopy = new Module2DxSettings
-                    {
-                        order = order,
-                        type = type,
-                        batchSize3D = (uint)module2DxSettings.FindPropertyRelative("batchSize3D").intValue,
-                        batchSize2D = (uint)module2DxSettings.FindPropertyRelative("batchSize2D").intValue,
-                    };
-
-                    sortedIndexes.Add(order, module2DxSettingsCopy);
-                }
-                var module2DxSettingsCopies = sortedIndexes.Values;
-
-                for(int i = 0; i < module2DxesSettings.arraySize; i++)
-                {
-                    var module2DxSettingsCopy = module2DxSettingsCopies[i];
-                    var module2DxSettings = module2DxesSettings.GetArrayElementAtIndex(i);
-
-                    module2DxSettings.FindPropertyRelative("order").intValue = module2DxSettingsCopy.order;
-                    module2DxSettings.FindPropertyRelative("typeName").stringValue = module2DxSettingsCopy.type.AssemblyQualifiedName;
-                    module2DxSettings.FindPropertyRelative("batchSize3D").intValue = (int)module2DxSettingsCopy.batchSize3D;
-                    module2DxSettings.FindPropertyRelative("batchSize2D").intValue = (int)module2DxSettingsCopy.batchSize2D;
-                }
-                customSettings.ApplyModifiedProperties();
-            }
-            */
         }
 
         private void SelectList(ReorderableList reorderableList)
@@ -304,7 +252,7 @@ namespace Physics2DxSystem.Editor
         {
             customSettings.Update();
 
-            EditorGUILayout.PropertyField(is2Dnot3D);
+            EditorGUILayout.PropertyField(is2DNot3D);
             EditorGUILayout.PropertyField(conversionTime);
             EditorGUILayout.PropertyField(splitConversion);
             EditorGUILayout.PropertyField(slimHierarchy);
@@ -318,7 +266,7 @@ namespace Physics2DxSystem.Editor
 
             if(GUILayout.Button("Reset"))
             {
-                var physics2DxSettings = (Physics2DxSettings)customSettings.targetObject;
+                var physics2DxSettings = (Settings)customSettings.targetObject;
                 physics2DxSettings.Reset();
                 EditorApplication.delayCall += CreateReorderableList;
             }
@@ -328,12 +276,12 @@ namespace Physics2DxSystem.Editor
 
         // Register the SettingsProvider
         [SettingsProvider]
-        public static SettingsProvider CreateMyCustomSettingsProvider()
+        public static UnityEditor.SettingsProvider CreateMyCustomSettingsProvider()
         {
             // Settings Asset doesn't exist yet; no need to display anything in the Settings window.
             return !IsSettingsAvailable()
                 ? null
-                : new Physics2DxSettingsProvider(customPath, SettingsScope.Project, GetSearchKeywords());
+                : new SettingsProvider(customPath, SettingsScope.Project, GetSearchKeywords());
         }
     }
 }

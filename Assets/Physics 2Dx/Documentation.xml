@@ -24,73 +24,16 @@
         <splitConversionOverMultipleFrames>
             <summary>If enabled, the conversion is split over multiple frames, but never longer than the conversionTime.</summary>
         </splitConversionOverMultipleFrames>
+        <AddModule2DxInstance>
+            <summary>Add a Module2Dx to the conversion set.</summary>
+        </AddModule2DxInstance>
+        <RemoveModule2DxInstance>
+            <summary>Remove a Module2Dx from the conversion set.</summary>
+        </RemoveModule2DxInstance>
+        <ConvertModule2Dxes>
+            <summary>Convert all Module2Dxes in the conversion set.</summary>
+        </ConvertModule2Dxes>
     </Physics2Dx>
-    <Modules>
-        <Module2Dx>
-            <ConvertInstances>
-                <summary>Converts every enabled Module2Dx to the specified Physics2Dx mode.</summary>
-            </ConvertInstances>
-            <conversionOrder>
-                <summary>Used to manage the order in which this module is converted, ascending.</summary>
-            </conversionOrder>
-            <batchSize>
-                <summary>Determines the maximum number of modules of this type that will be converted in a single frame.</summary>
-            </batchSize>
-            <Convert>
-                <summary>Converts this Module2Dx to the specified Physics2Dx mode.</summary>
-            </Convert>
-            <ConvertTo2D>
-                <summary>Converts this Module2Dx to its 2D form.</summary>
-            </ConvertTo2D>
-            <ConvertTo3D>
-                <summary>Converts this Module2Dx to its 3D form.</summary>
-            </ConvertTo3D>
-        </Module2Dx>
-        <Collider2Dx>
-            <colliders>
-                <summary>The colliders attached to this Collider2Dx.</summary>
-            </colliders>
-            <collider2Ds>
-                <summary>The collider2Ds attached to this Collider2Dx.</summary>
-            </collider2Ds>
-            <AddCollider>
-                <summary>Add a Collider and create an equivalent Collider2D.</summary>
-                <param name="toAdd">The Collider to copy from.</param>
-                <param name="ignore">The properties to ignore when copying.</param>
-            </AddCollider>
-            <DestroyCollider>
-                <summary>Destroy a Collider and its equivalent Collider2D.</summary>
-                <param name="index">The index of the Collider to destroy.</param>
-                <param name="collider">The Collider to destroy.</param>
-            </DestroyCollider>
-            <AddCollider2D>
-                <summary>Add a Collider2D and create an equivalent Collider.</summary>
-                <param name="toAdd">The Collider2D to copy from.</param>
-                <param name="ignore">The properties to ignore when copying.</param>
-            </AddCollider2D>
-            <DestroyCollider2D>
-                <summary>Destroy a Collider2D and its equivalent Collider.</summary>
-                <param name="index">The index of the Collider2D to destroy.</param>
-                <param name="collider2D">The Collider2D to destroy.</param>
-            </DestroyCollider2D>
-            <Update2DTransform>
-                <summary>Rotate the collider2DsCache transform to have a 2D relative rotation from the Collider2Dx.</summary>
-                <remarks>2D relative means the same up (y) or right (x) direction as the Collider2Dx but with the forward direction (z) looking forward.</remarks>
-            </Update2DTransform>
-            <UpdateMappedColliders>
-                <summary>Update the mapped Colliders to remove any destroyed Colliders or recreate any destroyed Collider2Ds.</summary>
-            </UpdateMappedColliders>
-            <CacheColliders>
-                <summary>Iterate through all Colliders on the Collider2Dx and the collidersCache and cache them if they weren't already.</summary>
-            </CacheColliders>
-            <UpdateMappedCollider2Ds>
-                <summary>Update the mapped Collider2Ds to remove any destroyed Collider2Ds or recreate any destroyed Colliders.</summary>
-            </UpdateMappedCollider2Ds>
-            <CacheCollider2Ds>
-                <summary>Iterate through all Collider2Ds on the Collider2Dx and the collider2DsCache and cache them if they weren't already.</summary>
-            </CacheCollider2Ds>
-        </Collider2Dx>
-    </Modules>
     <Converter2Dx>
         <PhysicMaterial>
             <summary>Converts a PhysicMaterial to its PhysicsMaterial2D equivalent.</summary>
@@ -112,6 +55,16 @@
             <param name="rigidbody2D">The Rigidbody2D to convert.</param>
             <param name="rigidbody">The Rigidbody to convert to.</param>
         </Rigidbody2D>
+        <Collider>
+            <summary>Converts a Collider to its Collider2D equivalent.</summary>
+            <param name="collider">The Collider to convert.</param>
+            <param name="collider2D">The Collider2D to convert to.</param>
+        </Collider>
+        <Collider2D>
+            <summary>Converts a Collider2D to its Collider equivalent.</summary>
+            <param name="collider2D">The Collider2D to convert to.</param>
+            <param name="collider">The Collider to convert.</param>
+        </Collider2D>
         <Sphere>
             <summary>Converts a SphereCollider to its CircleCollider2D equivalent.</summary>
             <param name="sphereCollider">The SphereCollider to convert.</param>
@@ -159,17 +112,59 @@
             <param name="meshCollider">The MeshCollider to convert to.</param>
             <param name="converstionOptions">Options used to determine how to convert the PolygonCollider2D.</param>
         </Polygon2D>
+    </Converter2Dx>
+    <Copier2Dx>
         <Collider>
-            <summary>Converts a Collider to its Collider2D equivalent.</summary>
-            <param name="collider">The Collider to convert.</param>
-            <param name="collider2D">The Collider2D to convert to.</param>
+            <summary>Copies a Collider to another Collider.</summary>
+            <param name="collider">The Collider to copy from.</param>
+            <param name="other">The Collider to copy to.</param>
         </Collider>
         <Collider2D>
-            <summary>Converts a Collider2D to its Collider equivalent.</summary>
-            <param name="collider2D">The Collider2D to convert to.</param>
-            <param name="collider">The Collider to convert.</param>
+            <summary>Copies a Collider2D to another Collider2D.</summary>
+            <param name="collider2D">The Collider2D to copy from.</param>
+            <param name="other">The Collider2D to copy to.</param>
         </Collider2D>
-    </Converter2Dx>
+        <Sphere>
+            <summary>Copies a SphereCollider to another SphereCollider.</summary>
+            <param name="sphereCollider">The SphereCollider to copy from.</param>
+            <param name="other">The SphereCollider to copy to.</param>
+        </Sphere>
+        <Circle2D>
+            <summary>Copies a CircleCollider2D to another CircleCollider2D.</summary>
+            <param name="circleCollider2D">The CircleCollider2D to copy from.</param>
+            <param name="other">The CircleCollider2D to copy to.</param>
+        </Circle2D>
+        <Capsule>
+            <summary>Copies a CapsuleCollider to another CapsuleCollider.</summary>
+            <param name="capsuleCollider">The CapsuleCollider to copy from.</param>
+            <param name="other">The CapsuleCollider to copy to.</param>
+        </Capsule>
+        <Capsule2D>
+            <summary>Copies a CapsuleCollider2D to another CapsuleCollider2D.</summary>
+            <param name="capsuleCollider2D">The CapsuleCollider2D to copy from.</param>
+            <param name="other">The CapsuleCollider2D to copy to.</param>
+        </Capsule2D>
+        <Box>
+            <summary>Copies a BoxCollider to another BoxCollider.</summary>
+            <param name="boxCollider">The BoxCollider to copy from.</param>
+            <param name="other">The BoxCollider to copy to.</param>
+        </Box>
+        <Box2D>
+            <summary>Copies a BoxCollider2D to another BoxCollider2D.</summary>
+            <param name="boxCollider2D">The BoxCollider2D to copy from.</param>
+            <param name="other">The BoxCollider2D to copy to.</param>
+        </Box2D>
+        <Mesh>
+            <summary>Copies a MeshCollider to another MeshCollider.</summary>
+            <param name="meshCollider">The MeshCollider to copy from.</param>
+            <param name="other">The MeshCollider to copy to.</param>
+        </Mesh>
+        <Polygon2D>
+            <summary>Copies a PolygonCollider2D to another PolygonCollider2D.</summary>
+            <param name="polygonCollider2D">The PolygonCollider2D to copy from.</param>
+            <param name="other">The PolygonCollider2D to copy to.</param>
+        </Polygon2D>
+    </Copier2Dx>
     <Box2DxTools>
         <IsBox>
             <summary>Checks if a PolygonCollider2D is representing a BoxCollider at a certain rotation.</summary>
@@ -188,4 +183,90 @@
             <param name="polygonCollider2D">The PolygonCollider2D to convert to.</param>
         </Box2D>
     </Box2DxTools>
+    <Module2Dx>
+        <Convert>
+            <summary>Converts this Module2Dx to the specified Physics2Dx mode.</summary>
+        </Convert>
+        <ConvertTo2D>
+            <summary>Converts this Module2Dx to its 2D form.</summary>
+        </ConvertTo2D>
+        <ConvertTo3D>
+            <summary>Converts this Module2Dx to its 3D form.</summary>
+        </ConvertTo3D>
+    </Module2Dx>
+    <Collider2Dx>
+        <GetPairedCollider2D>
+            <summary>Get the Collider2D that is paired to this Collider.</summary>
+            <returns>The paired Collider2D or null if none.</returns>
+        </GetPairedCollider2D>
+        <GetPairedCollider>
+            <summary>Get the Collider that is paired to this Collider2D.</summary>
+            <returns>The paired Collider or null if none.</returns>
+        </GetPairedCollider>
+        <ColliderToCollider>
+            <summary>Copies one Colliders properties to another.</summary>
+            <param name="collider">The Collider to copy from.</param>
+            <param name="other">The Collider to copy to.</param>
+        </ColliderToCollider>
+        <Collider2DToCollider2D>
+            <summary>Copies one Collider2Ds properties to another.</summary>
+            <param name="collider2D">The Collider2D to copy from.</param>
+            <param name="other">The Collider2D to copy to.</param>
+        </Collider2DToCollider2D>
+        <AddCollider>
+            <summary>Add a <typeparamref name="C"/> and create and pair it with a <typeparamref name="C2D"/>.</summary>
+            <param name="copyOf">The Collider to copy from.</param>
+        </AddCollider>
+        <AddCollider2D>
+            <summary>Add a <typeparamref name="C2D"/> and create and pair it with a <typeparamref name="C"/>.</summary>
+            <param name="copyOf">The Collider2D to copy from.</param>
+        </AddCollider2D>
+        <DestroyPairedColliders>
+            <summary>Destroy a Collider Collider2D pair.</summary>
+            <param name="collider">The Collider of the pair to destroy.</param>
+            <param name="collider2D">The Collider2D of the pair to destroy.</param>
+            <param name="index">The index of the pair to destroy.</param>
+        </DestroyPairedColliders>
+        <UpdateColliders>
+            <summary>Update the paired Colliders to remove any destroyed Colliders or recreate any destroyed Collider2Ds.</summary>
+        </UpdateColliders>
+        <CacheColliders>
+            <summary>Iterate through all <typeparamref name="C"/> on the Collider2Dx and the Transform3D and add them if they weren't already added.</summary>
+        </CacheColliders>
+        <UpdateCollider2Ds>
+            <summary>Update the paired Collider2Ds to remove any destroyed Collider2Ds or recreate any destroyed Colliders.</summary>
+        </UpdateCollider2Ds>
+        <CacheCollider2Ds>
+            <summary>Iterate through all <typeparamref name="C2D"/> on the Collider2Dx and the Transform2D and add them if they weren't already added.</summary>
+        </CacheCollider2Ds>
+        <ColliderToCollider2D>
+            <summary>Converts a Collider to a Collider2D.</summary>
+            <param name="collider">The Collider to convert.</param>
+            <param name="collider2D">The Collider2D to convert to.</param>
+        </ColliderToCollider2D>
+        <Collider2DToCollider>
+            <summary>Converts a Collider2D to a Collider.</summary>
+            <param name="collider2D">The Collider2D to convert.</param>
+            <param name="collider">The Collider to convert to.</param>
+        </Collider2DToCollider>
+    </Collider2Dx>
+    <BoxConverter>
+        <AddBoxCollider2D>
+            <summary>Add a <typeparamref name="C2D"/> from a BoxCollider2D and create and pair it with a <typeparamref name="C"/>.</summary>
+            <param name="copyOf">The BoxCollider2D to copy from.</param>
+        </AddBoxCollider2D>
+        <CacheCollider2Ds>
+            <summary>Iterate through all <typeparamref name="C2D"/> and BoxCollider2Ds on the Collider2Dx and the Transform2D and add them if they weren't already added.</summary>
+        </CacheCollider2Ds>
+    </BoxConverter>
+    <Camera2Dx>
+        <SetView>
+            <summary>Set the camera's view projection.</summary>
+            <param name="toOrthographicNotPerspective">If the view projection should be set to orthographic or perspective.</param>
+        </SetView>
+        <ChangeView>
+            <summary>Change the camera's view projection over the conversion time.</summary>
+            <param name="toOrthographicNotPerspective">If the view projection should be set to orthographic or perspective.</param>
+        </ChangeView>
+    </Camera2Dx>
 </docs>

@@ -1,4 +1,4 @@
-﻿namespace Physics2DxSystem.Utilities
+﻿namespace Physics2DxSystem
 {
     /// <summary>Conversion render sizes for converting MeshCollider to PolygonCollider2D.</summary>
     public enum MeshColliderConversionRenderSize

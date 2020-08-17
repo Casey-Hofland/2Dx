@@ -64,5 +64,5 @@ crashlytics-build.properties
 !/[Aa]ssets/Physics 2Dx.meta
 
 # Don't include the Physics 2Dx settings. These will (and should!) be regenerated in new projects.
-/[Aa]ssets/Physics 2Dx/Resources/Physics2DxSettings.asset
-/[Aa]ssets/Physics 2Dx/Resources/Physics2DxSettings.asset.meta
+/[Aa]ssets/Physics 2Dx/Resources/Settings.asset
+/[Aa]ssets/Physics 2Dx/Resources/Settings.asset.meta

@@ -90,7 +90,7 @@ namespace Physics2DxSystem
                 orderedBatches[conversionOrder][batchSize].Add(this);
             }
 
-            Convert(Physics2Dx.is2Dnot3D);
+            Convert(Physics2Dx.is2DNot3D);
 
             IEnumerator AddToConversionList()
             {

@@ -28,6 +28,7 @@ namespace Physics2DxSystem.Utilities
             other.offset = collider2D.offset;
         }
 
+        /// <include file='../Documentation.xml' path='docs/Copier2Dx/Collider/*'/>
         public static void ToCollider(this Collider collider, Collider other)
         {
             switch(collider)
@@ -50,6 +51,7 @@ namespace Physics2DxSystem.Utilities
             }
         }
 
+        /// <include file='../Documentation.xml' path='docs/Copier2Dx/Collider2D/*'/>
         public static void ToCollider2D(this Collider2D collider2D, Collider2D other)
         {
             switch(collider2D)
@@ -72,6 +74,7 @@ namespace Physics2DxSystem.Utilities
             }
         }
 
+        /// <include file='../Documentation.xml' path='docs/Copier2Dx/Sphere/*'/>
         public static void ToSphereCollider(this SphereCollider sphereCollider, SphereCollider other)
         {
             sphereCollider.GenericPropertiesToCollider(other);
@@ -81,6 +84,7 @@ namespace Physics2DxSystem.Utilities
             other.radius = sphereCollider.radius;
         }
 
+        /// <include file='../Documentation.xml' path='docs/Copier2Dx/Circle2D/*'/>
         public static void ToCircleCollider2D(this CircleCollider2D circleCollider2D, CircleCollider2D other)
         {
             circleCollider2D.GenericPropertiesToCollider2D(other);
@@ -88,6 +92,7 @@ namespace Physics2DxSystem.Utilities
             other.radius = circleCollider2D.radius;
         }
 
+        /// <include file='../Documentation.xml' path='docs/Copier2Dx/Capsule/*'/>
         public static void ToCapsuleCollider(this CapsuleCollider capsuleCollider, CapsuleCollider other)
         {
             capsuleCollider.GenericPropertiesToCollider(other);
@@ -99,6 +104,7 @@ namespace Physics2DxSystem.Utilities
             other.direction = capsuleCollider.direction;
         }
 
+        /// <include file='../Documentation.xml' path='docs/Copier2Dx/Capsule2D/*'/>
         public static void ToCapsuleCollider2D(this CapsuleCollider2D capsuleCollider2D, CapsuleCollider2D other)
         {
             capsuleCollider2D.GenericPropertiesToCollider2D(other);
@@ -107,6 +113,7 @@ namespace Physics2DxSystem.Utilities
             other.direction = capsuleCollider2D.direction;
         }
 
+        /// <include file='../Documentation.xml' path='docs/Copier2Dx/Box/*'/>
         public static void ToBoxCollider(this BoxCollider boxCollider, BoxCollider other)
         {
             boxCollider.GenericPropertiesToCollider(other);
@@ -116,6 +123,7 @@ namespace Physics2DxSystem.Utilities
             other.size = boxCollider.size;
         }
 
+        /// <include file='../Documentation.xml' path='docs/Copier2Dx/Box2D/*'/>
         public static void ToBoxCollider2D(this BoxCollider2D boxCollider2D, BoxCollider2D other)
         {
             boxCollider2D.GenericPropertiesToCollider2D(other);
@@ -126,6 +134,7 @@ namespace Physics2DxSystem.Utilities
             other.edgeRadius = boxCollider2D.edgeRadius;
         }
 
+        /// <include file='../Documentation.xml' path='docs/Copier2Dx/Mesh/*'/>
         public static void ToMeshCollider(this MeshCollider meshCollider, MeshCollider other)
         {
             meshCollider.GenericPropertiesToCollider(other);
@@ -138,6 +147,7 @@ namespace Physics2DxSystem.Utilities
             other.sharedMesh = meshCollider.sharedMesh;
         }
 
+        /// <include file='../Documentation.xml' path='docs/Copier2Dx/Polygon2D/*'/>
         public static void ToPolygonCollider2D(this PolygonCollider2D polygonCollider2D, PolygonCollider2D other)
         {
             polygonCollider2D.GenericPropertiesToCollider2D(other);

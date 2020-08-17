@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace Physics2DxSystem.Editor
 {
-    [CustomEditor(typeof(Physics2DxSettings))]
+    [CustomEditor(typeof(Settings))]
     [CanEditMultipleObjects]
-    public class Physics2DxSettingsEditor : UnityEditor.Editor
+    internal class SettingsEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {

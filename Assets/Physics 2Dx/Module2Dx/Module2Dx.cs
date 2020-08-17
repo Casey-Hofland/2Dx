@@ -8,7 +8,7 @@ namespace Physics2DxSystem
         {
             Physics2Dx.AddModule2DxInstance(this);
 
-            Convert(Physics2Dx.is2Dnot3D);
+            Convert(Physics2Dx.is2DNot3D);
         }
 
         protected virtual void OnDisable()
@@ -16,10 +16,10 @@ namespace Physics2DxSystem
             Physics2Dx.RemoveModule2DxInstance(this);
         }
 
-        /// <include file='../Documentation.xml' path='docs/Modules/Module2Dx/Convert/*'/>
-        public void Convert(bool to2Dnot3D)
+        /// <include file='../Documentation.xml' path='docs/Module2Dx/Convert/*'/>
+        public void Convert(bool to2DNot3D)
         {
-            if(to2Dnot3D)
+            if(to2DNot3D)
             {
                 ConvertTo2D();
             }
@@ -29,9 +29,9 @@ namespace Physics2DxSystem
             }
         }
 
-        /// <include file='../Documentation.xml' path='docs/Modules/Module2Dx/ConvertTo2D/*'/>
+        /// <include file='../Documentation.xml' path='docs/Module2Dx/ConvertTo2D/*'/>
         public abstract void ConvertTo2D();
-        /// <include file='../Documentation.xml' path='docs/Modules/Module2Dx/ConvertTo3D/*'/>
+        /// <include file='../Documentation.xml' path='docs/Module2Dx/ConvertTo3D/*'/>
         public abstract void ConvertTo3D();
     }
 }

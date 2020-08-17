@@ -14,18 +14,18 @@ namespace Physics2DxSystem
         public new Camera camera => _camera ? _camera : (_camera = GetComponent<Camera>());
         #endregion
 
-        [Tooltip("Orthographic to perspective view blends from left to right, and perspective to orthographic view blends from right to left.")] public AnimationCurve blendCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+        [Tooltip("Orthographic to perspective view blends from left to right, and perspective to orthographic view blends from right to left, within range 0 to 1.")] public AnimationCurve blendCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
         [Header("Perspective Projection")]
-        [Range(Vector2.kEpsilon, 179f)] public float fieldOfView = 60f;
+        [Tooltip("The camera's view angle measured in degrees along the selected axis.")] [Range(Vector2.kEpsilon, 179f)] public float fieldOfView = 60f;
         [Header("Orthographic Projection")]
-        public float orthographicSize = 5f;
+        [Tooltip("The vertical size of the camera view.")] public float orthographicSize = 5f;
 
         private Matrix4x4 perspectiveMatrix => Matrix4x4.Perspective(fieldOfView, camera.aspect, camera.nearClipPlane, camera.farClipPlane);
         private Matrix4x4 orthographicMatrix => Matrix4x4.Ortho(-orthographicSize * camera.aspect, orthographicSize * camera.aspect, -orthographicSize, orthographicSize, camera.nearClipPlane, camera.farClipPlane);
 
         private void OnEnable()
         {
-            SetView(Physics2Dx.is2Dnot3D);
+            SetView(Physics2Dx.is2DNot3D);
             Physics2Dx.onBeforeConvert += ChangeView;
         }
 
@@ -34,6 +34,7 @@ namespace Physics2DxSystem
             Physics2Dx.onBeforeConvert -= ChangeView;
         }
 
+        /// <include file='../Documentation.xml' path='docs/Camera2Dx/SetView/*' />
         public void SetView(bool toOrthographicNotPerspective)
         {
             if(toOrthographicNotPerspective)
@@ -46,6 +47,7 @@ namespace Physics2DxSystem
             }
         }
 
+        /// <include file='../Documentation.xml' path='docs/Camera2Dx/ChangeView/*' />
         public void ChangeView(bool toOrthographicNotPerspective)
         {
             if(isActiveAndEnabled)

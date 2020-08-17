@@ -21,7 +21,6 @@ namespace Physics2DxSystem.Utilities
         public static PhysicsMaterial2D AsPhysicsMaterial2D(this PhysicMaterial physicMaterial)
         {
             if(!physicMaterial)
-
             {
                 return null;
             }
@@ -697,7 +696,7 @@ namespace Physics2DxSystem.Utilities
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void InitColliderConversion()
         {
-            var settings = Resources.Load<Physics2DxSettings>(nameof(Physics2DxSettings));
+            var settings = Resources.Load<Settings>(nameof(Settings));
 
             renderTextures = new RenderTexture[8]
             {

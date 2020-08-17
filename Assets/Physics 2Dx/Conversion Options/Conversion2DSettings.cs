@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Physics2DxSystem.Utilities
+namespace Physics2DxSystem
 {
     /// <summary>Conversion2D settings that can be passed in the ToCollider method to define specific conversion behaviour.</summary>
     [Serializable]
