@@ -21,6 +21,9 @@ namespace Physics2DxSystem
 
         [Tooltip("This will hide every gameObject created by Physics2Dx that is used as a cache or otherwise background activity. Disable this to get a better understanding of how Physics2Dx operates and debug issues.")] 
         public bool slimHierarchy;
+        
+        [Tooltip("Camera2Dxes will take control over their camera's settings so updates to the camera2Dx are directly visualized. The camera's projection view will depend on the is 2D Not 3D setting.")]
+        public bool camera2DxLiveUpdate;
 
         [Tooltip("The order in which Module2Dxes are converted and in how large of a batch.")] 
         public Module2DxSettings[] module2DxesSettings;
@@ -31,6 +34,7 @@ namespace Physics2DxSystem
             conversionTime = 0.6666667f;
             splitConversion = true;
             slimHierarchy = true;
+            camera2DxLiveUpdate = true;
             module2DxesSettings = Array.Empty<Module2DxSettings>();
         }
     }

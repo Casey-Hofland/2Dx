@@ -89,12 +89,15 @@ namespace Physics2DxSystem.Editor
         private static IEnumerable<string> GetSearchKeywords() => GetSearchKeywordsFromPath(assetPath);
         #endregion
 
+        private static bool editorSettingsFoldout = false;
+
         private SerializedObject customSettings;
         private SerializedProperty is2DNot3D;
         private SerializedProperty conversionTime;
         private SerializedProperty splitConversion;
         private SerializedProperty slimHierarchy;
         private SerializedProperty module2DxesSettings;
+        private SerializedProperty camera2DxLiveUpdate;
         private ReorderableList reorderableList;
 
         public SettingsProvider(string path, SettingsScope scopes, IEnumerable<string> keywords = null) : base(path, scopes, keywords) { }
@@ -108,6 +111,7 @@ namespace Physics2DxSystem.Editor
             splitConversion = customSettings.FindProperty(nameof(splitConversion));
             slimHierarchy = customSettings.FindProperty(nameof(slimHierarchy));
             module2DxesSettings = customSettings.FindProperty(nameof(module2DxesSettings));
+            camera2DxLiveUpdate = customSettings.FindProperty(nameof(camera2DxLiveUpdate));
 
             CreateReorderableList();
         }
@@ -255,7 +259,6 @@ namespace Physics2DxSystem.Editor
             EditorGUILayout.PropertyField(is2DNot3D);
             EditorGUILayout.PropertyField(conversionTime);
             EditorGUILayout.PropertyField(splitConversion);
-            EditorGUILayout.PropertyField(slimHierarchy);
 
             if(Event.current.type == EventType.MouseUp)
             {
@@ -263,6 +266,14 @@ namespace Physics2DxSystem.Editor
             }
 
             reorderableList.DoLayoutList();
+
+            if(editorSettingsFoldout = EditorGUILayout.Foldout(editorSettingsFoldout, "Editor Settings"))
+            {
+                EditorGUI.indentLevel++;
+                EditorGUILayout.PropertyField(slimHierarchy);
+                EditorGUILayout.PropertyField(camera2DxLiveUpdate);
+                EditorGUI.indentLevel--;
+            }
 
             if(GUILayout.Button("Reset"))
             {
