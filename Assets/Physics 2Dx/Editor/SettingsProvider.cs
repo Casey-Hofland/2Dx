@@ -125,7 +125,7 @@ namespace Physics2DxSystem.Editor
                 var module2DxSettings = module2DxesSettings.GetArrayElementAtIndex(i);
                 var typeName = module2DxSettings.FindPropertyRelative("typeName").stringValue;
                 var type = Type.GetType(typeName);
-                if(type == null || module2DxesTypes.Contains(type))
+                if(type == null || type != typeof(Module2Dx) || module2DxesTypes.Contains(type))
                 {
                     module2DxesSettings.DeleteArrayElementAtIndex(i);
                 }
@@ -157,13 +157,13 @@ namespace Physics2DxSystem.Editor
                     int index;
                     switch(module2DxType.Name)
                     {
-                        case nameof(Transform2Dx):
+                        case nameof(Transform2DxConverter):
                             batchSize3D.intValue = batchSize2D.intValue = 1000;
                             module2DxesSettings.MoveArrayElement(arraySize, Math.Min(0, arraySize));
                             break;
                         case nameof(SphereConverter):
                             batchSize3D.intValue = batchSize2D.intValue = 100;
-                            index = FindIndex(module2DxesSettings, element => element.FindPropertyRelative("typeName").stringValue == typeof(Transform2Dx).AssemblyQualifiedName) + 1;
+                            index = FindIndex(module2DxesSettings, element => element.FindPropertyRelative("typeName").stringValue == typeof(Transform2DxConverter).AssemblyQualifiedName) + 1;
                             module2DxesSettings.MoveArrayElement(arraySize, Math.Min(index, arraySize));
                             break;
                         case nameof(CapsuleConverter):
@@ -179,6 +179,11 @@ namespace Physics2DxSystem.Editor
                         case nameof(MeshConverter):
                             batchSize3D.intValue = batchSize2D.intValue = 20;
                             index = FindIndex(module2DxesSettings, element => element.FindPropertyRelative("typeName").stringValue == typeof(BoxConverter).AssemblyQualifiedName) + 1;
+                            module2DxesSettings.MoveArrayElement(arraySize, Math.Min(index, arraySize));
+                            break;
+                        case nameof(RigidbodyConverter):
+                            batchSize3D.intValue = batchSize2D.intValue = 50;
+                            index = FindIndex(module2DxesSettings, element => element.FindPropertyRelative("typeName").stringValue == typeof(MeshConverter).AssemblyQualifiedName) + 1;
                             module2DxesSettings.MoveArrayElement(arraySize, Math.Min(index, arraySize));
                             break;
                         default:

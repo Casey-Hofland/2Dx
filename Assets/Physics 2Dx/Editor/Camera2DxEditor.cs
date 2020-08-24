@@ -4,10 +4,10 @@ using UnityEngine;
 
 namespace Physics2DxSystem.Editor
 {
-    [CustomEditor(typeof(Camera2Dx))]
+    [CustomEditor(typeof(CameraConverter))]
     public class Camera2DxEditor : UnityEditor.Editor
     {
-        Camera2Dx[] camera2Dxes => Array.ConvertAll(targets, target => (Camera2Dx)target);
+        CameraConverter[] camera2Dxes => Array.ConvertAll(targets, target => (CameraConverter)target);
         
         SerializedProperty blendCurve;
         SerializedProperty fieldOfView;

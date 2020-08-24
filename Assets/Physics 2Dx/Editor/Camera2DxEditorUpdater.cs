@@ -7,7 +7,7 @@ namespace Physics2DxSystem.Editor
     [InitializeOnLoad]
     public class Camera2DxEditorUpdater
     {
-        private static HashSet<Camera2Dx> updatingCamera2Dxes = new HashSet<Camera2Dx>();
+        private static HashSet<CameraConverter> updatingCamera2Dxes = new HashSet<CameraConverter>();
 
         static Camera2DxEditorUpdater()
         {
@@ -31,12 +31,12 @@ namespace Physics2DxSystem.Editor
         static void UpdateCamera2Dxes()
         {
             var settings = Resources.Load<Settings>(nameof(Settings));
-            if(!settings.camera2DxLiveUpdate)
+            if(settings == null || !settings.camera2DxLiveUpdate)
             {
                 return;
             }
 
-            foreach(var camera2Dx in Object.FindObjectsOfType<Camera2Dx>())
+            foreach(var camera2Dx in Object.FindObjectsOfType<CameraConverter>())
             {
                 if(updatingCamera2Dxes.Contains(camera2Dx))
                 {

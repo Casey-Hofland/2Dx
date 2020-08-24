@@ -4,10 +4,10 @@ using UnityEngine;
 
 namespace Physics2DxSystem
 {
-    [AddComponentMenu(Physics2Dx.componentMenu + "Camera 2Dx")]
+    [AddComponentMenu(Physics2Dx.componentMenu + "Camera Converter")]
     [RequireComponent(typeof(Camera))]
     [DisallowMultipleComponent]
-    public class Camera2Dx : MonoBehaviour
+    public class CameraConverter : MonoBehaviour
     {
         private void OnValidate()
         {

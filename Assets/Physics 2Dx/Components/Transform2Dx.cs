@@ -1,5 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 
 namespace Physics2DxSystem
@@ -7,7 +7,7 @@ namespace Physics2DxSystem
     [AddComponentMenu(Physics2Dx.componentMenu + "Transform 2Dx")]
     [DisallowMultipleComponent]
     [ExecuteAlways]
-    public class Transform2Dx : Module2Dx
+    public class Transform2Dx : MonoBehaviour
 #if UNITY_EDITOR
         , ISerializationCallbackReceiver
 #endif
@@ -15,7 +15,9 @@ namespace Physics2DxSystem
         #region Properties
         private static readonly Quaternion zRotation90Deg = new Quaternion(0f, 0f, 0.7071068f, 0.7071068f);
 
+#pragma warning disable CS0649
         [Tooltip("Determines the axis to align in 2D space. If Horizontal, X axis will be aligned, and if vertical, the Y axis.")] [SerializeField] private CapsuleDirection2D direction2D;
+#pragma warning restore CS0649
 
         public GameObject gameObject3D { get; private set; }
         public Transform transform3D => gameObject3D.transform;
@@ -97,6 +99,9 @@ namespace Physics2DxSystem
                 UnityEditor.EditorApplication.delayCall += OnDuplicate;
                 UnityEditor.EditorApplication.delayCall += Reset;
             }
+
+            UnityEditor.EditorApplication.playModeStateChanged -= DestroyWithRequireComponent;
+            UnityEditor.EditorApplication.playModeStateChanged += DestroyWithRequireComponent;
         }
        
         private void OnDuplicate()
@@ -129,6 +134,43 @@ namespace Physics2DxSystem
                 var staticEditorFlags = UnityEditor.GameObjectUtility.GetStaticEditorFlags(gameObject);
                 UnityEditor.GameObjectUtility.SetStaticEditorFlags(gameObject3D, staticEditorFlags);
                 UnityEditor.GameObjectUtility.SetStaticEditorFlags(gameObject2D, staticEditorFlags);
+            }
+        }
+
+        private void DestroyWithRequireComponent(UnityEditor.PlayModeStateChange playModeStateChange)
+        {
+            if(playModeStateChange == UnityEditor.PlayModeStateChange.ExitingPlayMode)
+            {
+                var components = GetComponents<Component>();
+                var requiredComponentsArray = new RequireComponent[components.Length][];
+                for(int i = 0; i < components.Length; i++)
+                {
+                    var component = components[i];
+                    requiredComponentsArray[i] = Attribute.GetCustomAttributes(component.GetType(), typeof(RequireComponent), true) as RequireComponent[];
+                }
+
+                DestroyWithRequireComponentOfType(typeof(Transform2Dx));
+                UnityEditor.EditorApplication.playModeStateChanged -= DestroyWithRequireComponent;
+
+                void DestroyWithRequireComponentOfType(Type type)
+                {
+                    for(int i = 0; i < components.Length; i++)
+                    {
+                        var component = components[i];
+                        Type componentType;
+                        if(!component || (componentType = component.GetType()) == type)
+                        {
+                            continue;
+                        }
+
+                        var requiredComponents = requiredComponentsArray[i];
+                        if(Array.Exists(requiredComponents, requiredComponent => requiredComponent.m_Type0 == type || requiredComponent.m_Type1 == type || requiredComponent.m_Type2 == type))
+                        {
+                            DestroyWithRequireComponentOfType(componentType);
+                            DestroyImmediate(component);
+                        }
+                    }
+                }
             }
         }
 #endif
@@ -180,34 +222,6 @@ namespace Physics2DxSystem
         #endregion
 
         #region Unity Methods
-        protected override void OnEnable()
-        {
-#if UNITY_EDITOR
-            if(Application.isPlaying)
-            {
-                base.OnEnable();
-            }
-#else
-            base.OnEnable();
-#endif
-        }
-
-        protected override void OnDisable()
-        {
-#if UNITY_EDITOR
-            if(Application.isPlaying)
-            {
-                try
-                {
-                    base.OnDisable();
-                }
-                catch(KeyNotFoundException) { }
-            }
-#else
-            base.OnDisable();
-#endif
-        }
-
         // Make sure the required gameObjects are always at the same position, (2D) rotation and scale as the parent transform.
         private void LateUpdate()
         {
@@ -265,20 +279,6 @@ namespace Physics2DxSystem
             Destroy(gameObject3D);
             Destroy(gameObject2D);
 #endif
-        }
-        #endregion
-
-        #region Module2Dx overrides
-        public override void ConvertTo2D()
-        {
-            gameObject3D.SetActive(false);
-            gameObject2D.SetActive(true);
-        }
-
-        public override void ConvertTo3D()
-        {
-            gameObject2D.SetActive(false);
-            gameObject3D.SetActive(true);
         }
         #endregion
     }

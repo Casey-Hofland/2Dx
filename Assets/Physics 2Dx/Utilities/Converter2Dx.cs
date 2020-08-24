@@ -117,7 +117,7 @@ namespace Physics2DxSystem.Utilities
             rigidbody.constraints = rigidbody2D.constraints.ToRigidbodyConstraints(rigidbody.constraints);
         }
 
-        private static RigidbodyConstraints2D ToRigidbodyConstraints2D(this RigidbodyConstraints constraints)
+        public static RigidbodyConstraints2D ToRigidbodyConstraints2D(this RigidbodyConstraints constraints)
         {
             RigidbodyConstraints2D constraints2D = RigidbodyConstraints2D.None;
 
@@ -139,7 +139,7 @@ namespace Physics2DxSystem.Utilities
             return constraints2D;
         }
 
-        private static RigidbodyConstraints ToRigidbodyConstraints(this RigidbodyConstraints2D constraints2D, RigidbodyConstraints constraints)
+        public static RigidbodyConstraints ToRigidbodyConstraints(this RigidbodyConstraints2D constraints2D, RigidbodyConstraints constraints)
         {
             if(constraints2D.HasFlag(RigidbodyConstraints2D.FreezePositionX))
             {
@@ -696,8 +696,6 @@ namespace Physics2DxSystem.Utilities
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void InitColliderConversion()
         {
-            var settings = Resources.Load<Settings>(nameof(Settings));
-
             renderTextures = new RenderTexture[8]
             {
                 new RenderTexture(32, 32, 0),
