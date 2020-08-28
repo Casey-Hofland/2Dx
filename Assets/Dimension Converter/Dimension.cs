@@ -86,11 +86,11 @@ namespace UnityEngine
                 StartCoroutine(UpdateIsConverting(value));
                 if(batchConversion)
                 {
-                    StartCoroutine(ConvertModule2DxesRoutine(value));
+                    StartCoroutine(ConvertConvertersRoutine(value));
                 }
                 else
                 {
-                    ConvertModule2Dxes(value);
+                    ConvertConverters(value);
                 }
             }
         }
@@ -151,51 +151,51 @@ namespace UnityEngine
         private static uint[] orderedBatchSizes3D = Array.Empty<uint>();
         private static uint[] orderedBatchSizes2D = Array.Empty<uint>();
 
-        /// <include file='./Documentation.xml' path='docs/Dimension/AddModule2DxInstance/*' />
-        public static void AddModule2DxInstance(Converter module2Dx)
+        /// <include file='./Documentation.xml' path='docs/Dimension/AddConverter/*' />
+        public static void AddConverter(Converter converter)
         {
             if(!batchConversion || StartCoroutine(AddToConversionList()) == null)
             {
-                var index = converterTypeIndex[module2Dx.GetType()];
-                orderedConverters[index].Add(module2Dx);
+                var index = converterTypeIndex[converter.GetType()];
+                orderedConverters[index].Add(converter);
             }
 
             IEnumerator AddToConversionList()
             {
                 yield return waitWhileConverting;
 
-                var index = converterTypeIndex[module2Dx.GetType()];
-                orderedConverters[index].Add(module2Dx);
+                var index = converterTypeIndex[converter.GetType()];
+                orderedConverters[index].Add(converter);
             }
         }
 
-        /// <include file='./Documentation.xml' path='docs/Dimension/RemoveModule2DxInstance/*' />
-        public static void RemoveModule2DxInstance(Converter module2Dx)
+        /// <include file='./Documentation.xml' path='docs/Dimension/RemoveConverter/*' />
+        public static void RemoveConverter(Converter converter)
         {
             if(!batchConversion || StartCoroutine(RemoveFromConversionList()) == null)
             {
-                var index = converterTypeIndex[module2Dx.GetType()];
-                orderedConverters[index].Remove(module2Dx);
+                var index = converterTypeIndex[converter.GetType()];
+                orderedConverters[index].Remove(converter);
             }
 
             IEnumerator RemoveFromConversionList()
             {
                 yield return waitWhileConverting;
 
-                var index = converterTypeIndex[module2Dx.GetType()];
-                orderedConverters[index].Remove(module2Dx);
+                var index = converterTypeIndex[converter.GetType()];
+                orderedConverters[index].Remove(converter);
             }
         }
 
-        /// <include file='./Documentation.xml' path='docs/Dimension/ConvertModule2Dxes/*' />
-        public static IEnumerator ConvertModule2DxesRoutine(bool to2DNot3D)
+        /// <include file='./Documentation.xml' path='docs/Dimension/ConvertConverters/*' />
+        public static IEnumerator ConvertConvertersRoutine(bool to2DNot3D)
         {
             uint currentBatchSize = 0;
             if(to2DNot3D)
             {
                 for(int i = 0; i < convertersLength; i++)
                 {
-                    var module2Dxes = orderedConverters[i];
+                    var converters = orderedConverters[i];
 
                     if(isConverting)
                     {
@@ -206,9 +206,9 @@ namespace UnityEngine
                             currentBatchSize = 0;
                         }
 
-                        foreach(var module2Dx in module2Dxes)
+                        foreach(var converter in converters)
                         {
-                            module2Dx.ConvertTo2D();
+                            converter.ConvertTo2D();
                             currentBatchSize++;
                             if(currentBatchSize == newBatchSize)
                             {
@@ -222,9 +222,9 @@ namespace UnityEngine
                     }
                     else
                     {
-                        foreach(var module2Dx in module2Dxes)
+                        foreach(var converter in converters)
                         {
-                            module2Dx.ConvertTo2D();
+                            converter.ConvertTo2D();
                         }
                     }
                 }
@@ -233,7 +233,7 @@ namespace UnityEngine
             {
                 for(int i = 0; i < convertersLength; i++)
                 {
-                    var module2Dxes = orderedConverters[i];
+                    var converters = orderedConverters[i];
 
                     if(isConverting)
                     {
@@ -244,9 +244,9 @@ namespace UnityEngine
                             currentBatchSize = 0;
                         }
 
-                        foreach(var module2Dx in module2Dxes)
+                        foreach(var converter in converters)
                         {
-                            module2Dx.ConvertTo3D();
+                            converter.ConvertTo3D();
                             currentBatchSize++;
                             if(currentBatchSize == newBatchSize)
                             {
@@ -260,35 +260,35 @@ namespace UnityEngine
                     }
                     else
                     {
-                        foreach(var module2Dx in module2Dxes)
+                        foreach(var converter in converters)
                         {
-                            module2Dx.ConvertTo3D();
+                            converter.ConvertTo3D();
                         }
                     }
                 }
             }
         }
 
-        /// <include file='./Documentation.xml' path='docs/Dimension/ConvertModule2Dxes/*' />
-        public static void ConvertModule2Dxes(bool to2DNot3D)
+        /// <include file='./Documentation.xml' path='docs/Dimension/ConvertConverters/*' />
+        public static void ConvertConverters(bool to2DNot3D)
         {
             if(to2DNot3D)
             {
-                foreach(var module2Dxes in orderedConverters)
+                foreach(var converters in orderedConverters)
                 {
-                    foreach(var module2Dx in module2Dxes)
+                    foreach(var converter in converters)
                     {
-                        module2Dx.ConvertTo2D();
+                        converter.ConvertTo2D();
                     }
                 }
             }
             else
             {
-                foreach(var module2Dxes in orderedConverters)
+                foreach(var converters in orderedConverters)
                 {
-                    foreach(var module2Dx in module2Dxes)
+                    foreach(var converter in converters)
                     {
-                        module2Dx.ConvertTo3D();
+                        converter.ConvertTo3D();
                     }
                 }
             }
@@ -318,11 +318,11 @@ namespace UnityEngine
             orderedBatchSizes2D = new uint[convertersLength];
             for(int i = 0; i < convertersLength; i++)
             {
-                var module2DxSettings = settings.convertersSettings[i];
-                converterTypeIndex.Add(module2DxSettings.type, i);
+                var converterSettings = settings.convertersSettings[i];
+                converterTypeIndex.Add(converterSettings.type, i);
                 orderedConverters[i] = new HashSet<Converter>();
-                orderedBatchSizes3D[i] = module2DxSettings.batchSize3D;
-                orderedBatchSizes2D[i] = module2DxSettings.batchSize2D;
+                orderedBatchSizes3D[i] = converterSettings.batchSize3D;
+                orderedBatchSizes2D[i] = converterSettings.batchSize2D;
             }
 
             var coroutineHandlerGO = new GameObject(nameof(coroutineHandler));

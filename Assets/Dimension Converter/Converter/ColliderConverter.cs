@@ -9,8 +9,8 @@ namespace DimensionConverter
     public abstract class ColliderConverter<C, C2D> : Converter where C : Collider where C2D : Collider2D
     {
         #region Required Components
-        private TransformSplitter _transform2Dx;
-        public TransformSplitter transform2Dx => _transform2Dx ? _transform2Dx : (_transform2Dx = GetComponent<TransformSplitter>());
+        private TransformSplitter _transformSplitter;
+        public TransformSplitter transformSplitter => _transformSplitter ? _transformSplitter : (_transformSplitter = GetComponent<TransformSplitter>());
         #endregion
 
         #region Properties
@@ -66,8 +66,8 @@ namespace DimensionConverter
         /// <include file='../Documentation.xml' path='docs/ColliderConverter/AddCollider/*' />
         public C AddCollider()
         {
-            var collider = transform2Dx.gameObject3D.AddComponent<C>();
-            var collider2D = transform2Dx.gameObject2D.AddComponent<C2D>();
+            var collider = transformSplitter.gameObject3D.AddComponent<C>();
+            var collider2D = transformSplitter.gameObject2D.AddComponent<C2D>();
 
             AddPair(collider, collider2D);
             return collider;
@@ -76,8 +76,8 @@ namespace DimensionConverter
         /// <include file='../Documentation.xml' path='docs/ColliderConverter/AddCollider2D/*' />
         public C2D AddCollider2D()
         {
-            var collider2D = transform2Dx.gameObject2D.AddComponent<C2D>();
-            var collider = transform2Dx.gameObject3D.AddComponent<C>();
+            var collider2D = transformSplitter.gameObject2D.AddComponent<C2D>();
+            var collider = transformSplitter.gameObject3D.AddComponent<C>();
 
             AddPair(collider, collider2D);
             return collider2D;
@@ -170,7 +170,7 @@ namespace DimensionConverter
                 // If the Collider2D is missing, create a new one.
                 else if(!collider2D)
                 {
-                    trackedCollider2Ds[i] = transform2Dx.gameObject2D.AddComponent<C2D>();
+                    trackedCollider2Ds[i] = transformSplitter.gameObject2D.AddComponent<C2D>();
                 }
             }
         }
@@ -195,7 +195,7 @@ namespace DimensionConverter
                 // If the Collider is missing, create a new one.
                 else if(!collider)
                 {
-                    trackedColliders[i] = transform2Dx.gameObject3D.AddComponent<C>();
+                    trackedColliders[i] = transformSplitter.gameObject3D.AddComponent<C>();
                 }
             }
         }
@@ -203,11 +203,11 @@ namespace DimensionConverter
         /// <include file='../Documentation.xml' path='docs/ColliderConverter/CacheColliders/*' />
         public virtual void CacheColliders()
         {
-            foreach(var collider in transform2Dx.gameObject3D.GetComponents<C>())
+            foreach(var collider in transformSplitter.gameObject3D.GetComponents<C>())
             {
                 if(!trackedColliders.Contains(collider) && !IgnoreCollider(collider))
                 {
-                    var collider2D = transform2Dx.gameObject2D.AddComponent<C2D>();
+                    var collider2D = transformSplitter.gameObject2D.AddComponent<C2D>();
                     if(Dimension.is2DNot3D)
                     {
                         ColliderToCollider2D(collider, collider2D);
@@ -230,11 +230,11 @@ namespace DimensionConverter
         /// <include file='../Documentation.xml' path='docs/ColliderConverter/CacheCollider2Ds/*' />
         public virtual void CacheCollider2Ds()
         {
-            foreach(var collider2D in transform2Dx.gameObject2D.GetComponents<C2D>())
+            foreach(var collider2D in transformSplitter.gameObject2D.GetComponents<C2D>())
             {
                 if(!trackedCollider2Ds.Contains(collider2D) && !IgnoreCollider2D(collider2D))
                 {
-                    var collider = transform2Dx.gameObject3D.AddComponent<C>();
+                    var collider = transformSplitter.gameObject3D.AddComponent<C>();
                     if(!Dimension.is2DNot3D)
                     {
                         Collider2DToCollider(collider2D, collider);

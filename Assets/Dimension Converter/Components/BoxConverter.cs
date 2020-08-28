@@ -47,7 +47,7 @@ namespace DimensionConverter
         /// <include file='../Documentation.xml' path='docs/BoxConverter/CacheCollider2Ds/*' />
         public override void CacheCollider2Ds()
         {
-            foreach(var boxCollider2D in transform2Dx.gameObject2D.GetComponents<BoxCollider2D>())
+            foreach(var boxCollider2D in transformSplitter.gameObject2D.GetComponents<BoxCollider2D>())
             {
                 if(!IgnoreBoxCollider2D(boxCollider2D))
                 {

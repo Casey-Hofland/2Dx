@@ -135,7 +135,7 @@ namespace DimensionConverter.Editor
                 }
             }
 
-            // Get all Module2Dx types in the project.
+            // Get all Converter types in the project.
             var converterTypes = from assembly in AppDomain.CurrentDomain.GetAssemblies()
                                  from type in GetLoadableTypes(assembly)
                                  where type.IsSubclassOf(typeof(Converter))
@@ -234,7 +234,7 @@ namespace DimensionConverter.Editor
             GUIContent header = new GUIContent
             {
                 text = "Conversion Order",
-                tooltip = "The order in which Module2Dxes are converted and in how large of a batch.",
+                tooltip = "The order in which Converters are converted and in how large of a batch.",
             };
 
             EditorGUI.LabelField(rect, header);
