@@ -8,20 +8,20 @@ namespace DimensionConverter
     public sealed class SplitterConverter : Converter
     {
         #region Required Components
-        private TransformSplitter _transform2Dx;
-        public TransformSplitter transform2Dx => _transform2Dx ? _transform2Dx : (_transform2Dx = GetComponent<TransformSplitter>());
+        private TransformSplitter _transformSplitter;
+        public TransformSplitter transformSplitter => _transformSplitter ? _transformSplitter : (_transformSplitter = GetComponent<TransformSplitter>());
         #endregion
 
         public override void ConvertTo2D()
         {
-            transform2Dx.gameObject3D.SetActive(false);
-            transform2Dx.gameObject2D.SetActive(true);
+            transformSplitter.gameObject3D.SetActive(false);
+            transformSplitter.gameObject2D.SetActive(true);
         }
 
         public override void ConvertTo3D()
         {
-            transform2Dx.gameObject2D.SetActive(false);
-            transform2Dx.gameObject3D.SetActive(true);
+            transformSplitter.gameObject2D.SetActive(false);
+            transformSplitter.gameObject3D.SetActive(true);
         }
     }
 }

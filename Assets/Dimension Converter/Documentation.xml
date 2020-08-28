@@ -1,38 +1,38 @@
 ﻿<docs>
     <Dimension>
         <is2DNot3D>
-            <summary>Returns if Physics2Dx is currently operating in 2D instead of 3D.</summary>
+            <summary>Returns if the dimension is currently 2D instead of 3D.</summary>
         </is2DNot3D>
         <Convert>
-            <summary>Converts the current Physics2Dx mode to the other.</summary>
+            <summary>Converts the current dimension.</summary>
         </Convert>
         <onConvert>
-            <summary>Invoked whenever the Physics2Dx mode is converted.</summary>
+            <summary>Invoked whenever the dimension is converted.</summary>
         </onConvert>
         <conversionTime>
-            <summary>The time it takes for the Physics2Dx mode to convert.</summary>
+            <summary>The time it takes for the dimension to convert.</summary>
         </conversionTime>
         <waitForConversionTime>
             <summary>Suspends the coroutine execution for the amount of conversionTime.</summary>
         </waitForConversionTime>
         <isConverting>
-            <summary>Returns if Physics2Dx is currently converting or not.</summary>
+            <summary>Returns if the dimension is converting or not.</summary>
         </isConverting>
         <waitWhileConverting>
-            <summary>Suspends the coroutine execution until Physics2Dx has stopped converting.</summary>
+            <summary>Suspends the coroutine execution until the dimension has stopped converting.</summary>
         </waitWhileConverting>
         <batchConversion>
             <summary>If enabled, the conversion is batched and converted over multiple frames, but never longer than the conversionTime.</summary>
         </batchConversion>
-        <AddModule2DxInstance>
-            <summary>Add a Module2Dx to the conversion set.</summary>
-        </AddModule2DxInstance>
-        <RemoveModule2DxInstance>
-            <summary>Remove a Module2Dx from the conversion set.</summary>
-        </RemoveModule2DxInstance>
-        <ConvertModule2Dxes>
-            <summary>Convert all Module2Dxes in the conversion set.</summary>
-        </ConvertModule2Dxes>
+        <AddConverter>
+            <summary>Add a Converter to the conversion set.</summary>
+        </AddConverter>
+        <RemoveConverter>
+            <summary>Remove a Converter from the conversion set.</summary>
+        </RemoveConverter>
+        <ConvertConverters>
+            <summary>Convert all Converters in the conversion set.</summary>
+        </ConvertConverters>
     </Dimension>
     <PhysicsConverter>
         <PhysicMaterial>
@@ -199,7 +199,7 @@
     </BoxConverterTools>
     <Converter>
         <Convert>
-            <summary>Converts this Converter to the specified Physics2Dx mode.</summary>
+            <summary>Converts this Converter to the current specified dimension.</summary>
         </Convert>
         <ConvertTo2D>
             <summary>Converts this Converter to its 2D form.</summary>
@@ -245,13 +245,13 @@
             <summary>Update the paired Colliders to remove any destroyed Colliders or recreate any destroyed Collider2Ds.</summary>
         </UpdateColliders>
         <CacheColliders>
-            <summary>Iterate through all <typeparamref name="C"/> on the Collider2Dx and the Transform3D and add them if they weren't already added.</summary>
+            <summary>Iterate through all <typeparamref name="C"/> on the ColliderConverter and the Transform3D and add them if they weren't already added.</summary>
         </CacheColliders>
         <UpdateCollider2Ds>
             <summary>Update the paired Collider2Ds to remove any destroyed Collider2Ds or recreate any destroyed Colliders.</summary>
         </UpdateCollider2Ds>
         <CacheCollider2Ds>
-            <summary>Iterate through all <typeparamref name="C2D"/> on the Collider2Dx and the Transform2D and add them if they weren't already added.</summary>
+            <summary>Iterate through all <typeparamref name="C2D"/> on the ColliderConverter and the Transform2D and add them if they weren't already added.</summary>
         </CacheCollider2Ds>
         <ColliderToCollider2D>
             <summary>Converts a Collider to a Collider2D.</summary>
@@ -270,7 +270,7 @@
             <param name="copyOf">The BoxCollider2D to copy from.</param>
         </AddBoxCollider2D>
         <CacheCollider2Ds>
-            <summary>Iterate through all <typeparamref name="C2D"/> and BoxCollider2Ds on the Collider2Dx and the Transform2D and add them if they weren't already added.</summary>
+            <summary>Iterate through all <typeparamref name="C2D"/> and BoxCollider2Ds on the ColliderConverter and the Transform2D and add them if they weren't already added.</summary>
         </CacheCollider2Ds>
     </BoxConverter>
     <RigidbodyConverter>

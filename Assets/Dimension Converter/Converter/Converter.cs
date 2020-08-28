@@ -6,14 +6,14 @@ namespace DimensionConverter
     {
         protected virtual void OnEnable()
         {
-            Dimension.AddModule2DxInstance(this);
+            Dimension.AddConverter(this);
 
             Convert(Dimension.is2DNot3D);
         }
 
         protected virtual void OnDisable()
         {
-            Dimension.RemoveModule2DxInstance(this);
+            Dimension.RemoveConverter(this);
         }
 
         /// <include file='../Documentation.xml' path='docs/Converter/Convert/*'/>

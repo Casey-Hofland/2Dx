@@ -71,7 +71,7 @@ namespace DimensionConverter.Utilities
         #endregion
 
         #region Rigidbody
-        /// <include file='../Documentation.xml' path='docs/Convert2dx/Rigidbody/*'/>
+        /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Rigidbody/*'/>
         public static void ToRigidbody2D(this Rigidbody rigidbody, Rigidbody2D rigidbody2D)
         {
             // Carry over the Rigidbody settings to its 2D equivalent.
@@ -100,7 +100,7 @@ namespace DimensionConverter.Utilities
             rigidbody2D.constraints = rigidbody.constraints.ToRigidbodyConstraints2D();
         }
 
-        /// <include file='../Documentation.xml' path='docs/Convert2dx/Rigidbody2D/*'/>
+        /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Rigidbody2D/*'/>
         public static void ToRigidbody(this Rigidbody2D rigidbody2D, Rigidbody rigidbody)
         {
             // Carry over the Rigidbody2D settings to its 3D equivalent.

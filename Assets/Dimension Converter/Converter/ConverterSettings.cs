@@ -27,11 +27,11 @@ namespace DimensionConverter
 
         public override bool Equals(object obj)
         {
-            return obj is ConverterSettings module2DxSettings
-                && module2DxSettings.type == type
-                && module2DxSettings.batchSize3D == batchSize3D
-                && module2DxSettings.batchSize2D == batchSize2D
-                && module2DxSettings.typeName == typeName;
+            return obj is ConverterSettings converterSettings
+                && converterSettings.type == type
+                && converterSettings.batchSize3D == batchSize3D
+                && converterSettings.batchSize2D == batchSize2D
+                && converterSettings.typeName == typeName;
         }
 
         public override int GetHashCode() => (type, batchSize3D, batchSize2D, typeName).GetHashCode();
