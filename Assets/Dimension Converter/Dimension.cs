@@ -130,11 +130,11 @@ namespace UnityEngine
             onBeforeConvert?.Invoke(to2Dnot3D);
 
             isConverting = true;
-            //var oldTimeScale = Time.timeScale;
-            //Time.timeScale = 0;
-            yield return waitForConversionTime;
+            if(conversionTime > 0)
+            {
+                yield return waitForConversionTime;
+            }
             isConverting = false;
-            //Time.timeScale = oldTimeScale;
 
             _is2DNot3D = to2Dnot3D;
             onAfterConvert?.Invoke(to2Dnot3D);
@@ -144,7 +144,7 @@ namespace UnityEngine
         public static bool batchConversion { get; set; }
         #endregion
 
-        #region Converter Instances Conversion
+        #region Converter Conversion
         private static int convertersLength;
         private static Dictionary<Type, int> converterTypeIndex = new Dictionary<Type, int>();
         private static HashSet<Converter>[] orderedConverters = Array.Empty<HashSet<Converter>>();

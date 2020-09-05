@@ -181,7 +181,7 @@ namespace DimensionConverter.Editor
                             index = FindIndex(convertersSettings, element => element.FindPropertyRelative("typeName").stringValue == typeof(BoxConverter).AssemblyQualifiedName) + 1;
                             convertersSettings.MoveArrayElement(arraySize, Math.Min(index, arraySize));
                             break;
-                        case nameof(RigidbodyConverter):
+                        case nameof(RigidbodyConverterDirect):
                             batchSize3D.intValue = batchSize2D.intValue = 50;
                             index = FindIndex(convertersSettings, element => element.FindPropertyRelative("typeName").stringValue == typeof(MeshConverter).AssemblyQualifiedName) + 1;
                             convertersSettings.MoveArrayElement(arraySize, Math.Min(index, arraySize));

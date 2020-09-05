@@ -5,9 +5,9 @@ using UnityEngine;
 
 namespace DimensionConverter
 {
-    [AddComponentMenu(Settings.componentMenu + "Rigidbody Converter")]
+    [AddComponentMenu(Settings.componentMenu + "Rigidbody Converter Direct")]
     [DisallowMultipleComponent]
-    public sealed class RigidbodyConverter : Converter
+    public sealed class RigidbodyConverterDirect : Converter
     {
         #region Copies Holder
         private static GameObject rigidbodyCopies;
