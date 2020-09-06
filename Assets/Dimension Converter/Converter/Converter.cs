@@ -7,7 +7,6 @@ namespace DimensionConverter
         protected virtual void OnEnable()
         {
             Dimension.AddConverter(this);
-
             Convert(Dimension.is2DNot3D);
         }
 

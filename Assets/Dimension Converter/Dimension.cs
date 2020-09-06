@@ -130,10 +130,7 @@ namespace UnityEngine
             onBeforeConvert?.Invoke(to2Dnot3D);
 
             isConverting = true;
-            if(conversionTime > 0)
-            {
-                yield return waitForConversionTime;
-            }
+            yield return waitForConversionTime;
             isConverting = false;
 
             _is2DNot3D = to2Dnot3D;
