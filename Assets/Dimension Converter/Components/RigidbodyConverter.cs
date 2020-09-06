@@ -85,7 +85,7 @@ namespace DimensionConverter
 #if UNITY_2020_1_OR_NEWER
         private void FixedUpdate()
         {
-            if(Physics2D.simulationMode == Physics2D.FixedUpdate)
+            if(Physics2D.simulationMode == SimulationMode2D.FixedUpdate)
             {
                 UpdateOverlap();
             }
@@ -93,7 +93,7 @@ namespace DimensionConverter
 
         private void Update()
         {
-            if(Physics2D.simulationMode == Physics2D.Update)
+            if(Physics2D.simulationMode == SimulationMode2D.Update)
             {
                 UpdateOverlap();
             }
