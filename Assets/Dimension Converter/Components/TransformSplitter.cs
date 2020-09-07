@@ -41,9 +41,10 @@ namespace DimensionConverter
             }
         }
 
+#if UNITY_EDITOR
         private GameObject GetGameObject(string name, int siblingIndex)
         {
-            var gameObject = new GameObject(name);
+            var gameObject = UnityEditor.EditorUtility.CreateGameObjectWithHideFlags(name, HideFlags.None);
             gameObject.transform.SetParent(transform, false);
             if(siblingIndex > -1)
             {
@@ -61,6 +62,7 @@ namespace DimensionConverter
 
             return gameObject;
         }
+#endif
         #endregion
 
         #region Serialization
