@@ -7,10 +7,7 @@ namespace DimensionConverter
     [AddComponentMenu(Settings.componentMenu + "Transform Splitter")]
     [DisallowMultipleComponent]
     [ExecuteAlways]
-    public class TransformSplitter : MonoBehaviour
-#if UNITY_EDITOR
-        , ISerializationCallbackReceiver
-#endif
+    public class TransformSplitter : MonoBehaviour, ISerializationCallbackReceiver
     {
         #region Properties
         private static readonly Quaternion zRotation90Deg = new Quaternion(0f, 0f, 0.7071068f, 0.7071068f);
@@ -25,7 +22,7 @@ namespace DimensionConverter
         public GameObject gameObject2D { get; private set; }
         public Transform transform2D => gameObject2D.transform;
 
-        private Vector3 upwardDirection
+        private Vector3 upwards2D
         {
             get
             {
@@ -40,48 +37,27 @@ namespace DimensionConverter
                 }
             }
         }
-
-#if UNITY_EDITOR
-        private GameObject GetGameObject(string name, int siblingIndex)
-        {
-            var gameObject = UnityEditor.EditorUtility.CreateGameObjectWithHideFlags(name, HideFlags.None);
-            gameObject.transform.SetParent(transform, false);
-            if(siblingIndex > -1)
-            {
-                gameObject.transform.SetSiblingIndex(siblingIndex);
-            }
-
-            gameObject.layer = this.gameObject.layer;
-            gameObject.tag = this.gameObject.tag;
-
-            if(!Application.isPlaying)
-            {
-                var staticEditorFlags = UnityEditor.GameObjectUtility.GetStaticEditorFlags(this.gameObject);
-                UnityEditor.GameObjectUtility.SetStaticEditorFlags(gameObject, staticEditorFlags);
-            }
-
-            return gameObject;
-        }
-#endif
         #endregion
 
         #region Serialization
-#if UNITY_EDITOR
         [HideInInspector] [SerializeField] private GameObject _gameObject3D;
         [HideInInspector] [SerializeField] private GameObject _gameObject2D;
-        private int siblingIndex3D = -1;
-        private int siblingIndex2D = -1;
-        private bool isDuplicate = true;
+        [HideInInspector] [SerializeField] private int siblingIndex3D = -1;
+        [HideInInspector] [SerializeField] private int siblingIndex2D = -1;
 
-        public void OnBeforeSerialize() 
+#if UNITY_EDITOR
+        [HideInInspector] [SerializeField] private bool isDuplicate = true;
+#endif
+
+        public void OnBeforeSerialize()
         {
             if(gameObject3D)
             {
-                _gameObject3D = gameObject3D;
+                siblingIndex3D = (_gameObject3D = gameObject3D).transform.GetSiblingIndex();
             }
             if(gameObject2D)
             {
-                _gameObject2D = gameObject2D;
+                siblingIndex2D = (_gameObject2D = gameObject2D).transform.GetSiblingIndex();
             }
         }
 
@@ -96,47 +72,22 @@ namespace DimensionConverter
                 gameObject2D = _gameObject2D;
             }
 
-            if(isDuplicate)
+#if UNITY_EDITOR
+            if(isDuplicate) 
             {
                 UnityEditor.EditorApplication.delayCall += OnDuplicate;
-                UnityEditor.EditorApplication.delayCall += Reset;
             }
 
             UnityEditor.EditorApplication.playModeStateChanged -= DestroyWithRequireComponent;
             UnityEditor.EditorApplication.playModeStateChanged += DestroyWithRequireComponent;
+#endif
         }
-       
+
+#if UNITY_EDITOR
         private void OnDuplicate()
         {
-            siblingIndex3D = _gameObject3D.transform.GetSiblingIndex();
-            siblingIndex2D = _gameObject2D.transform.GetSiblingIndex();
-
             DestroyImmediate(transform.GetChild(Mathf.Max(siblingIndex2D, siblingIndex3D)).gameObject);
             DestroyImmediate(transform.GetChild(Mathf.Min(siblingIndex2D, siblingIndex3D)).gameObject);
-        }
-
-        private void Reset()
-        {
-            isDuplicate = false;
-
-            if(!gameObject3D)
-            {
-                gameObject3D = GetGameObject("Transform3D", (siblingIndex2D < siblingIndex3D) ? siblingIndex3D - 1 : siblingIndex3D);
-            }
-            if(!gameObject2D)
-            {
-                gameObject2D = GetGameObject("Transform2D", siblingIndex2D);
-            }
-
-            gameObject3D.layer = gameObject2D.layer = gameObject.layer;
-            gameObject3D.tag = gameObject2D.tag = gameObject.tag;
-
-            if(!Application.isPlaying)
-            {
-                var staticEditorFlags = UnityEditor.GameObjectUtility.GetStaticEditorFlags(gameObject);
-                UnityEditor.GameObjectUtility.SetStaticEditorFlags(gameObject3D, staticEditorFlags);
-                UnityEditor.GameObjectUtility.SetStaticEditorFlags(gameObject2D, staticEditorFlags);
-            }
         }
 
         private void DestroyWithRequireComponent(UnityEditor.PlayModeStateChange playModeStateChange)
@@ -148,6 +99,10 @@ namespace DimensionConverter
                 for(int i = 0; i < components.Length; i++)
                 {
                     var component = components[i];
+                    if(!component)
+                    {
+                        continue;
+                    }
                     requiredComponentsArray[i] = Attribute.GetCustomAttributes(component.GetType(), typeof(RequireComponent), true) as RequireComponent[];
                 }
 
@@ -159,6 +114,10 @@ namespace DimensionConverter
                     for(int i = 0; i < components.Length; i++)
                     {
                         var component = components[i];
+                        if(!component)
+                        {
+                            continue;
+                        }
                         Type componentType;
                         if(!component || (componentType = component.GetType()) == type)
                         {
@@ -178,52 +137,23 @@ namespace DimensionConverter
 #endif
         #endregion
 
-        #region Validation
-        private void OnValidate()
+        #region Unity Methods
+        private void Awake()
         {
-            transform.hasChanged = true;
-        }
-
-        private IEnumerator OnTransformChildrenChanged()
-        {
-            yield return null;
+#if UNITY_EDITOR
+            isDuplicate = false;
+#endif
 
             if(!gameObject3D)
             {
-#if UNITY_EDITOR
-                if(Application.isPlaying)
-                {
-                    throw new MissingReferenceException($"Required child {gameObject3D} was removed from {gameObject}.");
-                }
-                else
-                {
-                    gameObject3D = GetGameObject("Transform3D", (siblingIndex2D < siblingIndex3D) ? siblingIndex3D - 1 : siblingIndex3D);
-                    Debug.LogWarning($"Child {gameObject3D.name} is required. To remove it, destroy the parent's {nameof(TransformSplitter)}.");
-                }
-#else
-                throw new MissingReferenceException($"Required child {gameObject3D} was removed from {gameObject}.");
-#endif
+                gameObject3D = CreateGameObject("Transform3D", (siblingIndex2D < siblingIndex3D) ? siblingIndex3D - 1 : siblingIndex3D);
             }
             if(!gameObject2D)
             {
-#if UNITY_EDITOR
-                if(Application.isPlaying)
-                {
-                    throw new MissingReferenceException($"Required child {gameObject2D} was removed from {gameObject}.");
-                }
-                else
-                {
-                    gameObject2D = GetGameObject("Transform2D", siblingIndex2D);
-                    Debug.LogWarning($"Child {gameObject2D.name} is required. To remove it, destroy the parent's {nameof(TransformSplitter)}.");
-                }
-#else
-                throw new MissingReferenceException($"Required child {gameObject2D} was removed from {gameObject}.");
-#endif
+                gameObject2D = CreateGameObject("Transform2D", siblingIndex2D);
             }
         }
-        #endregion
 
-        #region Unity Methods
         // Make sure the required gameObjects are always at the same position, (2D) rotation and scale as the parent transform.
         private void LateUpdate()
         {
@@ -248,6 +178,7 @@ namespace DimensionConverter
 
             void UpdateTransform3D()
             {
+                transform3D.SetParent(transform, false);
                 transform3D.SetPositionAndRotation(transform.position, transform.rotation);
                 transform3D.localScale = Vector3.one;
                 transform3D.hasChanged = false;
@@ -255,7 +186,8 @@ namespace DimensionConverter
 
             void UpdateTransform2D()
             {
-                transform2D.SetPositionAndRotation(transform.position, Quaternion.LookRotation(Vector3.forward, upwardDirection));
+                transform2D.SetParent(transform, false);
+                transform2D.SetPositionAndRotation(transform.position, Quaternion.LookRotation(Vector3.forward, upwards2D));
                 transform2D.localScale = Vector3.one;
                 transform2D.hasChanged = false;
             }
@@ -264,23 +196,57 @@ namespace DimensionConverter
         private void OnDestroy()
         {
 #if UNITY_EDITOR
-            if(Application.isPlaying)
+            UnityEditor.EditorApplication.delayCall += () =>
             {
-                Destroy(gameObject3D);
-                Destroy(gameObject2D);
-            }
-            else
-            {
-                UnityEditor.EditorApplication.delayCall += () =>
-                {
-                    DestroyImmediate(gameObject3D);
-                    DestroyImmediate(gameObject2D);
-                };
-            }
+                DestroyImmediate(gameObject3D);
+                DestroyImmediate(gameObject2D);
+            };
 #else
             Destroy(gameObject3D);
             Destroy(gameObject2D);
 #endif
+        }
+        #endregion
+
+        private GameObject CreateGameObject(string name, int siblingIndex)
+        {
+#if UNITY_EDITOR
+            var gameObject = UnityEditor.EditorUtility.CreateGameObjectWithHideFlags(name, HideFlags.None);
+            var currentUndoGroup = UnityEditor.Undo.GetCurrentGroupName();
+            UnityEditor.Undo.RegisterCreatedObjectUndo(gameObject, currentUndoGroup);
+#else
+            var gameObject = new GameObject(name);
+#endif
+            gameObject.transform.SetParent(transform, false);
+            if(siblingIndex > -1)
+            {
+                gameObject.transform.SetSiblingIndex(siblingIndex);
+            }
+
+            gameObject.layer = this.gameObject.layer;
+            gameObject.tag = this.gameObject.tag;
+
+#if UNITY_EDITOR
+            if(!Application.isPlaying)
+            {
+                var staticEditorFlags = UnityEditor.GameObjectUtility.GetStaticEditorFlags(this.gameObject);
+                UnityEditor.GameObjectUtility.SetStaticEditorFlags(gameObject, staticEditorFlags);
+            }
+#endif
+
+            return gameObject;
+        }
+
+        #region Validation
+        private void OnValidate()
+        {
+            transform.hasChanged = true;
+        }
+
+        private IEnumerator OnTransformChildrenChanged()
+        {
+            yield return null;
+            Awake();
         }
         #endregion
     }

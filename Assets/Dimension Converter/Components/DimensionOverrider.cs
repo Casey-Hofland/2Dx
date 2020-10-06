@@ -2,7 +2,7 @@
 
 namespace DimensionConverter
 {
-    [AddComponentMenu(Settings.componentMenu + "Dimension Setter")]
+    [AddComponentMenu(Settings.componentMenu + "Dimension Overrider")]
     [DisallowMultipleComponent]
     public class DimensionOverrider : MonoBehaviour
     {

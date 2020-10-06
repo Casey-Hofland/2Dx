@@ -216,7 +216,8 @@ namespace DimensionConverter.Utilities
                     boxCollider.ToPolygonCollider2D(polygonCollider2D);
                     break;
                 case MeshCollider meshCollider when collider2D is PolygonCollider2D polygonCollider2D:
-                    meshCollider.ToPolygonCollider2D(polygonCollider2D, conversionSettings.renderSize, conversionSettings.tolerance);
+                    //meshCollider.ToPolygonCollider2D(polygonCollider2D, conversionSettings.renderSize, conversionSettings.tolerance);
+                    meshCollider.ToPolygonCollider2D(polygonCollider2D, conversionSettings.resolution, conversionSettings.lineTolerance, conversionSettings.outlineTolerance, conversionSettings.simplifyTolerance);
                     break;
                 default:
                     collider.GenericPropertiesToCollider2D(collider2D);
@@ -530,16 +531,13 @@ namespace DimensionConverter.Utilities
         }
 
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Mesh/*'/>
-        public static void ToPolygonCollider2D(this MeshCollider meshCollider, PolygonCollider2D polygonCollider2D) => meshCollider.ToPolygonCollider2D(polygonCollider2D, MeshColliderConversionRenderSize._256, 0.05f);
+        public static void ToPolygonCollider2D(this MeshCollider meshCollider, PolygonCollider2D polygonCollider2D) => meshCollider.ToPolygonCollider2D(polygonCollider2D, 256, 1, 0.9899f, 0.05f);
+
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Mesh/*'/>
-        public static void ToPolygonCollider2D(this MeshCollider meshCollider, PolygonCollider2D polygonCollider2D, MeshColliderConversionRenderSize renderSize, float tolerance)
+        public static void ToPolygonCollider2D(this MeshCollider meshCollider, PolygonCollider2D polygonCollider2D, int resolution, uint lineTolerance, float outlineTolerance, float simplifyTolerance)
         {
             meshCollider.GenericPropertiesToCollider2D(polygonCollider2D);
-
-            if(meshCollider.convex)
-            {
-                polygonCollider2D.isTrigger = meshCollider.isTrigger;
-            }
+            polygonCollider2D.isTrigger = meshCollider.convex && meshCollider.isTrigger;
 
             // Setup the renderer and camera for the render shot.
             if(!(renderFilter.sharedMesh = meshCollider.sharedMesh))
@@ -549,60 +547,64 @@ namespace DimensionConverter.Utilities
                 return;
             }
 
-            // Position the transform so the bounds' center is at (0, 0, 0).
+            // Rotate the transform so the bounds get updated correctly.
             renderFilter.transform.rotation = Quaternion.Inverse(polygonCollider2D.transform.rotation) * meshCollider.transform.rotation;
+            //renderFilter.transform.localScale = meshCollider.transform.localScale;
             var bounds = renderRenderer.bounds;
-            renderFilter.transform.position -= bounds.center - Vector3.forward * bounds.extents.z;
-
-            renderCamera.orthographicSize =
-                bounds.extents.x > bounds.extents.y
-                ? bounds.extents.x * renderCamera.aspect
-                : bounds.extents.y;
-            if(Mathf.Approximately(renderCamera.orthographicSize, 0))
+            if(bounds.size.x == 0f || bounds.size.y == 0f)
             {
                 return;
             }
+
+            // Position the transform so the bounds' center is at (0, 0, 0).
+            renderFilter.transform.position -= bounds.center - Vector3.forward * bounds.extents.z;
+
+            // Set the pixel and camera size.
+            int pixelWidth, pixelHeight;
+            if(bounds.size.x > bounds.size.y)
+            {
+                pixelHeight = Mathf.CeilToInt((pixelWidth = resolution) * bounds.size.y / bounds.size.x);
+                renderCamera.orthographicSize = bounds.extents.x * pixelWidth / pixelHeight;
+            }
+            else
+            {
+                pixelWidth = Mathf.CeilToInt((pixelHeight = resolution) * bounds.size.x / bounds.size.y);
+                renderCamera.orthographicSize = bounds.extents.y;
+            }
             renderCamera.farClipPlane = Mathf.Max(bounds.size.z, 0.01f); // We assume the nearClipPlane to be 0, otherwise we would need to do renderCamera.nearClipPlane + 0.01f.
 
-            // Render the texture and read it to a Texture2D.
+            // Render the camera and read it to a Texture2D.
+            var renderTexture = RenderTexture.GetTemporary(pixelWidth, pixelHeight, 0, RenderTextureFormat.R8, RenderTextureReadWrite.Default, 1, RenderTextureMemoryless.Color);
             var activeRenderTexture = RenderTexture.active;
-            var renderTexture = RenderTexture.active = renderCamera.targetTexture = renderTextures[(int)renderSize];
+            RenderTexture.active = renderCamera.targetTexture = renderTexture;
 
             renderCamera.gameObject.SetActive(true);
             renderCamera.Render();
 
-            var texture2D = new Texture2D(renderTexture.width, renderTexture.height);
-            var rect = new Rect(0, 0, renderTexture.width, renderTexture.height);
+            texture2D.Resize(pixelWidth, pixelHeight);
+            rect.width = pixelWidth;
+            rect.height = pixelHeight;
             texture2D.ReadPixels(rect, 0, 0, false);
 
             renderCamera.gameObject.SetActive(false);
+            renderCamera.targetTexture = null;
             RenderTexture.active = activeRenderTexture;
+            RenderTexture.ReleaseTemporary(renderTexture);
 
-            // Create a sprite out of the texture2D and let it generate a physics shape.
-            var pixelsPerUnit = texture2D.width * 0.5f / renderCamera.orthographicSize; // We assume the texture2D is a square, otherwise we would need to do Mathf.Max(texture2D.width, texture2D.height).
-            Vector4 border = new Vector4(rect.xMin, rect.yMin, rect.xMax, rect.yMax);
-            var sprite = Sprite.Create(texture2D, rect, centerPivot, pixelsPerUnit, 0, SpriteMeshType.FullRect, border, true);
+            // Generate the paths and apply them to the polygonCollider2D.
+            var pixelsPerUnit = Mathf.Max(pixelWidth, pixelHeight) * 0.5f / renderCamera.orthographicSize;
 
-            // Give the generated physics shape to the polygonCollider2D and offset it by minus the renderer transform.
-            if((polygonCollider2D.pathCount = sprite.GetPhysicsShapeCount()) > 0)
+            var boundaryTracer = new ContourTracer();
+            boundaryTracer.Trace(texture2D, centerPivot, pixelsPerUnit, lineTolerance, outlineTolerance);
+
+            polygonCollider2D.pathCount = boundaryTracer.GetPathCount();
+            for(int i = 0; i < polygonCollider2D.pathCount; i++)
             {
-                if(tolerance > 0)
-                {
-                    for(int i = 0; i < polygonCollider2D.pathCount; i++)
-                    {
-                        sprite.GetPhysicsShape(i, points);
-                        polygonCollider2D.SetPath(i, DouglasPeuckerReduction.Reduce(points, tolerance));
-                    }
-                }
-                else
-                {
-                    for(int i = 0; i < polygonCollider2D.pathCount; i++)
-                    {
-                        sprite.GetPhysicsShape(i, points);
-                        polygonCollider2D.SetPath(i, points);
-                    }
-                }
+                boundaryTracer.GetPath(i, ref points);
+                LineUtility.Simplify(points, simplifyTolerance, simplifiedPoints);
+                polygonCollider2D.SetPath(i, simplifiedPoints);
             }
+
             polygonCollider2D.offset = -renderFilter.transform.position;
         }
 
@@ -685,29 +687,21 @@ namespace DimensionConverter.Utilities
 
         private static Vector2[] boxPoints6 = new Vector2[6];
         private static Vector2[] boxPoints4 = new Vector2[4];
-        private static readonly Vector2 centerPivot = new Vector2(0.5f, 0.5f);
 
-        private static RenderTexture[] renderTextures;
+        private static readonly Vector2 centerPivot = new Vector2(0.5f, 0.5f);
         private static Camera renderCamera;
         private static MeshFilter renderFilter;
         private static MeshRenderer renderRenderer;
+        private static Texture2D texture2D;
+        private static Rect rect;
+
         private static List<Vector2> points;
+        private static List<Vector2> simplifiedPoints;
         private static PolygonCollider2D polygonColliderMeshCreator;
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void InitColliderConversion()
         {
-            renderTextures = new RenderTexture[8]
-            {
-                new RenderTexture(32, 32, 0),
-                new RenderTexture(64, 64, 0),
-                new RenderTexture(256, 256, 0),
-                new RenderTexture(512, 512, 0),
-                new RenderTexture(1024, 1024, 0),
-                new RenderTexture(2048, 2048, 0),
-                new RenderTexture(4096, 4096, 0),
-                new RenderTexture(8192, 8192, 0),
-            };
-
             // Create renderCamera GameObject.
             var renderCameraGO = new GameObject(nameof(renderCamera));
             renderCameraGO.SetActive(false);
@@ -724,16 +718,26 @@ namespace DimensionConverter.Utilities
 
             // Create renderCamera.
             renderCamera = renderCameraGO.AddComponent<Camera>();
+
             renderCamera.clearFlags = CameraClearFlags.SolidColor;
             renderCamera.backgroundColor = Color.clear;
             renderCamera.cullingMask = 1 << 31;
             renderCamera.orthographic = true;
             renderCamera.nearClipPlane = 0f;
             renderCamera.renderingPath = RenderingPath.Forward;
-            renderCamera.useOcclusionCulling = 
-                renderCamera.allowHDR = 
-                renderCamera.allowMSAA = 
+            renderCamera.useOcclusionCulling =
+                renderCamera.allowHDR =
+                renderCamera.allowMSAA =
                 renderCamera.allowDynamicResolution = false;
+
+#if HDRP_7_1_OR_NEWER
+            // #if HDRP
+            var hdData = renderCameraGO.AddComponent<UnityEngine.Rendering.HighDefinition.HDAdditionalCameraData>();
+            hdData.volumeLayerMask = 0;
+            hdData.probeLayerMask = 0;
+            hdData.clearColorMode = UnityEngine.Rendering.HighDefinition.HDAdditionalCameraData.ClearColorMode.Color;
+            hdData.backgroundColorHDR = Color.clear;
+#endif
 
             // Create rendering Objects.
             renderFilter = renderingGO.AddComponent<MeshFilter>();
@@ -741,8 +745,15 @@ namespace DimensionConverter.Utilities
             renderRenderer = renderingGO.AddComponent<MeshRenderer>();
             renderRenderer.receiveShadows = false;
             renderRenderer.shadowCastingMode = ShadowCastingMode.Off;
+            renderRenderer.lightProbeUsage = LightProbeUsage.Off;
+            renderRenderer.motionVectorGenerationMode = MotionVectorGenerationMode.ForceNoMotion;
+            renderRenderer.allowOcclusionWhenDynamic = false;
+
+            texture2D = new Texture2D(0, 0, TextureFormat.R8, false);
+            rect = new Rect();
 
             points = new List<Vector2>();
+            simplifiedPoints = new List<Vector2>();
 
             // Create the polygonCollider2D dummy.
             var polygonColliderMeshCreatorGO = new GameObject(nameof(polygonColliderMeshCreator));
@@ -754,7 +765,6 @@ namespace DimensionConverter.Utilities
                 polygonColliderMeshCreatorGO.hideFlags |= HideFlags.HideInHierarchy;
             }
         }
-#endregion
+        #endregion
     }
 }
-

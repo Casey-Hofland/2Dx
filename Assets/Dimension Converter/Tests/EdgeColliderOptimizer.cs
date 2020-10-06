@@ -1,6 +1,4 @@
-﻿using DimensionConverter.Utilities;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace DimensionConverter.Tests
@@ -11,10 +9,9 @@ namespace DimensionConverter.Tests
     /// the given tolerance
     /// </summary>
     [RequireComponent(typeof(EdgeCollider2D))]
-	[Obsolete("This class isn't functioning properly.", false)]
 	public class EdgeColliderOptimizer : MonoBehaviour 
 	{
-		#region Required Components
+		#region Components
 		private EdgeCollider2D _edgeCollider2D;
 		public EdgeCollider2D edgeCollider2D => _edgeCollider2D ? _edgeCollider2D : (_edgeCollider2D = GetComponent<EdgeCollider2D>());
 		#endregion
@@ -24,13 +21,26 @@ namespace DimensionConverter.Tests
 		[SerializeField] [Range(0f, 1f)] private float _tolerance = default;
 
 		public float tolerance
-        {
+		{
 			get => _tolerance;
 			set => _tolerance = Mathf.Clamp01(value);
-        }
+		}
+
+		[SerializeField] [HideInInspector] private List<Vector2> originalPath = new List<Vector2>();
+		private List<Vector2> reducedPath = new List<Vector2>();
 
         private void OnValidate()
         {
+			if(!_edgeCollider2D)
+			{
+				//When first getting a reference to the collider save the paths so that the optimization is redoable (by performing it on the original path every time).
+				originalPath = new List<Vector2>(edgeCollider2D.points);
+			}
+			else
+            {
+				edgeCollider2D.points = originalPath.ToArray();
+            }
+
 			var path = new List<Vector2>();
 			var upperRight = edgeCollider2D.bounds.max;
 			var upperLeft = edgeCollider2D.bounds.min;
@@ -55,8 +65,8 @@ namespace DimensionConverter.Tests
                 }
 			}
 
-			var reducedPath = DouglasPeuckerReduction.Reduce(path, tolerance);
-			edgeCollider2D.points = reducedPath;
+			LineUtility.Simplify(path, tolerance, reducedPath);
+			edgeCollider2D.points = reducedPath.ToArray();
 		}
     }
 }

@@ -1,5 +1,4 @@
-﻿using DimensionConverter.Utilities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,7 +11,7 @@ namespace DimensionConverter.Tests
     [RequireComponent(typeof(PolygonCollider2D))]
 	public class PolygonColliderOptimizer : MonoBehaviour 
 	{
-		#region Required Components
+		#region Components
 		private PolygonCollider2D _polygonCollider2D;
 		public PolygonCollider2D polygonCollider2D => _polygonCollider2D ? _polygonCollider2D : (_polygonCollider2D = GetComponent<PolygonCollider2D>());
 		#endregion
@@ -26,6 +25,7 @@ namespace DimensionConverter.Tests
         }
 
 		[SerializeField] [HideInInspector] private List<ListWrapper> originalPaths = new List<ListWrapper>();
+		private List<Vector2> reducedPath = new List<Vector2>();
 
 		[Serializable]
 		private struct ListWrapper
@@ -53,7 +53,7 @@ namespace DimensionConverter.Tests
 			for(int i = 0; i < originalPaths.Count; i++)
             {
 				var originalPath = originalPaths[i].path;
-				var reducedPath = DouglasPeuckerReduction.Reduce(originalPath, tolerance);
+				LineUtility.Simplify(originalPath, tolerance, reducedPath);
 				polygonCollider2D.SetPath(i, reducedPath);
             }
 		}
