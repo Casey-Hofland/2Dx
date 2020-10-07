@@ -27,9 +27,6 @@ namespace DimensionConverter
         [Tooltip("This will hide certain gameObjects that are used as a cache or otherwise background activity. Disable this to get a better understanding of how Dimension Converter operates and debug issues.")] 
         public bool slimHierarchy;
         
-        [Tooltip("CameraConverters will take control over their camera's settings so updates to the CameraConverter are directly visualized. The camera's projection view will depend on the is 2D Not 3D setting.")]
-        public bool cameraConverterLiveUpdate;
-
         public void Reset()
         {
             is2DNot3D = true;
@@ -37,7 +34,6 @@ namespace DimensionConverter
             batchConversion = true;
             convertersSettings = Array.Empty<ConverterSettings>();
             slimHierarchy = true;
-            cameraConverterLiveUpdate = true;
         }
     }
 }

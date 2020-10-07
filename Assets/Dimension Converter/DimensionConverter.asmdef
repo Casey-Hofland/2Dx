@@ -13,8 +13,8 @@
     "versionDefines": [
         {
             "name": "com.unity.render-pipelines.high-definition",
-            "expression": "7.1",
-            "define": "HDRP_7_1_OR_NEWER"
+            "expression": "7.0",
+            "define": "HDRP_7_0_OR_NEWER"
         }
     ],
     "noEngineReferences": false

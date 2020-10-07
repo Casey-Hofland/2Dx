@@ -97,7 +97,6 @@ namespace DimensionConverter.Editor
         private SerializedProperty batchConversion;
         private SerializedProperty convertersSettings;
         private SerializedProperty slimHierarchy;
-        private SerializedProperty cameraConverterLiveUpdate;
         private ReorderableList reorderableList;
 
         public SettingsProvider(string path, SettingsScope scopes, IEnumerable<string> keywords = null) : base(path, scopes, keywords) { }
@@ -111,7 +110,6 @@ namespace DimensionConverter.Editor
             batchConversion = customSettings.FindProperty(nameof(batchConversion));
             convertersSettings = customSettings.FindProperty(nameof(convertersSettings));
             slimHierarchy = customSettings.FindProperty(nameof(slimHierarchy));
-            cameraConverterLiveUpdate = customSettings.FindProperty(nameof(cameraConverterLiveUpdate));
 
             CreateReorderableList();
         }
@@ -272,13 +270,7 @@ namespace DimensionConverter.Editor
 
             reorderableList.DoLayoutList();
 
-            if(editorSettingsFoldout = EditorGUILayout.Foldout(editorSettingsFoldout, "Editor Settings"))
-            {
-                EditorGUI.indentLevel++;
-                EditorGUILayout.PropertyField(slimHierarchy);
-                EditorGUILayout.PropertyField(cameraConverterLiveUpdate);
-                EditorGUI.indentLevel--;
-            }
+            EditorGUILayout.PropertyField(slimHierarchy);
 
             if(GUILayout.Button("Reset"))
             {

@@ -31,6 +31,27 @@ namespace DimensionConverter.Editor
         {
             serializedObject.Update();
 
+            // Set View
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.PrefixLabel($"Set View");
+            if(GUILayout.Button($"3D"))
+            {
+                foreach(CameraConverter cameraConverter in targets)
+                {
+                    cameraConverter.SetView(false);
+                }
+            }
+            if(GUILayout.Button($"2D"))
+            {
+                foreach(CameraConverter cameraConverter in targets)
+                {
+                    cameraConverter.SetView(true);
+                }
+            }
+            GUILayout.EndHorizontal();
+            EditorGUILayout.Space();
+
+            // Blend Curve
             EditorGUILayout.PropertyField(blendCurve);
             
             // Field Of View

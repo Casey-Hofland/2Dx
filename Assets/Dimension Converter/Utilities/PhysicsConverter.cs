@@ -200,7 +200,7 @@ namespace DimensionConverter.Utilities
         }
 
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Collider/*'/>
-        public static void ToCollider2D(this Collider collider, Collider2D collider2D) => collider.ToCollider2D(collider2D, default);
+        public static void ToCollider2D(this Collider collider, Collider2D collider2D) => collider.ToCollider2D(collider2D, ConversionSettings.Default);
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Collider/*'/>
         public static void ToCollider2D(this Collider collider, Collider2D collider2D, ConversionSettings conversionSettings)
         {
@@ -226,7 +226,7 @@ namespace DimensionConverter.Utilities
         }
 
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Collider2D/*'/>
-        public static void ToCollider(this Collider2D collider2D, Collider collider) => collider2D.ToCollider(collider, default);
+        public static void ToCollider(this Collider2D collider2D, Collider collider) => collider2D.ToCollider(collider, Conversion2DSettings.Default);
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Collider2D/*'/>
         public static void ToCollider(this Collider2D collider2D, Collider collider, Conversion2DSettings conversion2DSettings)
         {
@@ -531,7 +531,7 @@ namespace DimensionConverter.Utilities
         }
 
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Mesh/*'/>
-        public static void ToPolygonCollider2D(this MeshCollider meshCollider, PolygonCollider2D polygonCollider2D) => meshCollider.ToPolygonCollider2D(polygonCollider2D, 256, 1, 0.9899f, 0.05f);
+        public static void ToPolygonCollider2D(this MeshCollider meshCollider, PolygonCollider2D polygonCollider2D) => meshCollider.ToPolygonCollider2D(polygonCollider2D, ConversionSettings.Default.resolution, ConversionSettings.Default.lineTolerance, ConversionSettings.Default.outlineTolerance, ConversionSettings.Default.simplifyTolerance);
 
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Mesh/*'/>
         public static void ToPolygonCollider2D(this MeshCollider meshCollider, PolygonCollider2D polygonCollider2D, int resolution, uint lineTolerance, float outlineTolerance, float simplifyTolerance)
@@ -592,7 +592,7 @@ namespace DimensionConverter.Utilities
             RenderTexture.ReleaseTemporary(renderTexture);
 
             // Generate the paths and apply them to the polygonCollider2D.
-            var pixelsPerUnit = Mathf.Max(pixelWidth, pixelHeight) * 0.5f / renderCamera.orthographicSize;
+            var pixelsPerUnit = pixelHeight * 0.5f / renderCamera.orthographicSize;
 
             var boundaryTracer = new ContourTracer();
             boundaryTracer.Trace(texture2D, centerPivot, pixelsPerUnit, lineTolerance, outlineTolerance);
@@ -602,14 +602,22 @@ namespace DimensionConverter.Utilities
             {
                 boundaryTracer.GetPath(i, ref points);
                 LineUtility.Simplify(points, simplifyTolerance, simplifiedPoints);
-                polygonCollider2D.SetPath(i, simplifiedPoints);
+                if(simplifiedPoints.Count < 3)
+                {
+                    polygonCollider2D.pathCount--;
+                    i--;
+                }
+                else
+                {
+                    polygonCollider2D.SetPath(i, simplifiedPoints);
+                }
             }
 
             polygonCollider2D.offset = -renderFilter.transform.position;
         }
 
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Polygon2D/*'/>
-        public static void ToMeshCollider(this PolygonCollider2D polygonCollider2D, MeshCollider meshCollider) => polygonCollider2D.ToMeshCollider(meshCollider, default);
+        public static void ToMeshCollider(this PolygonCollider2D polygonCollider2D, MeshCollider meshCollider) => polygonCollider2D.ToMeshCollider(meshCollider, Conversion2DSettings.Default.polygonCollider2DConversionOptions);
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Polygon2D/*'/>
         public static void ToMeshCollider(this PolygonCollider2D polygonCollider2D, MeshCollider meshCollider, PolygonCollider2DConversionOptions conversionOptions)
         {
@@ -687,16 +695,17 @@ namespace DimensionConverter.Utilities
 
         private static Vector2[] boxPoints6 = new Vector2[6];
         private static Vector2[] boxPoints4 = new Vector2[4];
+        private static List<Vector2> points = new List<Vector2>();
+        private static List<Vector2> simplifiedPoints = new List<Vector2>();
 
+        private static Texture2D texture2D = new Texture2D(0, 0, TextureFormat.R8, false);
+        private static Rect rect = new Rect();
         private static readonly Vector2 centerPivot = new Vector2(0.5f, 0.5f);
+
         private static Camera renderCamera;
         private static MeshFilter renderFilter;
         private static MeshRenderer renderRenderer;
-        private static Texture2D texture2D;
-        private static Rect rect;
 
-        private static List<Vector2> points;
-        private static List<Vector2> simplifiedPoints;
         private static PolygonCollider2D polygonColliderMeshCreator;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -730,8 +739,7 @@ namespace DimensionConverter.Utilities
                 renderCamera.allowMSAA =
                 renderCamera.allowDynamicResolution = false;
 
-#if HDRP_7_1_OR_NEWER
-            // #if HDRP
+#if HDRP_7_0_OR_NEWER
             var hdData = renderCameraGO.AddComponent<UnityEngine.Rendering.HighDefinition.HDAdditionalCameraData>();
             hdData.volumeLayerMask = 0;
             hdData.probeLayerMask = 0;
@@ -748,12 +756,6 @@ namespace DimensionConverter.Utilities
             renderRenderer.lightProbeUsage = LightProbeUsage.Off;
             renderRenderer.motionVectorGenerationMode = MotionVectorGenerationMode.ForceNoMotion;
             renderRenderer.allowOcclusionWhenDynamic = false;
-
-            texture2D = new Texture2D(0, 0, TextureFormat.R8, false);
-            rect = new Rect();
-
-            points = new List<Vector2>();
-            simplifiedPoints = new List<Vector2>();
 
             // Create the polygonCollider2D dummy.
             var polygonColliderMeshCreatorGO = new GameObject(nameof(polygonColliderMeshCreator));

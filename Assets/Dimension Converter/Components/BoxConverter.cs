@@ -16,7 +16,7 @@ namespace DimensionConverter
         [Tooltip("The BoxCollider2Ds to ignore for conversion.")] public BoxCollider2D[] ignoredBoxCollider2Ds;
 
         [Header("Convert to 3D")]
-        [Tooltip("If enabled, PolygonCollider2D to BoxCollider will go through a safety check to make sure the PolygonCollider2D is in an appropriate BoxCollider shape.")] public bool toBoxColliderSafe = true;
+        [Tooltip("If enabled, PolygonCollider2D to BoxCollider will go through a safety check to make sure the PolygonCollider2D is in an appropriate BoxCollider shape.")] public bool toBoxColliderSafe = Conversion2DSettings.Default.toBoxColliderSafe;
 
         public bool IgnoreBoxCollider2D(BoxCollider2D boxCollider2D) => Array.IndexOf(ignoredBoxCollider2Ds, boxCollider2D) != -1;
 
