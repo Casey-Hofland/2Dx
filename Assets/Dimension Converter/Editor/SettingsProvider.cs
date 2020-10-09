@@ -89,14 +89,12 @@ namespace DimensionConverter.Editor
         private static IEnumerable<string> GetSearchKeywords() => GetSearchKeywordsFromPath(assetPath);
         #endregion
 
-        private static bool editorSettingsFoldout = false;
-
         private SerializedObject customSettings;
         private SerializedProperty is2DNot3D;
+        private SerializedProperty defaultOutliner;
         private SerializedProperty conversionTime;
         private SerializedProperty batchConversion;
         private SerializedProperty convertersSettings;
-        private SerializedProperty slimHierarchy;
         private ReorderableList reorderableList;
 
         public SettingsProvider(string path, SettingsScope scopes, IEnumerable<string> keywords = null) : base(path, scopes, keywords) { }
@@ -106,10 +104,10 @@ namespace DimensionConverter.Editor
             customSettings = GetSerializedObject();
 
             is2DNot3D = customSettings.FindProperty(nameof(is2DNot3D));
+            defaultOutliner = customSettings.FindProperty(nameof(defaultOutliner));
             conversionTime = customSettings.FindProperty(nameof(conversionTime));
             batchConversion = customSettings.FindProperty(nameof(batchConversion));
             convertersSettings = customSettings.FindProperty(nameof(convertersSettings));
-            slimHierarchy = customSettings.FindProperty(nameof(slimHierarchy));
 
             CreateReorderableList();
         }
@@ -260,6 +258,7 @@ namespace DimensionConverter.Editor
             customSettings.Update();
 
             EditorGUILayout.PropertyField(is2DNot3D);
+            EditorGUILayout.PropertyField(defaultOutliner);
             EditorGUILayout.PropertyField(conversionTime);
             EditorGUILayout.PropertyField(batchConversion);
 
@@ -269,8 +268,6 @@ namespace DimensionConverter.Editor
             }
 
             reorderableList.DoLayoutList();
-
-            EditorGUILayout.PropertyField(slimHierarchy);
 
             if(GUILayout.Button("Reset"))
             {

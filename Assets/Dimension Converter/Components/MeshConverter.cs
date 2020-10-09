@@ -8,12 +8,10 @@ namespace DimensionConverter
     public sealed class MeshConverter : ColliderConverter<MeshCollider, PolygonCollider2D>
     {
         [Header("Convert to 2D")]
-        public int resolution = ConversionSettings.Default.resolution;
-        public uint lineTolerance = ConversionSettings.Default.lineTolerance;
-        [Range(0f, 1f)] public float outlineTolerance = ConversionSettings.Default.outlineTolerance;
-        [Tooltip("Tolerance for optimizing the PolygonCollider2D. 0 means no optimization. 0.03-0.05 is good for most cases.")] public float simplifyTolerance = ConversionSettings.Default.simplifyTolerance;
+        [Tooltip("The outliner holding the settings for tracing a MeshCollider outline.")] public Outliner outliner;
+
         [Header("Convert to 3D")]
-        [Tooltip("Determines the behaviour for converting PolygonCollider2Ds to MeshColliders.")] public PolygonCollider2DConversionOptions conversionOptions = Conversion2DSettings.Default.polygonCollider2DConversionOptions;
+        [Tooltip("Determines the behaviour for converting PolygonCollider2Ds to MeshColliders.")] public PolygonCollider2DConversionOptions conversionOptions;
 
         protected override void ColliderToCollider(MeshCollider collider, MeshCollider other)
         {
@@ -27,7 +25,7 @@ namespace DimensionConverter
 
         protected override void ColliderToCollider2D(MeshCollider collider, PolygonCollider2D collider2D)
         {
-            collider.ToPolygonCollider2D(collider2D, resolution, lineTolerance, outlineTolerance, simplifyTolerance);
+            collider.ToPolygonCollider2D(collider2D, outliner);
         }
 
         protected override void Collider2DToCollider(PolygonCollider2D collider2D, MeshCollider collider)

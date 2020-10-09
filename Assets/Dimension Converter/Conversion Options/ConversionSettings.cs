@@ -7,31 +7,20 @@ namespace DimensionConverter
     [Serializable]
     public struct ConversionSettings
     {
-        public static readonly ConversionSettings Default = new ConversionSettings(256, 3, 0.99f, 0.03f);
+        [Tooltip("The outliner holding the settings for tracing a MeshCollider outline.")] public Outliner outliner;
 
-        public int resolution;
-        public uint lineTolerance;
-        public float outlineTolerance;
-        [Tooltip("Tolerance for optimizing the PolygonCollider2D. 0 means no optimization. 0.03-0.05 is good for most cases.")] [SerializeField] public float simplifyTolerance;
-
-        public ConversionSettings(int resolution, uint lineTolerance, float outlineTolerance, float simplifyTolerance)
+        public ConversionSettings(Outliner outliner)
         {
-            this.resolution = resolution;
-            this.lineTolerance = lineTolerance;
-            this.outlineTolerance = outlineTolerance;
-            this.simplifyTolerance = simplifyTolerance;
+            this.outliner = outliner;
         }
 
         public override bool Equals(object obj)
         {
             return obj is ConversionSettings conversionSettings
-                && conversionSettings.resolution == resolution
-                && conversionSettings.lineTolerance == lineTolerance
-                && conversionSettings.outlineTolerance == outlineTolerance
-                && conversionSettings.simplifyTolerance == simplifyTolerance;
+                && conversionSettings.outliner == outliner;
         }
 
-        public override int GetHashCode() => (resolution, lineTolerance, outlineTolerance, simplifyTolerance).GetHashCode();
+        public override int GetHashCode() => (outliner).GetHashCode();
 
         public static bool operator ==(ConversionSettings left, ConversionSettings right) => left.Equals(right);
         public static bool operator !=(ConversionSettings left, ConversionSettings right) => !(left == right);

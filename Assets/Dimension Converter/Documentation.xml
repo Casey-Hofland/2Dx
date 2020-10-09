@@ -104,7 +104,7 @@
             <summary>Converts a MeshCollider to its PolygonCollider2D equivalent.</summary>
             <param name="meshCollider">The MeshCollider to convert.</param>
             <param name="polygonCollider2D">The PolygonCollider2D to convert to.</param>
-            <param name="renderSize">The render size to use when rendering out the MeshCollider as a Texture2D.</param>
+            <param name="outliner">The outliner holding the settings for tracing a MeshCollider outline.</param>
         </Mesh>
         <Polygon2D>
             <summary>Converts a PolygonCollider2D to its MeshCollider equivalent.</summary>
@@ -179,6 +179,24 @@
             <param name="other">The PolygonCollider2D to copy to.</param>
         </Polygon2D>
     </PhysicsCopier>
+    <ContourTracer>
+        <pathCount>
+            <summary>The number of paths of the contour.</summary>
+        </pathCount>
+        <GetPath>
+            <summary>Gets a path from the ContourTracer by its index.</summary>
+            <param name="index">The index of the path to retrieve.</param>
+            <param name="path">An ordered list of the points in the selected path to store points in.</param>
+        </GetPath>
+        <Trace>
+            <summary>Traces a contour and stores its paths.</summary>
+            <param name="texture">Texture from which to trace the contour.</param>
+            <param name="pivot">Contours pivot point relative to its texture.</param>
+            <param name="pixelsPerUnit">The number of pixels in the texture that correspond to one unit in world space.</param>
+            <param name="gapLength">How much difference in pixels in a straight line is considered a gap.</param>
+            <param name="product">The vector product of 2 sequential points above which a new point is ignored.</param>
+        </Trace>
+    </ContourTracer>
     <BoxConverterTools>
         <IsBox>
             <summary>Checks if a PolygonCollider2D is representing a BoxCollider at a certain rotation.</summary>

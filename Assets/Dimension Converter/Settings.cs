@@ -9,32 +9,33 @@ namespace DimensionConverter
     {
         internal const string componentMenu = "Dimension Converter/";
 
-        /// <include file='./Documentation.xml' path='docs/Dimension/is2Dnot3D/*' />
         [Tooltip("Returns if the dimension is currently 2D instead of 3D.")] 
-        public bool is2DNot3D;
+        public bool is2DNot3D = true;
 
-        /// <include file='./Documentation.xml' path='docs/Dimension/conversionTime/*' />
+        [Tooltip("The default outliner to use on a MeshConverter if no outliner is specified on it.")] 
+        public Outliner defaultOutliner;
+
         [Tooltip("The time it takes for the dimension to convert.")] 
-        public float conversionTime;
+        public float conversionTime = 0.6666667f;
 
-        /// <include file='./Documentation.xml' path='docs/Dimension/batchConversion/*' />
         [Tooltip("If enabled, the conversion is batched and converted over multiple frames, but never longer than the conversionTime.")] 
-        public bool batchConversion;
+        public bool batchConversion = true;
 
         [Tooltip("The order in which Converters are converted and in how large of a batch.")]
-        public ConverterSettings[] convertersSettings;
+        public ConverterSettings[] convertersSettings = Array.Empty<ConverterSettings>();
 
-        [Tooltip("This will hide certain gameObjects that are used as a cache or otherwise background activity. Disable this to get a better understanding of how Dimension Converter operates and debug issues.")] 
-        public bool slimHierarchy;
-        
+        [Obsolete("Replace with Create Instance in SettingsProvider instead", false)]
         public void Reset()
         {
             is2DNot3D = true;
+            defaultOutliner = null;
             conversionTime = 0.6666667f;
             batchConversion = true;
             convertersSettings = Array.Empty<ConverterSettings>();
-            slimHierarchy = true;
         }
+
+        private static Settings _settings;
+        public static Settings GetSettings => _settings || (_settings = Resources.Load<Settings>(nameof(Settings))) ? _settings : (_settings = CreateInstance<Settings>());
     }
 }
 

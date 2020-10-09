@@ -7,21 +7,19 @@ namespace DimensionConverter
     [Serializable]
     public struct Conversion2DSettings
     {
-        public static readonly Conversion2DSettings Default = new Conversion2DSettings(true, 0);
-
-        [Tooltip("If enabled, PolygonCollider2D to BoxCollider will first go through a safety check to make sure the PolygonCollider2D is in an appropriate BoxCollider shape.")] public bool toBoxColliderSafe;
+        [Tooltip("If disabled, PolygonCollider2D to BoxCollider will skip the safety check to make sure the PolygonCollider2D is in an appropriate BoxCollider shape.")] public bool toBoxColliderSkipSafetyCheck;
         [Tooltip("Determines the behaviour for converting PolygonCollider2Ds to MeshColliders.")] public PolygonCollider2DConversionOptions polygonCollider2DConversionOptions;
 
-        public Conversion2DSettings(bool toBoxColliderSafe, PolygonCollider2DConversionOptions polygonCollider2DConversionOptions)
+        public Conversion2DSettings(bool toBoxColliderSkipSafetyCheck, PolygonCollider2DConversionOptions polygonCollider2DConversionOptions)
         {
-            this.toBoxColliderSafe = toBoxColliderSafe;
+            this.toBoxColliderSkipSafetyCheck = toBoxColliderSkipSafetyCheck;
             this.polygonCollider2DConversionOptions = polygonCollider2DConversionOptions;
         }
 
         public override bool Equals(object obj)
         {
             return obj is Conversion2DSettings conversionSettings2D
-                && conversionSettings2D.toBoxColliderSafe == toBoxColliderSafe
+                && conversionSettings2D.toBoxColliderSkipSafetyCheck == toBoxColliderSkipSafetyCheck
                 && conversionSettings2D.polygonCollider2DConversionOptions == polygonCollider2DConversionOptions;
         }
 

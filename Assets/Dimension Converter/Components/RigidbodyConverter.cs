@@ -15,12 +15,10 @@ namespace DimensionConverter
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void Initialize()
         {
+            var settings = Settings.GetSettings;
+
             rigidbodyCopies = new GameObject(nameof(rigidbodyCopies));
             DontDestroyOnLoad(rigidbodyCopies);
-            if(Dimension.slimHierarchy)
-            {
-                rigidbodyCopies.hideFlags |= HideFlags.HideInHierarchy;
-            }
         }
         #endregion
 

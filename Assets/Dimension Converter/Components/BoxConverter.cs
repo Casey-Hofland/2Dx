@@ -13,12 +13,12 @@ namespace DimensionConverter
             Debug.LogWarning($"Note that {nameof(BoxConverter)} is still untested!");
         }
 
-        [Tooltip("The BoxCollider2Ds to ignore for conversion.")] public BoxCollider2D[] ignoredBoxCollider2Ds;
+        [Tooltip("The BoxCollider2Ds to ignore for conversion.")] public BoxCollider2D[] ignoredBoxColliders2D;
 
         [Header("Convert to 3D")]
-        [Tooltip("If enabled, PolygonCollider2D to BoxCollider will go through a safety check to make sure the PolygonCollider2D is in an appropriate BoxCollider shape.")] public bool toBoxColliderSafe = Conversion2DSettings.Default.toBoxColliderSafe;
+        [Tooltip("If enabled, PolygonCollider2D to BoxCollider will go through a safety check to make sure the PolygonCollider2D is in an appropriate BoxCollider shape.")] public bool skipSafetyCheck;
 
-        public bool IgnoreBoxCollider2D(BoxCollider2D boxCollider2D) => Array.IndexOf(ignoredBoxCollider2Ds, boxCollider2D) != -1;
+        public bool IgnoreBoxCollider2D(BoxCollider2D boxCollider2D) => Array.IndexOf(ignoredBoxColliders2D, boxCollider2D) != -1;
 
         /// <include file='../Documentation.xml' path='docs/BoxConverter/AddBoxCollider2D/*' />
         public PolygonCollider2D AddBoxCollider2D()
@@ -85,13 +85,13 @@ namespace DimensionConverter
 
         protected override void Collider2DToCollider(PolygonCollider2D collider2D, BoxCollider collider)
         {
-            if(toBoxColliderSafe)
+            if(skipSafetyCheck)
             {
-                collider2D.ToBoxColliderSafe(collider);
+                collider2D.ToBoxCollider(collider);
             }
             else 
             {
-                collider2D.ToBoxCollider(collider);
+                collider2D.ToBoxColliderSafe(collider);
             }
         }
     }

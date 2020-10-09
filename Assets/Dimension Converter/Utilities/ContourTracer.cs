@@ -1,12 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DimensionConverter.Utilities
 {
     public class ContourTracer
     {
-        private List<List<Vector2Int>> pixelPaths = new List<List<Vector2Int>>();
-        private int pathCount;
+        private List<Stack<Vector2Int>> pixelPaths = new List<Stack<Vector2Int>>();
+        /// <include file='../Documentation.xml' path='docs/ContourTracer/pathCount/*'/>
+        public int pathCount { get; private set; }
         private float pointMultiplier;
         private Vector2 pointOffset;
 
@@ -26,30 +28,49 @@ namespace DimensionConverter.Utilities
             Outer
         }
 
-        public int GetPathCount() => pathCount;
-
+        /// <include file='../Documentation.xml' path='docs/ContourTracer/GetPath/*'/>
         public Vector2[] GetPath(int index)
         {
-            return pixelPaths[index].ConvertAll(point => (Vector2)point * pointMultiplier - pointOffset).ToArray();
+            var points = pixelPaths[index].ToArray();
+            return Array.ConvertAll(points, point => (Vector2)point * pointMultiplier - pointOffset);
         }
 
+        /// <include file='../Documentation.xml' path='docs/ContourTracer/GetPath/*'/>
         public int GetPath(int index, ref List<Vector2> path)
         {
-            path.Clear();
+            var points = pixelPaths[index].ToArray();
+            int pointIndex;
 
-            if(index < pathCount)
+            Vector2 Point() => (Vector2)points[pointIndex] * pointMultiplier - pointOffset;
+
+            if(points.Length > path.Count)
             {
-                var pixelPath = pixelPaths[index];
-                var points = pixelPath.ConvertAll(point => (Vector2)point * pointMultiplier - pointOffset);
-                path.AddRange(points);
+                for(pointIndex = 0; pointIndex < path.Count; ++pointIndex)
+                {
+                    path[pointIndex] = Point();
+                }
+                for(; pointIndex < points.Length; ++pointIndex)
+                {
+                    path.Add(Point());
+                }
+            }
+            else
+            {
+                for(pointIndex = 0; pointIndex < points.Length; ++pointIndex)
+                {
+                    path[pointIndex] = Point();
+                }
+                path.RemoveRange(pointIndex, path.Count - points.Length);
             }
 
-            return path.Count;
+            return pointIndex;
         }
 
-        public void Trace(Texture2D texture, Vector2 pivot, float pixelsPerUnit, uint lineTolerance, float outlineTolerance)
+        /// <include file='../Documentation.xml' path='docs/ContourTracer/Trace/*'/>
+        public void Trace(Texture2D texture, Vector2 pivot, float pixelsPerUnit, uint gapLength, float product)
         {
             Debug.LogWarning($"Trace method is still missing support for InnerOuter points.");
+            Debug.LogWarning($"Trace method is still missing support for Rect.");
 
             pathCount = 0;
             pointMultiplier = 1 / pixelsPerUnit;
@@ -68,7 +89,7 @@ namespace DimensionConverter.Utilities
 
             var pixels = texture.GetPixels();
             var found = new HashSet<Vector2Int>();
-            List<Vector2Int> list;
+            Stack<Vector2Int> stack;
             var inside = false;
 
             #region Methods
@@ -124,32 +145,42 @@ namespace DimensionConverter.Utilities
                             {
                                 if(lastLineCode == Code.Inner)
                                 {
-                                    var lastPoint = list[list.Count - 1];
-                                    list.RemoveAt(list.Count - 1);
+                                    var lastPoint = stack.Pop();
                                     Smooth();
-                                    list.Add(lastPoint);
+                                    stack.Push(lastPoint);
 
                                     lastDir = Vector2.zero;
-                                    list.Add(point);
+                                    stack.Push(point);
+
+                                    //var lastPoint = list[list.Count - 1];
+                                    //list.RemoveAt(list.Count - 1);
+                                    //Smooth();
+                                    //list.Add(lastPoint);
+
+                                    //lastDir = Vector2.zero;
+                                    //list.Add(point);
                                 }
                                 else if(lineLength > maxLineLength)
                                 {
-                                    list.Add(point);
+                                    stack.Push(point);
+                                    //list.Add(point);
                                 }
                             }
                             else
                             {
-                                list.Add(point);
+                                stack.Push(point);
+                                //list.Add(point);
                             }
                         }
 
-                        maxLineLength = lineLength + lineTolerance;
+                        maxLineLength = lineLength + gapLength;
                         lineLength = 0;
                         break;
                     case Code.InnerOuter:
                         if(code != Code.InnerOuter)
                         {
-                            list.Add(point);
+                            stack.Push(point);
+                            //list.Add(point);
                         }
                         break;
                     case Code.Straight:
@@ -159,7 +190,7 @@ namespace DimensionConverter.Utilities
 
                             if(code == Code.Outer)
                             {
-                                if(list[list.Count - 1] == point)
+                                if(stack.Peek() == point)
                                 {
                                     break;
                                 }
@@ -167,7 +198,8 @@ namespace DimensionConverter.Utilities
                                 Smooth();
                             }
 
-                            list.Add(point);
+                            stack.Push(point);
+                            //list.Add(point);
                         }
 
                         ++lineLength;
@@ -184,13 +216,14 @@ namespace DimensionConverter.Utilities
                                 }
                                 else
                                 {
-                                    list.RemoveAt(list.Count - 1);
+                                    //list.RemoveAt(list.Count - 1);
+                                    stack.Pop();
                                     Smooth();
                                 }
                             }
                             else if(code == Code.Outer)
                             {
-                                if(list[list.Count - 1] == point)
+                                if(stack.Peek() == point)
                                 {
                                     break;
                                 }
@@ -199,7 +232,8 @@ namespace DimensionConverter.Utilities
                                 lastDir = Vector2.zero;
                             }
 
-                            list.Add(point);
+                            stack.Push(point);
+                            //list.Add(point);
                             lineLength = float.PositiveInfinity;
                         }
                         break;
@@ -224,11 +258,12 @@ namespace DimensionConverter.Utilities
 
             void Smooth()
             {
-                Vector2 lastPoint = list[list.Count - 1];
-                var dir = (point - lastPoint).normalized;
-                if(Vector2.Dot(dir, lastDir) > outlineTolerance)
+                //Vector2 lastPoint = list[list.Count - 1];
+                var dir = (point - (Vector2)stack.Peek()).normalized;
+                if(Vector2.Dot(dir, lastDir) > product)
                 {
-                    list.RemoveAt(list.Count - 1);
+                    //list.RemoveAt(list.Count - 1);
+                    stack.Pop();
                 }
 
                 lastDir = dir;
@@ -257,9 +292,14 @@ namespace DimensionConverter.Utilities
                     {
                         if(pathCount >= pixelPaths.Count)
                         {
-                            pixelPaths.Add(new List<Vector2Int>());
+                            //pixelPaths.Add(new List<Vector2Int>());
+                            pixelPaths.Add(new Stack<Vector2Int>());
                         }
-                        list = pixelPaths[pathCount];
+                        else
+                        {
+                            pixelPaths[pathCount].Clear();
+                        }
+                        stack = pixelPaths[pathCount];
 
                         var startPoint = point;
                         var startDirection = direction;
@@ -337,12 +377,13 @@ namespace DimensionConverter.Utilities
 
                         if(code == Code.Straight && lastLineCode == Code.Inner)
                         {
-                            list.RemoveAt(list.Count - 1);
+                            //list.RemoveAt(list.Count - 1);
+                            stack.Pop();
                         }
 
                         Smooth();
 
-                        if(list.Count >= 3)
+                        if(stack.Count >= 3)
                         {
                             ++pathCount;
                         }

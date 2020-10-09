@@ -200,7 +200,7 @@ namespace DimensionConverter.Utilities
         }
 
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Collider/*'/>
-        public static void ToCollider2D(this Collider collider, Collider2D collider2D) => collider.ToCollider2D(collider2D, ConversionSettings.Default);
+        public static void ToCollider2D(this Collider collider, Collider2D collider2D) => collider.ToCollider2D(collider2D, default);
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Collider/*'/>
         public static void ToCollider2D(this Collider collider, Collider2D collider2D, ConversionSettings conversionSettings)
         {
@@ -216,8 +216,7 @@ namespace DimensionConverter.Utilities
                     boxCollider.ToPolygonCollider2D(polygonCollider2D);
                     break;
                 case MeshCollider meshCollider when collider2D is PolygonCollider2D polygonCollider2D:
-                    //meshCollider.ToPolygonCollider2D(polygonCollider2D, conversionSettings.renderSize, conversionSettings.tolerance);
-                    meshCollider.ToPolygonCollider2D(polygonCollider2D, conversionSettings.resolution, conversionSettings.lineTolerance, conversionSettings.outlineTolerance, conversionSettings.simplifyTolerance);
+                    meshCollider.ToPolygonCollider2D(polygonCollider2D, conversionSettings.outliner);
                     break;
                 default:
                     collider.GenericPropertiesToCollider2D(collider2D);
@@ -226,7 +225,7 @@ namespace DimensionConverter.Utilities
         }
 
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Collider2D/*'/>
-        public static void ToCollider(this Collider2D collider2D, Collider collider) => collider2D.ToCollider(collider, Conversion2DSettings.Default);
+        public static void ToCollider(this Collider2D collider2D, Collider collider) => collider2D.ToCollider(collider, default);
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Collider2D/*'/>
         public static void ToCollider(this Collider2D collider2D, Collider collider, Conversion2DSettings conversion2DSettings)
         {
@@ -239,13 +238,13 @@ namespace DimensionConverter.Utilities
                     capsuleCollider2D.ToCapsuleCollider(capsuleCollider);
                     break;
                 case PolygonCollider2D polygonCollider2D when collider is BoxCollider boxCollider:
-                    if(conversion2DSettings.toBoxColliderSafe)
+                    if(conversion2DSettings.toBoxColliderSkipSafetyCheck)
                     {
-                        polygonCollider2D.ToBoxColliderSafe(boxCollider);
+                        polygonCollider2D.ToBoxCollider(boxCollider);
                     }
                     else
                     {
-                        polygonCollider2D.ToBoxCollider(boxCollider);
+                        polygonCollider2D.ToBoxColliderSafe(boxCollider);
                     }
                     break;
                 case PolygonCollider2D polygonCollider2D when collider is MeshCollider meshCollider:
@@ -531,10 +530,10 @@ namespace DimensionConverter.Utilities
         }
 
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Mesh/*'/>
-        public static void ToPolygonCollider2D(this MeshCollider meshCollider, PolygonCollider2D polygonCollider2D) => meshCollider.ToPolygonCollider2D(polygonCollider2D, ConversionSettings.Default.resolution, ConversionSettings.Default.lineTolerance, ConversionSettings.Default.outlineTolerance, ConversionSettings.Default.simplifyTolerance);
+        public static void ToPolygonCollider2D(this MeshCollider meshCollider, PolygonCollider2D polygonCollider2D) => meshCollider.ToPolygonCollider2D(polygonCollider2D, default);
 
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Mesh/*'/>
-        public static void ToPolygonCollider2D(this MeshCollider meshCollider, PolygonCollider2D polygonCollider2D, int resolution, uint lineTolerance, float outlineTolerance, float simplifyTolerance)
+        public static void ToPolygonCollider2D(this MeshCollider meshCollider, PolygonCollider2D polygonCollider2D, Outliner outliner)
         {
             meshCollider.GenericPropertiesToCollider2D(polygonCollider2D);
             polygonCollider2D.isTrigger = meshCollider.convex && meshCollider.isTrigger;
@@ -559,16 +558,18 @@ namespace DimensionConverter.Utilities
             // Position the transform so the bounds' center is at (0, 0, 0).
             renderFilter.transform.position -= bounds.center - Vector3.forward * bounds.extents.z;
 
+            outliner = outliner ? outliner : defaultOutliner;
+
             // Set the pixel and camera size.
             int pixelWidth, pixelHeight;
             if(bounds.size.x > bounds.size.y)
             {
-                pixelHeight = Mathf.CeilToInt((pixelWidth = resolution) * bounds.size.y / bounds.size.x);
+                pixelHeight = Mathf.CeilToInt((pixelWidth = outliner.resolution) * bounds.size.y / bounds.size.x);
                 renderCamera.orthographicSize = bounds.extents.x * pixelWidth / pixelHeight;
             }
             else
             {
-                pixelWidth = Mathf.CeilToInt((pixelHeight = resolution) * bounds.size.x / bounds.size.y);
+                pixelWidth = Mathf.CeilToInt((pixelHeight = outliner.resolution) * bounds.size.x / bounds.size.y);
                 renderCamera.orthographicSize = bounds.extents.y;
             }
             renderCamera.farClipPlane = Mathf.Max(bounds.size.z, 0.01f); // We assume the nearClipPlane to be 0, otherwise we would need to do renderCamera.nearClipPlane + 0.01f.
@@ -595,21 +596,21 @@ namespace DimensionConverter.Utilities
             var pixelsPerUnit = pixelHeight * 0.5f / renderCamera.orthographicSize;
 
             var boundaryTracer = new ContourTracer();
-            boundaryTracer.Trace(texture2D, centerPivot, pixelsPerUnit, lineTolerance, outlineTolerance);
+            boundaryTracer.Trace(texture2D, centerPivot, pixelsPerUnit, outliner.gapLength, outliner.product);
 
-            polygonCollider2D.pathCount = boundaryTracer.GetPathCount();
+            polygonCollider2D.pathCount = boundaryTracer.pathCount;
             for(int i = 0; i < polygonCollider2D.pathCount; i++)
             {
-                boundaryTracer.GetPath(i, ref points);
-                LineUtility.Simplify(points, simplifyTolerance, simplifiedPoints);
-                if(simplifiedPoints.Count < 3)
+                boundaryTracer.GetPath(i, ref path);
+                LineUtility.Simplify(path, outliner.tolerance, points);
+                if(points.Count < 3)
                 {
                     polygonCollider2D.pathCount--;
                     i--;
                 }
                 else
                 {
-                    polygonCollider2D.SetPath(i, simplifiedPoints);
+                    polygonCollider2D.SetPath(i, points);
                 }
             }
 
@@ -617,7 +618,7 @@ namespace DimensionConverter.Utilities
         }
 
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Polygon2D/*'/>
-        public static void ToMeshCollider(this PolygonCollider2D polygonCollider2D, MeshCollider meshCollider) => polygonCollider2D.ToMeshCollider(meshCollider, Conversion2DSettings.Default.polygonCollider2DConversionOptions);
+        public static void ToMeshCollider(this PolygonCollider2D polygonCollider2D, MeshCollider meshCollider) => polygonCollider2D.ToMeshCollider(meshCollider, default);
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Polygon2D/*'/>
         public static void ToMeshCollider(this PolygonCollider2D polygonCollider2D, MeshCollider meshCollider, PolygonCollider2DConversionOptions conversionOptions)
         {
@@ -696,9 +697,10 @@ namespace DimensionConverter.Utilities
         private static Vector2[] boxPoints6 = new Vector2[6];
         private static Vector2[] boxPoints4 = new Vector2[4];
         private static List<Vector2> points = new List<Vector2>();
-        private static List<Vector2> simplifiedPoints = new List<Vector2>();
+        private static List<Vector2> path = new List<Vector2>();
 
-        private static Texture2D texture2D = new Texture2D(0, 0, TextureFormat.R8, false);
+        private static Outliner defaultOutliner;
+        private static Texture2D texture2D;
         private static Rect rect = new Rect();
         private static readonly Vector2 centerPivot = new Vector2(0.5f, 0.5f);
 
@@ -711,14 +713,15 @@ namespace DimensionConverter.Utilities
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void InitColliderConversion()
         {
+            var settings = Settings.GetSettings;
+
+            defaultOutliner = settings.defaultOutliner ? settings.defaultOutliner : ScriptableObject.CreateInstance<Outliner>();
+            texture2D = new Texture2D(0, 0, TextureFormat.R8, false);
+
             // Create renderCamera GameObject.
             var renderCameraGO = new GameObject(nameof(renderCamera));
             renderCameraGO.SetActive(false);
             Object.DontDestroyOnLoad(renderCameraGO);
-            if(Dimension.slimHierarchy)
-            {
-                renderCameraGO.hideFlags |= HideFlags.HideInHierarchy;
-            }
 
             // Create rendering GameObject.
             var renderingGO = new GameObject(nameof(renderFilter));
@@ -762,10 +765,6 @@ namespace DimensionConverter.Utilities
             polygonColliderMeshCreatorGO.SetActive(false);
             Object.DontDestroyOnLoad(polygonColliderMeshCreatorGO);
             polygonColliderMeshCreator = polygonColliderMeshCreatorGO.AddComponent<PolygonCollider2D>();
-            if(Dimension.slimHierarchy)
-            {
-                polygonColliderMeshCreatorGO.hideFlags |= HideFlags.HideInHierarchy;
-            }
         }
         #endregion
     }

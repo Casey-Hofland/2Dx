@@ -292,21 +292,16 @@ namespace UnityEngine
         }
         #endregion
 
-        #region Debugging
-        public static bool slimHierarchy { get; private set; }
-        #endregion
-
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void Init()
         {
             onBeforeConvert = onAfterConvert = default;
 
-            var settings = Resources.Load<Settings>(nameof(Settings));
+            var settings = Settings.GetSettings;
             _is2DNot3D = settings.is2DNot3D;
             isConverting = false;
             conversionTime = settings.conversionTime;
             batchConversion = settings.batchConversion;
-            slimHierarchy = settings.slimHierarchy;
 
             convertersLength = settings.convertersSettings.Length;
             converterTypeIndex = new Dictionary<Type, int>();
@@ -324,10 +319,6 @@ namespace UnityEngine
 
             var coroutineHandlerGO = new GameObject(nameof(coroutineHandler));
             Object.DontDestroyOnLoad(coroutineHandlerGO);
-            if(slimHierarchy)
-            {
-                coroutineHandlerGO.hideFlags |= HideFlags.HideInHierarchy;
-            }
 
             coroutineHandler = coroutineHandlerGO.AddComponent<Persistent>();
             Persistent.Init();
