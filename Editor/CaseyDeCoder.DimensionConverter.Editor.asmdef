@@ -1,0 +1,17 @@
+{
+    "name": "CaseyDeCoder.DimensionConverter.Editor",
+    "references": [
+        "GUID:025e56738c6512b41b7f2446eb7a52d8"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
