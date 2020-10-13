@@ -1,0 +1,17 @@
+{
+    "name": "CaseyDeCoder.DimensionConverter.Editor.Tests",
+    "references": [
+        "GUID:025e56738c6512b41b7f2446eb7a52d8",
+        "GUID:fe8d4fb5b0660684ba9bf25a3e77f24b",
+        "GUID:b80f9f88e6da2d544a6410170161bad6"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
