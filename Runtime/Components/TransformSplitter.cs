@@ -78,8 +78,8 @@ namespace DimensionConverter
                 UnityEditor.EditorApplication.delayCall += OnDuplicate;
             }
 
-            UnityEditor.EditorApplication.playModeStateChanged -= DestroyWithRequireComponent;
-            UnityEditor.EditorApplication.playModeStateChanged += DestroyWithRequireComponent;
+            //UnityEditor.EditorApplication.playModeStateChanged -= DestroyWithRequireComponent;
+            //UnityEditor.EditorApplication.playModeStateChanged += DestroyWithRequireComponent;
 #endif
         }
 
@@ -196,17 +196,22 @@ namespace DimensionConverter
         private void OnDestroy()
         {
 #if UNITY_EDITOR
-            UnityEditor.EditorApplication.delayCall += () =>
+            if(Application.IsPlaying(gameObject))
+            {
+                Destroy(gameObject3D);
+                Destroy(gameObject2D);
+            }
+            else
             {
                 DestroyImmediate(gameObject3D);
                 DestroyImmediate(gameObject2D);
-            };
+            }
 #else
             Destroy(gameObject3D);
             Destroy(gameObject2D);
 #endif
         }
-        #endregion
+#endregion
 
         private GameObject CreateGameObject(string name, int siblingIndex)
         {
@@ -237,17 +242,16 @@ namespace DimensionConverter
             return gameObject;
         }
 
-        #region Validation
+#region Validation
         private void OnValidate()
         {
             transform.hasChanged = true;
         }
 
-        private IEnumerator OnTransformChildrenChanged()
+        private void OnTransformChildrenChanged()
         {
-            yield return null;
-            Awake();
+            Invoke(nameof(Awake), Time.fixedUnscaledDeltaTime);
         }
-        #endregion
+#endregion
     }
 }
