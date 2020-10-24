@@ -160,7 +160,7 @@ namespace DimensionConverter.Utilities
                                     //lastDir = Vector2.zero;
                                     //list.Add(point);
                                 }
-                                else if(lineLength > maxLineLength)
+                                else if(lineLength >= maxLineLength)
                                 {
                                     stack.Push(point);
                                     //list.Add(point);
