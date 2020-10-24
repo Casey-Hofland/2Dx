@@ -1,5 +1,4 @@
 ﻿using DimensionConverter.Utilities;
-using System;
 using UnityEngine;
 
 namespace DimensionConverter
@@ -13,12 +12,8 @@ namespace DimensionConverter
             Debug.LogWarning($"Note that {nameof(BoxConverter)} is still untested!");
         }
 
-        [Tooltip("The BoxCollider2Ds to ignore for conversion.")] public BoxCollider2D[] ignoredBoxColliders2D;
-
         [Header("Convert to 3D")]
         [Tooltip("If enabled, PolygonCollider2D to BoxCollider will go through a safety check to make sure the PolygonCollider2D is in an appropriate BoxCollider shape.")] public bool skipSafetyCheck;
-
-        public bool IgnoreBoxCollider2D(BoxCollider2D boxCollider2D) => Array.IndexOf(ignoredBoxColliders2D, boxCollider2D) != -1;
 
         /// <include file='../Documentation.xml' path='docs/BoxConverter/AddBoxCollider2D/*' />
         public PolygonCollider2D AddBoxCollider2D()
@@ -49,20 +44,14 @@ namespace DimensionConverter
         {
             foreach(var boxCollider2D in transformSplitter.gameObject2D.GetComponents<BoxCollider2D>())
             {
-                if(!IgnoreBoxCollider2D(boxCollider2D))
-                {
-                    AddBoxCollider2D(boxCollider2D);
-                    DestroyImmediate(boxCollider2D);
-                }
+                AddBoxCollider2D(boxCollider2D);
+                DestroyImmediate(boxCollider2D);
             }
 
             foreach(var boxCollider2D in GetComponents<BoxCollider2D>())
             {
-                if(!IgnoreBoxCollider2D(boxCollider2D))
-                {
-                    AddBoxCollider2D(boxCollider2D);
-                    DestroyImmediate(boxCollider2D);
-                }
+                AddBoxCollider2D(boxCollider2D);
+                DestroyImmediate(boxCollider2D);
             }
 
             base.CacheCollider2Ds();

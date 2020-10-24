@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using UnityEngine;
 
 namespace DimensionConverter
 {
     [RequireComponent(typeof(TransformSplitter))]
+    [System.Serializable]
     public abstract class ColliderConverter<C, C2D> : Converter where C : Collider where C2D : Collider2D
     {
         #region Required Components
@@ -14,12 +14,7 @@ namespace DimensionConverter
         #endregion
 
         #region Properties
-        [Tooltip("Automatically update the tracked colliders by looking for dynamically added and removed colliders. To improve performance, turn this setting off and use the Add / Remove methods of this Component instead.")] public bool autoUpdate = true;
-        [Tooltip("The Colliders to ignore for conversion.")] public C[] ignoredColliders;
-        [Tooltip("The Collider2Ds to ignore for conversion.")] public C2D[] ignoredColliders2D;
-
-        public bool IgnoreCollider(C collider) => Array.IndexOf(ignoredColliders, collider) != -1;
-        public bool IgnoreCollider2D(C2D collider2D) => Array.IndexOf(ignoredColliders2D, collider2D) != -1;
+        [Tooltip("Automatically update the tracked colliders by looking for dynamically added and removed colliders. Preferably you should turn this setting off and use the Add / Remove methods of this Component instead.")] public bool autoUpdate = true;
         #endregion
         
         #region Tracked Colliders
@@ -205,7 +200,7 @@ namespace DimensionConverter
         {
             foreach(var collider in transformSplitter.gameObject3D.GetComponents<C>())
             {
-                if(!trackedColliders.Contains(collider) && !IgnoreCollider(collider))
+                if(!trackedColliders.Contains(collider))
                 {
                     var collider2D = transformSplitter.gameObject2D.AddComponent<C2D>();
                     if(Dimension.is2DNot3D)
@@ -219,11 +214,8 @@ namespace DimensionConverter
 
             foreach(var collider in GetComponents<C>())
             {
-                if(!IgnoreCollider(collider))
-                {
-                    AddCollider(collider);
-                    DestroyImmediate(collider);
-                }
+                AddCollider(collider);
+                DestroyImmediate(collider);
             }
         }
 
@@ -232,7 +224,7 @@ namespace DimensionConverter
         {
             foreach(var collider2D in transformSplitter.gameObject2D.GetComponents<C2D>())
             {
-                if(!trackedCollider2Ds.Contains(collider2D) && !IgnoreCollider2D(collider2D))
+                if(!trackedCollider2Ds.Contains(collider2D))
                 {
                     var collider = transformSplitter.gameObject3D.AddComponent<C>();
                     if(!Dimension.is2DNot3D)
@@ -246,11 +238,8 @@ namespace DimensionConverter
 
             foreach(var collider2D in GetComponents<C2D>())
             {
-                if(!IgnoreCollider2D(collider2D))
-                {
-                    AddCollider2D(collider2D);
-                    DestroyImmediate(collider2D);
-                }
+                AddCollider2D(collider2D);
+                DestroyImmediate(collider2D);
             }
         }
         #endregion
