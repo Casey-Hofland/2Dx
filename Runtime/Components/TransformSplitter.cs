@@ -12,15 +12,23 @@ namespace DimensionConverter
         #region Properties
         private static readonly Quaternion zRotation90Deg = new Quaternion(0f, 0f, 0.7071068f, 0.7071068f);
 
-#pragma warning disable CS0649
-        [Tooltip("Determines the axis to align in 2D space. If Horizontal, X axis will be aligned, and if vertical, the Y axis.")] [SerializeField] private CapsuleDirection2D direction2D;
-#pragma warning restore CS0649
+        [Tooltip("Determines the axis to align in 2D space. If Horizontal, X axis will be aligned, and if vertical, the Y axis.")] [SerializeField] private CapsuleDirection2D _direction2D = default;
 
         public GameObject gameObject3D { get; private set; }
         public Transform transform3D => gameObject3D.transform;
 
         public GameObject gameObject2D { get; private set; }
         public Transform transform2D => gameObject2D.transform;
+
+        public CapsuleDirection2D direction2D
+        {
+            get => _direction2D;
+            set
+            {
+                _direction2D = value;
+                transform2D.hasChanged = true;
+            }
+        }
 
         private Vector3 upwards2D
         {

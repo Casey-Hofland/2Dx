@@ -103,6 +103,7 @@ namespace DimensionConverter
             if(conversionTime > 0f)
             {
                 var lerpMultiplier = 1 / conversionTime;
+                camera.orthographic = false;
 
                 while(conversionTime > 0f)
                 {

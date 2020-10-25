@@ -73,10 +73,18 @@ namespace DimensionConverter
             rigidbodyCopy = new GameObject($"{name} {nameof(rigidbodyCopy)}").AddComponent<Rigidbody>();
             rigidbodyCopy.gameObject.SetActive(false);
             rigidbodyCopy.transform.SetParent(rigidbodyCopies.transform, false);
+            if(rigidbody = GetComponent<Rigidbody>())
+            {
+                rigidbody.ToRigidbody(rigidbodyCopy);
+            }
 
             rigidbody2DCopy = new GameObject($"{name} {nameof(rigidbody2DCopy)}").AddComponent<Rigidbody2D>();
             rigidbody2DCopy.gameObject.SetActive(false);
             rigidbody2DCopy.transform.SetParent(rigidbodyCopies.transform, false);
+            if(rigidbody2D = GetComponent<Rigidbody2D>())
+            {
+                rigidbody2D.ToRigidbody2D(rigidbody2DCopy);
+            }
         }
 
 #if UNITY_2020_1_OR_NEWER
