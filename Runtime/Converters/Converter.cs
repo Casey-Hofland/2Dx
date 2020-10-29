@@ -9,6 +9,8 @@ namespace DimensionConverter
         {
             Dimension.AddConverter(this);
             Convert(Dimension.is2DNot3D);
+
+            Debug.Log("Converter Enabled");
         }
 
         protected virtual void OnDisable()

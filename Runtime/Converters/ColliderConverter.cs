@@ -5,7 +5,6 @@ using UnityEngine;
 namespace DimensionConverter
 {
     [RequireComponent(typeof(TransformSplitter))]
-    [System.Serializable]
     public abstract class ColliderConverter<C, C2D> : Converter where C : Collider where C2D : Collider2D
     {
         #region Required Components
@@ -211,12 +210,6 @@ namespace DimensionConverter
                     AddPair(collider, collider2D);
                 }
             }
-
-            foreach(var collider in GetComponents<C>())
-            {
-                AddCollider(collider);
-                DestroyImmediate(collider);
-            }
         }
 
         /// <include file='../Documentation.xml' path='docs/ColliderConverter/CacheCollider2Ds/*' />
@@ -234,12 +227,6 @@ namespace DimensionConverter
 
                     AddPair(collider, collider2D);
                 }
-            }
-
-            foreach(var collider2D in GetComponents<C2D>())
-            {
-                AddCollider2D(collider2D);
-                DestroyImmediate(collider2D);
             }
         }
         #endregion

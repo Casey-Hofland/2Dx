@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [0.1.3] - 2020-10-24
 ### Added
 - TransformSplitter now has a property to change the directional focus of the Transform2D.
+- Added icon for MeshConverter.
+- Added Editors for the ColliderConverters to push Colliders to the transformSplitters gameobjects. A ColliderConverter does not allow colliders on the same Object anymore.
 
 ### Changed
 - Pragma warning disabling in TransformSplitter removed and instead initialized the variable in question with default.
+
+### Removed
+- RigidbodyConverter had a script execution order of -1, which has been reset to 0.
+- ColliderConverter no longer caches Colliders that are on the same Object as the ColliderConverter (this in tandem with the added Editors which won't allow Colliders to reside on the same Object).
 
 ### Fixed
 - ContourTracer would miss a point if a certain condition was met.
