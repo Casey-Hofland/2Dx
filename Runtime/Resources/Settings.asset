@@ -41,3 +41,6 @@ MonoBehaviour:
     batchSize2D: 50
     typeName: DimensionConverter.RigidbodyConverter, CaseyDeCoder.DimensionConverter.Runtime,
       Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - batchSize3D: 100
+    batchSize2D: 100
+    typeName: SomeTest, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null

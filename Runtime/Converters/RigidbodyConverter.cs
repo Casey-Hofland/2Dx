@@ -23,6 +23,8 @@ namespace DimensionConverter
         #region Properties
         [Header("Convert to 2D")]
         [Tooltip("When converting to 2D, ignore collisions of overlapping Collider2Ds until they aren't overlapping anymore.")] public bool ignoreOverlap = true;
+        public RigidbodyEvent onRigidbodyConverted = new RigidbodyEvent();
+        public Rigidbody2DEvent onRigidbody2DConverted = new Rigidbody2DEvent();
 
         private Rigidbody rigidbodyCopy;
         private Rigidbody2D rigidbody2DCopy;
@@ -126,7 +128,7 @@ namespace DimensionConverter
             Destroy(rigidbody2DCopy.gameObject);
 #endif
         }
-#endregion
+        #endregion
 
         #region Conversion
         public override void ConvertTo2D()
@@ -146,6 +148,8 @@ namespace DimensionConverter
                 {
                     IgnoreOverlap();
                 }
+
+                onRigidbody2DConverted.Invoke(rigidbody2D);
             }
         }
 
@@ -163,6 +167,8 @@ namespace DimensionConverter
                 rigidbodyCopy.gameObject.SetActive(false);
 
                 ClearOverlap();
+
+                onRigidbodyConverted.Invoke(rigidbody);
             }
         }
         #endregion
