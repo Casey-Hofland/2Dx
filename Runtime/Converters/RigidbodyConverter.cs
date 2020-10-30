@@ -22,13 +22,21 @@ namespace DimensionConverter
 
         #region Properties
         [Header("Convert to 2D")]
-        [Tooltip("When converting to 2D, ignore collisions of overlapping Collider2Ds until they aren't overlapping anymore.")] public bool ignoreOverlap = true;
+        [Tooltip("When converting to 2D, ignore collisions of overlapping Collider2Ds until they aren't overlapping anymore.")] [SerializeField] private bool _ignoreOverlap = true;
+        public RigidbodyEvent onRigidbodyConverted = new RigidbodyEvent();
+        public Rigidbody2DEvent onRigidbody2DConverted = new Rigidbody2DEvent();
 
         private Rigidbody rigidbodyCopy;
         private Rigidbody2D rigidbody2DCopy;
 
         public new Rigidbody rigidbody { get; private set; }
         public new Rigidbody2D rigidbody2D { get; private set; }
+
+        public bool ignoreOverlap
+        {
+            get => _ignoreOverlap;
+            set => _ignoreOverlap = value;
+        }
 
         private List<Collider2D> attachedColliders = new List<Collider2D>();
         private List<Collider2D> overlapColliders = new List<Collider2D>();
@@ -73,10 +81,18 @@ namespace DimensionConverter
             rigidbodyCopy = new GameObject($"{name} {nameof(rigidbodyCopy)}").AddComponent<Rigidbody>();
             rigidbodyCopy.gameObject.SetActive(false);
             rigidbodyCopy.transform.SetParent(rigidbodyCopies.transform, false);
+            if(rigidbody = GetComponent<Rigidbody>())
+            {
+                rigidbody.ToRigidbody(rigidbodyCopy);
+            }
 
             rigidbody2DCopy = new GameObject($"{name} {nameof(rigidbody2DCopy)}").AddComponent<Rigidbody2D>();
             rigidbody2DCopy.gameObject.SetActive(false);
             rigidbody2DCopy.transform.SetParent(rigidbodyCopies.transform, false);
+            if(rigidbody2D = GetComponent<Rigidbody2D>())
+            {
+                rigidbody2D.ToRigidbody2D(rigidbody2DCopy);
+            }
         }
 
 #if UNITY_2020_1_OR_NEWER
@@ -118,7 +134,7 @@ namespace DimensionConverter
             Destroy(rigidbody2DCopy.gameObject);
 #endif
         }
-#endregion
+        #endregion
 
         #region Conversion
         public override void ConvertTo2D()
@@ -138,6 +154,8 @@ namespace DimensionConverter
                 {
                     IgnoreOverlap();
                 }
+
+                onRigidbody2DConverted.Invoke(rigidbody2D);
             }
         }
 
@@ -155,6 +173,8 @@ namespace DimensionConverter
                 rigidbodyCopy.gameObject.SetActive(false);
 
                 ClearOverlap();
+
+                onRigidbodyConverted.Invoke(rigidbody);
             }
         }
         #endregion

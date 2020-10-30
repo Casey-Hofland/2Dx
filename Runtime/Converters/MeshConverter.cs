@@ -7,11 +7,25 @@ namespace DimensionConverter
     [DisallowMultipleComponent]
     public sealed class MeshConverter : ColliderConverter<MeshCollider, PolygonCollider2D>
     {
+        #region Properties
         [Header("Convert to 2D")]
-        [Tooltip("The outliner holding the settings for tracing a MeshCollider outline.")] public Outliner outliner;
+        [Tooltip("The outliner holding the settings for tracing a MeshCollider outline.")] [SerializeField] private Outliner _outliner;
 
         [Header("Convert to 3D")]
-        [Tooltip("Determines the behaviour for converting PolygonCollider2Ds to MeshColliders.")] public PolygonCollider2DConversionOptions conversionOptions;
+        [Tooltip("Determines the behaviour for converting PolygonCollider2Ds to MeshColliders.")] [SerializeField] private PolygonCollider2DConversionOptions _conversionOptions;
+
+        public Outliner outliner
+        {
+            get => _outliner;
+            set => _outliner = value;
+        }
+
+        public PolygonCollider2DConversionOptions conversionOptions
+        {
+            get => _conversionOptions;
+            set => _conversionOptions = value;
+        }
+        #endregion
 
         protected override void ColliderToCollider(MeshCollider collider, MeshCollider other)
         {

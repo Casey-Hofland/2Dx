@@ -12,15 +12,23 @@ namespace DimensionConverter
         #region Properties
         private static readonly Quaternion zRotation90Deg = new Quaternion(0f, 0f, 0.7071068f, 0.7071068f);
 
-#pragma warning disable CS0649
-        [Tooltip("Determines the axis to align in 2D space. If Horizontal, X axis will be aligned, and if vertical, the Y axis.")] [SerializeField] private CapsuleDirection2D direction2D;
-#pragma warning restore CS0649
+        [Tooltip("Determines the axis to align in 2D space. If Horizontal, X axis will be aligned, and if vertical, the Y axis.")] [SerializeField] private CapsuleDirection2D _direction2D = default;
 
         public GameObject gameObject3D { get; private set; }
         public Transform transform3D => gameObject3D.transform;
 
         public GameObject gameObject2D { get; private set; }
         public Transform transform2D => gameObject2D.transform;
+
+        public CapsuleDirection2D direction2D
+        {
+            get => _direction2D;
+            set
+            {
+                _direction2D = value;
+                transform2D.hasChanged = true;
+            }
+        }
 
         private Vector3 upwards2D
         {
@@ -77,9 +85,6 @@ namespace DimensionConverter
             {
                 UnityEditor.EditorApplication.delayCall += OnDuplicate;
             }
-
-            //UnityEditor.EditorApplication.playModeStateChanged -= DestroyWithRequireComponent;
-            //UnityEditor.EditorApplication.playModeStateChanged += DestroyWithRequireComponent;
 #endif
         }
 
@@ -88,51 +93,6 @@ namespace DimensionConverter
         {
             DestroyImmediate(transform.GetChild(Mathf.Max(siblingIndex2D, siblingIndex3D)).gameObject);
             DestroyImmediate(transform.GetChild(Mathf.Min(siblingIndex2D, siblingIndex3D)).gameObject);
-        }
-
-        private void DestroyWithRequireComponent(UnityEditor.PlayModeStateChange playModeStateChange)
-        {
-            if(playModeStateChange == UnityEditor.PlayModeStateChange.ExitingPlayMode)
-            {
-                var components = GetComponents<Component>();
-                var requiredComponentsArray = new RequireComponent[components.Length][];
-                for(int i = 0; i < components.Length; i++)
-                {
-                    var component = components[i];
-                    if(!component)
-                    {
-                        continue;
-                    }
-                    requiredComponentsArray[i] = Attribute.GetCustomAttributes(component.GetType(), typeof(RequireComponent), true) as RequireComponent[];
-                }
-
-                DestroyWithRequireComponentOfType(typeof(TransformSplitter));
-                UnityEditor.EditorApplication.playModeStateChanged -= DestroyWithRequireComponent;
-
-                void DestroyWithRequireComponentOfType(Type type)
-                {
-                    for(int i = 0; i < components.Length; i++)
-                    {
-                        var component = components[i];
-                        if(!component)
-                        {
-                            continue;
-                        }
-                        Type componentType;
-                        if(!component || (componentType = component.GetType()) == type)
-                        {
-                            continue;
-                        }
-
-                        var requiredComponents = requiredComponentsArray[i];
-                        if(Array.Exists(requiredComponents, requiredComponent => requiredComponent.m_Type0 == type || requiredComponent.m_Type1 == type || requiredComponent.m_Type2 == type))
-                        {
-                            DestroyWithRequireComponentOfType(componentType);
-                            DestroyImmediate(component);
-                        }
-                    }
-                }
-            }
         }
 #endif
         #endregion
@@ -245,7 +205,7 @@ namespace DimensionConverter
 #region Validation
         private void OnValidate()
         {
-            transform.hasChanged = true;
+            transform2D.hasChanged = true;
         }
 
         private void OnTransformChildrenChanged()

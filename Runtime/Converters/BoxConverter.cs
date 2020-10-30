@@ -12,9 +12,18 @@ namespace DimensionConverter
             Debug.LogWarning($"Note that {nameof(BoxConverter)} is still untested!");
         }
 
+        #region Properties
         [Header("Convert to 3D")]
-        [Tooltip("If enabled, PolygonCollider2D to BoxCollider will go through a safety check to make sure the PolygonCollider2D is in an appropriate BoxCollider shape.")] public bool skipSafetyCheck;
+        [Tooltip("If enabled, PolygonCollider2D to BoxCollider will go through a safety check to make sure the PolygonCollider2D is in an appropriate BoxCollider shape.")] [SerializeField] private bool _skipSafetyCheck;
 
+        public bool skipSafetyCheck
+        {
+            get => _skipSafetyCheck;
+            set => _skipSafetyCheck = value;
+        }
+        #endregion
+
+        #region BoxCollider2D Conversion
         /// <include file='../Documentation.xml' path='docs/BoxConverter/AddBoxCollider2D/*' />
         public PolygonCollider2D AddBoxCollider2D()
         {
@@ -56,7 +65,9 @@ namespace DimensionConverter
 
             base.CacheCollider2Ds();
         }
+        #endregion
 
+        #region overrides
         protected override void ColliderToCollider(BoxCollider collider, BoxCollider other)
         {
             collider.ToBoxCollider(other);
@@ -83,5 +94,6 @@ namespace DimensionConverter
                 collider2D.ToBoxColliderSafe(collider);
             }
         }
+        #endregion
     }
 }

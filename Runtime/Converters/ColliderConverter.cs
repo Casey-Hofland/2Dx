@@ -5,7 +5,6 @@ using UnityEngine;
 namespace DimensionConverter
 {
     [RequireComponent(typeof(TransformSplitter))]
-    [System.Serializable]
     public abstract class ColliderConverter<C, C2D> : Converter where C : Collider where C2D : Collider2D
     {
         #region Required Components
@@ -14,10 +13,16 @@ namespace DimensionConverter
         #endregion
 
         #region Properties
-        [Tooltip("Automatically update the tracked colliders by looking for dynamically added and removed colliders. Preferably you should turn this setting off and use the Add / Remove methods of this Component instead.")] public bool autoUpdate = true;
+        [Tooltip("Automatically update the tracked colliders by looking for dynamically added and removed colliders. Preferably you should turn this setting off and use the Add / Remove methods of this Component instead.")] [SerializeField] private bool _autoUpdate = true;
+
+        public bool autoUpdate
+        {
+            get => _autoUpdate;
+            set => _autoUpdate = value;
+        }
         #endregion
         
-        #region Tracked Colliders
+        #region Collider Tracking
         private List<C> trackedColliders = new List<C>();
         private List<C2D> trackedCollider2Ds = new List<C2D>();
 
@@ -211,12 +216,6 @@ namespace DimensionConverter
                     AddPair(collider, collider2D);
                 }
             }
-
-            foreach(var collider in GetComponents<C>())
-            {
-                AddCollider(collider);
-                DestroyImmediate(collider);
-            }
         }
 
         /// <include file='../Documentation.xml' path='docs/ColliderConverter/CacheCollider2Ds/*' />
@@ -234,12 +233,6 @@ namespace DimensionConverter
 
                     AddPair(collider, collider2D);
                 }
-            }
-
-            foreach(var collider2D in GetComponents<C2D>())
-            {
-                AddCollider2D(collider2D);
-                DestroyImmediate(collider2D);
             }
         }
         #endregion

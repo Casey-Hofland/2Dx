@@ -4,6 +4,6 @@ using UnityEngine.Events;
 namespace DimensionConverter
 {
     [Serializable]
-    public class ConvertEvent : UnityEvent<bool> { }
+    public class BoolEvent : UnityEvent<bool> { }
 }
 
