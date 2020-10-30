@@ -85,9 +85,6 @@ namespace DimensionConverter
             {
                 UnityEditor.EditorApplication.delayCall += OnDuplicate;
             }
-
-            UnityEditor.EditorApplication.playModeStateChanged -= DestroyWithRequireComponent;
-            UnityEditor.EditorApplication.playModeStateChanged += DestroyWithRequireComponent;
 #endif
         }
 
@@ -96,51 +93,6 @@ namespace DimensionConverter
         {
             DestroyImmediate(transform.GetChild(Mathf.Max(siblingIndex2D, siblingIndex3D)).gameObject);
             DestroyImmediate(transform.GetChild(Mathf.Min(siblingIndex2D, siblingIndex3D)).gameObject);
-        }
-
-        private void DestroyWithRequireComponent(UnityEditor.PlayModeStateChange playModeStateChange)
-        {
-            if(playModeStateChange == UnityEditor.PlayModeStateChange.ExitingPlayMode)
-            {
-                var components = GetComponents<Component>();
-                var requiredComponentsArray = new RequireComponent[components.Length][];
-                for(int i = 0; i < components.Length; i++)
-                {
-                    var component = components[i];
-                    if(!component)
-                    {
-                        continue;
-                    }
-                    requiredComponentsArray[i] = Attribute.GetCustomAttributes(component.GetType(), typeof(RequireComponent), true) as RequireComponent[];
-                }
-
-                DestroyWithRequireComponentOfType(typeof(TransformSplitter));
-                UnityEditor.EditorApplication.playModeStateChanged -= DestroyWithRequireComponent;
-
-                void DestroyWithRequireComponentOfType(Type type)
-                {
-                    for(int i = 0; i < components.Length; i++)
-                    {
-                        var component = components[i];
-                        if(!component)
-                        {
-                            continue;
-                        }
-                        Type componentType;
-                        if(!component || (componentType = component.GetType()) == type)
-                        {
-                            continue;
-                        }
-
-                        var requiredComponents = requiredComponentsArray[i];
-                        if(Array.Exists(requiredComponents, requiredComponent => requiredComponent.m_Type0 == type || requiredComponent.m_Type1 == type || requiredComponent.m_Type2 == type))
-                        {
-                            DestroyWithRequireComponentOfType(componentType);
-                            DestroyImmediate(component);
-                        }
-                    }
-                }
-            }
         }
 #endif
         #endregion
@@ -204,11 +156,16 @@ namespace DimensionConverter
         private void OnDestroy()
         {
 #if UNITY_EDITOR
-            UnityEditor.EditorApplication.delayCall += () =>
+            if(Application.IsPlaying(gameObject))
+            {
+                Destroy(gameObject3D);
+                Destroy(gameObject2D);
+            }
+            else
             {
                 DestroyImmediate(gameObject3D);
                 DestroyImmediate(gameObject2D);
-            };
+            }
 #else
             Destroy(gameObject3D);
             Destroy(gameObject2D);
@@ -248,13 +205,12 @@ namespace DimensionConverter
         #region Validation
         private void OnValidate()
         {
-            transform.hasChanged = true;
+            transform2D.hasChanged = true;
         }
 
-        private IEnumerator OnTransformChildrenChanged()
+        private void OnTransformChildrenChanged()
         {
-            yield return null;
-            Awake();
+            Invoke(nameof(Awake), Time.fixedUnscaledDeltaTime);
         }
         #endregion
     }
