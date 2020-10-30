@@ -13,10 +13,16 @@ namespace DimensionConverter
         #endregion
 
         #region Properties
-        [Tooltip("Automatically update the tracked colliders by looking for dynamically added and removed colliders. Preferably you should turn this setting off and use the Add / Remove methods of this Component instead.")] public bool autoUpdate = true;
+        [Tooltip("Automatically update the tracked colliders by looking for dynamically added and removed colliders. Preferably you should turn this setting off and use the Add / Remove methods of this Component instead.")] [SerializeField] private bool _autoUpdate = true;
+
+        public bool autoUpdate
+        {
+            get => _autoUpdate;
+            set => _autoUpdate = value;
+        }
         #endregion
         
-        #region Tracked Colliders
+        #region Collider Tracking
         private List<C> trackedColliders = new List<C>();
         private List<C2D> trackedCollider2Ds = new List<C2D>();
 

@@ -22,7 +22,7 @@ namespace DimensionConverter
 
         #region Properties
         [Header("Convert to 2D")]
-        [Tooltip("When converting to 2D, ignore collisions of overlapping Collider2Ds until they aren't overlapping anymore.")] public bool ignoreOverlap = true;
+        [Tooltip("When converting to 2D, ignore collisions of overlapping Collider2Ds until they aren't overlapping anymore.")] [SerializeField] private bool _ignoreOverlap = true;
         public RigidbodyEvent onRigidbodyConverted = new RigidbodyEvent();
         public Rigidbody2DEvent onRigidbody2DConverted = new Rigidbody2DEvent();
 
@@ -31,6 +31,12 @@ namespace DimensionConverter
 
         public new Rigidbody rigidbody { get; private set; }
         public new Rigidbody2D rigidbody2D { get; private set; }
+
+        public bool ignoreOverlap
+        {
+            get => _ignoreOverlap;
+            set => _ignoreOverlap = value;
+        }
 
         private List<Collider2D> attachedColliders = new List<Collider2D>();
         private List<Collider2D> overlapColliders = new List<Collider2D>();
