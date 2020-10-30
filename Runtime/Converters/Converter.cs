@@ -1,16 +1,24 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace DimensionConverter
 {
     public abstract class Converter : MonoBehaviour
     {
+        private bool started = false;
+
         protected virtual void OnEnable()
         {
             Dimension.AddConverter(this);
-            Convert(Dimension.is2DNot3D);
+            if(started)
+            {
+                Convert(Dimension.is2DNot3D);
+            }
+        }
 
-            Debug.Log("Converter Enabled");
+        private void Start()
+        {
+            Convert(Dimension.is2DNot3D);
+            started = true;
         }
 
         protected virtual void OnDisable()

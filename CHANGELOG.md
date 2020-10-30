@@ -4,7 +4,7 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [0.1.3] - 2020-10-24
+## [0.1.3] - 2020-10-30
 ### Added
 - TransformSplitter now has a property to change the directional focus of the Transform2D.
 - Added icon for MeshConverter.
@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 - Pragma warning disabling in TransformSplitter removed and instead initialized the variable in question with default.
+- Converters will now Convert for the first time in Start and only after that in OnEnable.
 
 ### Removed
 - RigidbodyConverter had a script execution order of -1, which has been reset to 0.
