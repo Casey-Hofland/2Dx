@@ -104,9 +104,9 @@ namespace UnityEngine
         /// <include file='./Documentation.xml' path='docs/Dimension/onConvert/*' />
         public delegate void OnConvert(bool to2Dnot3D);
         /// <include file='./Documentation.xml' path='docs/Dimension/onConvert/*' />
-        public static OnConvert onBeforeConvert { get; set; }
+        public static event OnConvert onBeforeConvert;
         /// <include file='./Documentation.xml' path='docs/Dimension/onConvert/*' />
-        public static OnConvert onAfterConvert { get; set; }
+        public static event OnConvert onAfterConvert;
 
         /// <include file='./Documentation.xml' path='docs/Dimension/waitForConversionTime/*' />
         public static WaitForSecondsRealtime waitForConversionTime { get; } = new WaitForSecondsRealtime(0f);
