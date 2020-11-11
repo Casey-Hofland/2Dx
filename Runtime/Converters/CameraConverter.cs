@@ -10,8 +10,10 @@ namespace DimensionConverter
     public class CameraConverter : MonoBehaviour
     {
         #region Required Components
+#pragma warning disable CS0108 // Member hides inherited member; missing new keyword
         private Camera _camera;
-        public new Camera camera => _camera ? _camera : (_camera = GetComponent<Camera>());
+        public Camera camera => _camera ? _camera : (_camera = GetComponent<Camera>());
+#pragma warning restore CS0108 // Member hides inherited member; missing new keyword
         #endregion
 
         #region Properties
