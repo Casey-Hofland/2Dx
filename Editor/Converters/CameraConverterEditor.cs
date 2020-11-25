@@ -6,25 +6,25 @@ namespace DimensionConverter.Editor
     [CustomEditor(typeof(CameraConverter))]
     public class CameraConverterEditor : UnityEditor.Editor
     {
-        SerializedProperty blendCurve;
-        SerializedProperty fieldOfView;
-        SerializedProperty usePhysicalProperties;
-        SerializedProperty focalLength;
-        SerializedProperty sensorSize;
-        SerializedProperty lensShift;
-        SerializedProperty gateFit;
-        SerializedProperty orthographicSize;
+        private SerializedProperty _blendCurve;
+        private SerializedProperty _fieldOfView;
+        private SerializedProperty _usePhysicalProperties;
+        private SerializedProperty _focalLength;
+        private SerializedProperty _sensorSize;
+        private SerializedProperty _lensShift;
+        private SerializedProperty _gateFit;
+        private SerializedProperty _orthographicSize;
 
         private void OnEnable()
         {
-            blendCurve = serializedObject.FindProperty(nameof(blendCurve));
-            fieldOfView = serializedObject.FindProperty(nameof(fieldOfView));
-            usePhysicalProperties = serializedObject.FindProperty(nameof(usePhysicalProperties));
-            focalLength = serializedObject.FindProperty(nameof(focalLength));
-            sensorSize = serializedObject.FindProperty(nameof(sensorSize));
-            lensShift = serializedObject.FindProperty(nameof(lensShift));
-            gateFit = serializedObject.FindProperty(nameof(gateFit));
-            orthographicSize = serializedObject.FindProperty(nameof(orthographicSize));
+            _blendCurve = serializedObject.FindProperty(nameof(_blendCurve));
+            _fieldOfView = serializedObject.FindProperty(nameof(_fieldOfView));
+            _usePhysicalProperties = serializedObject.FindProperty(nameof(_usePhysicalProperties));
+            _focalLength = serializedObject.FindProperty(nameof(_focalLength));
+            _sensorSize = serializedObject.FindProperty(nameof(_sensorSize));
+            _lensShift = serializedObject.FindProperty(nameof(_lensShift));
+            _gateFit = serializedObject.FindProperty(nameof(_gateFit));
+            _orthographicSize = serializedObject.FindProperty(nameof(_orthographicSize));
         }
 
         public override void OnInspectorGUI()
@@ -52,39 +52,39 @@ namespace DimensionConverter.Editor
             EditorGUILayout.Space();
 
             // Blend Curve
-            EditorGUILayout.PropertyField(blendCurve);
+            EditorGUILayout.PropertyField(_blendCurve);
             
             // Field Of View
-            if(usePhysicalProperties.boolValue)
+            if(_usePhysicalProperties.boolValue)
             {
                 EditorGUI.BeginChangeCheck();
-                EditorGUILayout.PropertyField(fieldOfView);
+                EditorGUILayout.PropertyField(_fieldOfView);
                 if(EditorGUI.EndChangeCheck())
                 {
-                    focalLength.floatValue = Camera.FieldOfViewToFocalLength(fieldOfView.floatValue, sensorSize.vector2Value.y);
+                    _focalLength.floatValue = Camera.FieldOfViewToFocalLength(_fieldOfView.floatValue, _sensorSize.vector2Value.y);
                     Debug.LogWarning($"Updated Focal Length might be incorrect if the camera's FOV Axis is set to Horizontal.");
                 }
             }
             else
             {
-                EditorGUILayout.PropertyField(fieldOfView);
+                EditorGUILayout.PropertyField(_fieldOfView);
             }
 
             // Physical Properties
-            EditorGUILayout.PropertyField(usePhysicalProperties);
-            if(usePhysicalProperties.boolValue)
+            EditorGUILayout.PropertyField(_usePhysicalProperties);
+            if(_usePhysicalProperties.boolValue)
             {
                 EditorGUI.indentLevel++;
-                EditorGUILayout.PropertyField(focalLength);
-                focalLength.floatValue = Mathf.Clamp(focalLength.floatValue, 0.1047227f, 1.375099e+08f);
+                EditorGUILayout.PropertyField(_focalLength);
+                _focalLength.floatValue = Mathf.Clamp(_focalLength.floatValue, 0.1047227f, 1.375099e+08f);
 
-                EditorGUILayout.PropertyField(sensorSize);
-                EditorGUILayout.PropertyField(lensShift);
-                EditorGUILayout.PropertyField(gateFit);
+                EditorGUILayout.PropertyField(_sensorSize);
+                EditorGUILayout.PropertyField(_lensShift);
+                EditorGUILayout.PropertyField(_gateFit);
                 EditorGUI.indentLevel--;
             }
 
-            EditorGUILayout.PropertyField(orthographicSize);
+            EditorGUILayout.PropertyField(_orthographicSize);
 
             serializedObject.ApplyModifiedProperties();
         }

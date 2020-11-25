@@ -4,13 +4,14 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [0.1.3-1] - 2020-11-12
+## [0.1.3-1] - Not Yet Published
 ### Changed
 - RigidbodyConverter will throw events for when Rigidbodies are assigned instead of when they are converted. If this behaviour is required, Dimension.isConverting can be checked when the event is thrown.
 
 ### Fixed
 - Persistent will set itself enabled in OnDisable if it may not be disabled.
 - ColliderConverter wouldn't cache colliders on the component itself. Although colliders on a collider converter should be avoided, it should still check and cache them.
+- CamereConverterEditor had SerializedProperties with wrong names.
 
 ## [0.1.3] - 2020-10-30
 ### Added
