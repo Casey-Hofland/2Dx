@@ -203,7 +203,7 @@ namespace DimensionConverter
         /// <include file='../Documentation.xml' path='docs/ColliderConverter/CacheColliders/*' />
         public virtual void CacheColliders()
         {
-            foreach(var collider in transformSplitter.gameObject3D.GetComponents<C>())
+            foreach(C collider in transformSplitter.gameObject3D.GetComponents<C>())
             {
                 if(!trackedColliders.Contains(collider))
                 {
@@ -216,12 +216,18 @@ namespace DimensionConverter
                     AddPair(collider, collider2D);
                 }
             }
+
+            foreach(C collider in GetComponents<C>())
+            {
+                AddCollider(collider);
+                DestroyImmediate(collider);
+            }
         }
 
         /// <include file='../Documentation.xml' path='docs/ColliderConverter/CacheCollider2Ds/*' />
         public virtual void CacheCollider2Ds()
         {
-            foreach(var collider2D in transformSplitter.gameObject2D.GetComponents<C2D>())
+            foreach(C2D collider2D in transformSplitter.gameObject2D.GetComponents<C2D>())
             {
                 if(!trackedCollider2Ds.Contains(collider2D))
                 {
@@ -233,6 +239,12 @@ namespace DimensionConverter
 
                     AddPair(collider, collider2D);
                 }
+            }
+
+            foreach(C2D collider2D in GetComponents<C2D>())
+            {
+                AddCollider2D(collider2D);
+                DestroyImmediate(collider2D);
             }
         }
         #endregion

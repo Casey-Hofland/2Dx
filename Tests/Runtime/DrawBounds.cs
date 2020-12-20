@@ -4,8 +4,10 @@ namespace DimensionConverter.Tests
 {
     public class DrawBounds : MonoBehaviour
     {
+#pragma warning disable CS0108 // Member hides inherited member; missing new keyword
         private Renderer _renderer;
-        private new Renderer renderer => _renderer ? _renderer : (_renderer = GetComponent<Renderer>()); 
+        private Renderer renderer => _renderer ? _renderer : (_renderer = GetComponent<Renderer>());
+#pragma warning restore CS0108 // Member hides inherited member; missing new keyword
 
         private void OnDrawGizmosSelected()
         {

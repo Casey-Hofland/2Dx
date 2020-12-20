@@ -31,6 +31,7 @@ namespace UnityEngine
             {
                 if(!willDisable)
                 {
+                    enabled = true;
                     throw new CannotDisableException($"{GetType().Name} may not be disabled except on quit!");
                 }
             }

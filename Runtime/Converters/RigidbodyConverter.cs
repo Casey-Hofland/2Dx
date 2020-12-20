@@ -23,14 +23,16 @@ namespace DimensionConverter
         #region Properties
         [Header("Convert to 2D")]
         [Tooltip("When converting to 2D, ignore collisions of overlapping Collider2Ds until they aren't overlapping anymore.")] [SerializeField] private bool _ignoreOverlap = true;
-        public RigidbodyEvent onRigidbodyConverted = new RigidbodyEvent();
-        public Rigidbody2DEvent onRigidbody2DConverted = new Rigidbody2DEvent();
+        public RigidbodyEvent onRigidbodyAssigned = new RigidbodyEvent();
+        public Rigidbody2DEvent onRigidbody2DAssigned = new Rigidbody2DEvent();
 
         private Rigidbody rigidbodyCopy;
         private Rigidbody2D rigidbody2DCopy;
 
-        public new Rigidbody rigidbody { get; private set; }
-        public new Rigidbody2D rigidbody2D { get; private set; }
+#pragma warning disable CS0108 // Member hides inherited member; missing new keyword
+        public Rigidbody rigidbody { get; private set; }
+        public Rigidbody2D rigidbody2D { get; private set; }
+#pragma warning restore CS0108 // Member hides inherited member; missing new keyword
 
         public bool ignoreOverlap
         {
@@ -49,28 +51,34 @@ namespace DimensionConverter
         /// <include file='../Documentation.xml' path='docs/RigidbodyConverter/AddRigidbody/*' />
         public Rigidbody AddRigidbody()
         {
-            return rigidbody = gameObject.AddComponent<Rigidbody>();
+            rigidbody = gameObject.AddComponent<Rigidbody>();
+            onRigidbodyAssigned.Invoke(rigidbody);
+            return rigidbody;
         }
 
         /// <include file='../Documentation.xml' path='docs/RigidbodyConverter/AddRigidbody2D/*' />
         public Rigidbody2D AddRigidbody2D()
         {
-            return rigidbody2D = gameObject.AddComponent<Rigidbody2D>();
+            rigidbody2D = gameObject.AddComponent<Rigidbody2D>();
+            onRigidbody2DAssigned.Invoke(rigidbody2D);
+            return rigidbody2D;
         }
 
         /// <include file='../Documentation.xml' path='docs/RigidbodyConverter/AddRigidbody/*' />
         public Rigidbody AddRigidbody(Rigidbody copyOf)
         {
-            var rigidbody = AddRigidbody();
+            rigidbody = gameObject.AddComponent<Rigidbody>();
             copyOf.ToRigidbody(rigidbody);
+            onRigidbodyAssigned.Invoke(rigidbody);
             return rigidbody;
         }
 
         /// <include file='../Documentation.xml' path='docs/RigidbodyConverter/AddRigidbody2D/*' />
         public Rigidbody2D AddRigidbody2D(Rigidbody2D copyOf)
         {
-            var rigidbody2D = AddRigidbody2D();
+            rigidbody2D = gameObject.AddComponent<Rigidbody2D>();
             copyOf.ToRigidbody2D(rigidbody2D);
+            onRigidbody2DAssigned.Invoke(rigidbody2D);
             return rigidbody2D;
         }
         #endregion
@@ -84,6 +92,7 @@ namespace DimensionConverter
             if(rigidbody = GetComponent<Rigidbody>())
             {
                 rigidbody.ToRigidbody(rigidbodyCopy);
+                onRigidbodyAssigned.Invoke(rigidbody);
             }
 
             rigidbody2DCopy = new GameObject($"{name} {nameof(rigidbody2DCopy)}").AddComponent<Rigidbody2D>();
@@ -92,6 +101,7 @@ namespace DimensionConverter
             if(rigidbody2D = GetComponent<Rigidbody2D>())
             {
                 rigidbody2D.ToRigidbody2D(rigidbody2DCopy);
+                onRigidbody2DAssigned.Invoke(rigidbody2D);
             }
         }
 
@@ -155,7 +165,7 @@ namespace DimensionConverter
                     IgnoreOverlap();
                 }
 
-                onRigidbody2DConverted.Invoke(rigidbody2D);
+                onRigidbody2DAssigned.Invoke(rigidbody2D);
             }
         }
 
@@ -174,7 +184,7 @@ namespace DimensionConverter
 
                 ClearOverlap();
 
-                onRigidbodyConverted.Invoke(rigidbody);
+                onRigidbodyAssigned.Invoke(rigidbody);
             }
         }
         #endregion
