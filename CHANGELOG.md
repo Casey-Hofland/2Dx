@@ -4,7 +4,12 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [0.1.3-1] - Not Yet Published
+## [0.1.4]
+### Changed
+- TransformSplitter now has a bool "convert" to replace the Component "SplitterConverter".
+- TransformSplitter can now be given an UpdateMode to specify how often the transforms need to be updated.
+
+## [0.1.3-1] - 2020-12-20
 ### Changed
 - RigidbodyConverter will throw events for when Rigidbodies are assigned instead of when they are converted. If this behaviour is required, Dimension.isConverting can be checked when the event is thrown.
 
