@@ -12,13 +12,21 @@ namespace DimensionConverter
         #region Properties
         private static readonly Quaternion zRotation90Deg = new Quaternion(0f, 0f, 0.7071068f, 0.7071068f);
 
+        [Tooltip("Controls when the transforms will be updated.")] [SerializeField] private UpdateMode _updateMode;
         [Tooltip("Determines the axis to align in 2D space. If Horizontal, X axis will be aligned, and if vertical, the Y axis.")] [SerializeField] private CapsuleDirection2D _direction2D = default;
+        [Tooltip("Activate and deactivate the split transforms on a dimension convert.")] [SerializeField] private bool _convert = true;
 
         public GameObject gameObject3D { get; private set; }
         public Transform transform3D => gameObject3D.transform;
 
         public GameObject gameObject2D { get; private set; }
         public Transform transform2D => gameObject2D.transform;
+
+        public UpdateMode updateMode
+        {
+            get => _updateMode;
+            set => _updateMode = value;
+        }
 
         public CapsuleDirection2D direction2D
         {
@@ -27,6 +35,30 @@ namespace DimensionConverter
             {
                 _direction2D = value;
                 transform2D.hasChanged = true;
+            }
+        }
+
+        public bool convert
+        {
+            get => _convert;
+            set
+            {
+                if(_convert != value)
+                {
+                    if(Application.IsPlaying(gameObject))
+                    {
+                        if(convert)
+                        {
+                            ConvertTransforms(Dimension.is2DNot3D);
+                            Dimension.onBeforeConvert += ConvertTransforms;
+                        }
+                        else
+                        {
+                            Dimension.onBeforeConvert -= ConvertTransforms;
+                        }
+                    }
+                }
+                _convert = value;
             }
         }
 
@@ -44,6 +76,13 @@ namespace DimensionConverter
                         return default;
                 }
             }
+        }
+
+        public enum UpdateMode
+        {
+            LateUpdate,
+            FixedUpdate,
+            Custom,
         }
         #endregion
 
@@ -114,42 +153,37 @@ namespace DimensionConverter
             }
         }
 
-        // Make sure the required gameObjects are always at the same position, (2D) rotation and scale as the parent transform.
+        private void OnEnable()
+        {
+            if(Application.IsPlaying(gameObject) && convert)
+            {
+                ConvertTransforms(Dimension.is2DNot3D);
+                Dimension.onBeforeConvert += ConvertTransforms;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if(Application.IsPlaying(gameObject) && convert)
+            {
+                Dimension.onBeforeConvert -= ConvertTransforms;
+            }
+        }
+
         private void LateUpdate()
         {
-            if(!transform.hasChanged)
+            if(updateMode == UpdateMode.LateUpdate || 
+                (!Application.IsPlaying(gameObject) && updateMode != UpdateMode.Custom))
             {
-                if(transform3D.hasChanged)
-                {
-                    UpdateTransform3D();
-                }
-
-                if(transform2D.hasChanged)
-                {
-                    UpdateTransform2D();
-                }
+                UpdateTransforms();
             }
-            else
-            {
-                UpdateTransform3D();
-                UpdateTransform2D();
-                transform.hasChanged = false;
-            }
+        }
 
-            void UpdateTransform3D()
+        private void FixedUpdate()
+        {
+            if(updateMode == UpdateMode.FixedUpdate)
             {
-                transform3D.SetParent(transform, false);
-                transform3D.SetPositionAndRotation(transform.position, transform.rotation);
-                transform3D.localScale = Vector3.one;
-                transform3D.hasChanged = false;
-            }
-
-            void UpdateTransform2D()
-            {
-                transform2D.SetParent(transform, false);
-                transform2D.SetPositionAndRotation(transform.position, Quaternion.LookRotation(Vector3.forward, upwards2D));
-                transform2D.localScale = Vector3.one;
-                transform2D.hasChanged = false;
+                UpdateTransforms();
             }
         }
 
@@ -202,7 +236,52 @@ namespace DimensionConverter
             return gameObject;
         }
 
-#region Validation
+        private void ConvertTransforms(bool to2Dnot3D)
+        {
+            gameObject3D.SetActive(!to2Dnot3D);
+            gameObject2D.SetActive(to2Dnot3D);
+        }
+
+        // Make sure the required gameObjects are always at the same position, (2D) rotation and scale as the parent transform.
+        public void UpdateTransforms()
+        {
+            if(!transform.hasChanged)
+            {
+                if(transform3D.hasChanged)
+                {
+                    UpdateTransform3D();
+                }
+
+                if(transform2D.hasChanged)
+                {
+                    UpdateTransform2D();
+                }
+            }
+            else
+            {
+                UpdateTransform3D();
+                UpdateTransform2D();
+                transform.hasChanged = false;
+            }
+
+            void UpdateTransform3D()
+            {
+                transform3D.SetParent(transform, false);
+                transform3D.SetPositionAndRotation(transform.position, transform.rotation);
+                transform3D.localScale = Vector3.one;
+                transform3D.hasChanged = false;
+            }
+
+            void UpdateTransform2D()
+            {
+                transform2D.SetParent(transform, false);
+                transform2D.SetPositionAndRotation(transform.position, Quaternion.LookRotation(Vector3.forward, upwards2D));
+                transform2D.localScale = Vector3.one;
+                transform2D.hasChanged = false;
+            }
+        }
+
+        #region Validation
         private void OnValidate()
         {
             transform2D.hasChanged = true;

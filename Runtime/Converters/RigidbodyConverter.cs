@@ -42,6 +42,7 @@ namespace DimensionConverter
 
         private List<Collider2D> attachedColliders = new List<Collider2D>();
         private List<Collider2D> overlapColliders = new List<Collider2D>();
+        private List<RaycastHit2D> castHits = new List<RaycastHit2D>();
         private List<Collider2D> trackedColliders = new List<Collider2D>();
 
         public ReadOnlyCollection<Collider2D> ignoredColliders => trackedColliders.AsReadOnly();
@@ -193,9 +194,17 @@ namespace DimensionConverter
         /// <include file='../Documentation.xml' path='docs/RigidbodyConverter/IgnoreOverlap/*' />
         public void IgnoreOverlap()
         {
-            rigidbody2D.GetAttachedColliders(attachedColliders);
-            rigidbody2D.OverlapCollider(default, trackedColliders);
+            if(rigidbody2D.Cast(Vector2.zero, castHits) == 0)
+            {
+                return;
+            }
 
+            foreach(var raycastHit2D in castHits)
+            {
+                trackedColliders.Add(raycastHit2D.collider);
+            }
+
+            rigidbody2D.GetAttachedColliders(attachedColliders);
             foreach(var attachedCollider in attachedColliders)
             {
                 foreach(var trackedCollider in trackedColliders)
