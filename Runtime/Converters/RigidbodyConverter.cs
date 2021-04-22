@@ -10,10 +10,10 @@ namespace DimensionConverter
     public sealed class RigidbodyConverter : Converter
     {
         #region Copies Holder
-        private static GameObject rigidbodyCopies;
+        public static GameObject rigidbodyCopies { get; private set; }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void Initialize()
+        private static void SubsystemRegistration()
         {
             rigidbodyCopies = new GameObject(nameof(rigidbodyCopies));
             DontDestroyOnLoad(rigidbodyCopies);
@@ -26,8 +26,43 @@ namespace DimensionConverter
         public RigidbodyEvent onRigidbodyAssigned = new RigidbodyEvent();
         public Rigidbody2DEvent onRigidbody2DAssigned = new Rigidbody2DEvent();
 
-        private Rigidbody rigidbodyCopy;
-        private Rigidbody2D rigidbody2DCopy;
+        private Rigidbody _rigidbodyCopy;
+        public Rigidbody rigidbodyCopy 
+        { 
+            get
+            {
+                if(!_rigidbodyCopy)
+                {
+                    var copyGameObject = new GameObject($"{name} {nameof(rigidbodyCopy)}");
+                    copyGameObject.SetActive(false);
+                    copyGameObject.transform.SetParent(rigidbodyCopies.transform, false);
+                    
+                    _rigidbodyCopy = copyGameObject.AddComponent<Rigidbody>();
+                }
+
+                return _rigidbodyCopy;
+            }
+            private set => _rigidbodyCopy = value;
+        }
+
+        private Rigidbody2D _rigidbody2DCopy;
+        public Rigidbody2D rigidbody2DCopy 
+        { 
+            get
+            {
+                if(!_rigidbody2DCopy)
+                {
+                    var copy2DGameObject = new GameObject($"{name} {nameof(rigidbody2DCopy)}");
+                    copy2DGameObject.SetActive(false);
+                    copy2DGameObject.transform.SetParent(rigidbodyCopies.transform, false);
+
+                    _rigidbody2DCopy = copy2DGameObject.AddComponent<Rigidbody2D>();
+                }
+
+                return _rigidbody2DCopy;
+            }
+            private set => _rigidbody2DCopy = value;
+        }
 
 #pragma warning disable CS0108 // Member hides inherited member; missing new keyword
         public Rigidbody rigidbody { get; private set; }
@@ -87,18 +122,12 @@ namespace DimensionConverter
         #region Unity Methods
         private void Awake()
         {
-            rigidbodyCopy = new GameObject($"{name} {nameof(rigidbodyCopy)}").AddComponent<Rigidbody>();
-            rigidbodyCopy.gameObject.SetActive(false);
-            rigidbodyCopy.transform.SetParent(rigidbodyCopies.transform, false);
             if(rigidbody = GetComponent<Rigidbody>())
             {
                 rigidbody.ToRigidbody(rigidbodyCopy);
                 onRigidbodyAssigned.Invoke(rigidbody);
             }
 
-            rigidbody2DCopy = new GameObject($"{name} {nameof(rigidbody2DCopy)}").AddComponent<Rigidbody2D>();
-            rigidbody2DCopy.gameObject.SetActive(false);
-            rigidbody2DCopy.transform.SetParent(rigidbodyCopies.transform, false);
             if(rigidbody2D = GetComponent<Rigidbody2D>())
             {
                 rigidbody2D.ToRigidbody2D(rigidbody2DCopy);
@@ -132,11 +161,11 @@ namespace DimensionConverter
         private void OnDestroy()
         {
 #if UNITY_EDITOR
-            if(rigidbodyCopy)
+            if(rigidbodyCopy.gameObject)
             {
                 Destroy(rigidbodyCopy.gameObject);
             }
-            if(rigidbody2DCopy)
+            if(rigidbody2DCopy.gameObject)
             {
                 Destroy(rigidbody2DCopy.gameObject);
             }

@@ -15,7 +15,7 @@ namespace DimensionConverter
             }
         }
 
-        private void Start()
+        protected virtual void Start()
         {
             Convert(Dimension.is2DNot3D);
             started = true;

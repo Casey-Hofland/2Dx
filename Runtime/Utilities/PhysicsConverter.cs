@@ -6,169 +6,17 @@ namespace DimensionConverter.Utilities
 {
     public static class PhysicsConverter
     {
-        #region PhysicMaterial
-        private static Dictionary<PhysicMaterial, PhysicsMaterial2D> physicMaterialPairs = new Dictionary<PhysicMaterial, PhysicsMaterial2D>();
-        private static Dictionary<PhysicsMaterial2D, PhysicMaterial> physicsMaterial2DPairs = new Dictionary<PhysicsMaterial2D, PhysicMaterial>();
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void InitPhysicMaterialPairs()
+        #region Vector
+        public static Vector2 ToVector2D(this Vector3 vector3, Component component, Component component2D)
         {
-            physicMaterialPairs = new Dictionary<PhysicMaterial, PhysicsMaterial2D>();
-            physicsMaterial2DPairs = new Dictionary<PhysicsMaterial2D, PhysicMaterial>();
+            return Quaternion.Inverse(component2D.transform.rotation) * component.transform.rotation * vector3;
         }
 
-        /// <include file='../Documentation.xml' path='docs/PhysicsConverter/PhysicMaterial/*'/>
-        public static PhysicsMaterial2D AsPhysicsMaterial2D(this PhysicMaterial physicMaterial)
+        public static Vector3 ToVector(this Vector2 vector2, Component component2D, Component component, Vector3 vector3)
         {
-            if(!physicMaterial)
-            {
-                return null;
-            }
-
-            // If there is no 2D equivalent of the physicMaterial, create a new one.
-            if(!physicMaterialPairs.TryGetValue(physicMaterial, out var physicsMaterial2D))
-            {
-                physicsMaterial2D = new PhysicsMaterial2D();
-
-                physicMaterialPairs.Add(physicMaterial, physicsMaterial2D);
-                physicsMaterial2DPairs.Add(physicsMaterial2D, physicMaterial);
-            }
-
-            // Carry over the physicMaterial settings to its 2D equivalent.
-            physicsMaterial2D.name = physicMaterial.name;
-            physicsMaterial2D.hideFlags = physicMaterial.hideFlags;
-            physicsMaterial2D.bounciness = physicMaterial.bounciness;
-            physicsMaterial2D.friction = physicMaterial.dynamicFriction;
-
-            return physicsMaterial2D;
-        }
-
-        /// <include file='../Documentation.xml' path='docs/PhysicsConverter/PhysicsMaterial2D/*'/>
-        public static PhysicMaterial AsPhysicMaterial(this PhysicsMaterial2D physicsMaterial2D)
-        {
-            if(!physicsMaterial2D)
-            {
-                return null;
-            }
-
-            // If there is no 3D equivalent of the physicsMaterial2D, create a new one.
-            if(!physicsMaterial2DPairs.TryGetValue(physicsMaterial2D, out var physicMaterial))
-            {
-                physicMaterial = new PhysicMaterial();
-
-                physicsMaterial2DPairs.Add(physicsMaterial2D, physicMaterial);
-                physicMaterialPairs.Add(physicMaterial, physicsMaterial2D);
-            }
-
-            // Carry over the physicsMaterial2D settings to its 3D equivalent.
-            physicMaterial.name = physicsMaterial2D.name;
-            physicMaterial.hideFlags = physicsMaterial2D.hideFlags;
-            physicMaterial.bounciness = physicsMaterial2D.bounciness;
-            physicMaterial.dynamicFriction = physicsMaterial2D.friction;
-
-            return physicMaterial;
-        }
-        #endregion
-
-        #region Rigidbody
-        /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Rigidbody/*'/>
-        public static void ToRigidbody2D(this Rigidbody rigidbody, Rigidbody2D rigidbody2D)
-        {
-            // Carry over the Rigidbody settings to its 2D equivalent.
-            rigidbody2D.angularDrag = Mathf.Min(rigidbody.angularDrag, 1000000f);
-            rigidbody2D.angularVelocity = rigidbody.angularVelocity.z * Mathf.Rad2Deg;
-            rigidbody2D.bodyType =
-                rigidbody.isKinematic
-                ? RigidbodyType2D.Kinematic
-                : RigidbodyType2D.Dynamic;
-            rigidbody2D.collisionDetectionMode =
-                (rigidbody.collisionDetectionMode == CollisionDetectionMode.Discrete)
-                ? CollisionDetectionMode2D.Discrete
-                : CollisionDetectionMode2D.Continuous;
-            rigidbody2D.drag = Mathf.Min(rigidbody.drag, 1000000f);
-            rigidbody2D.gravityScale =
-                rigidbody.useGravity
-                ? 1f
-                : 0f;
-            rigidbody2D.hideFlags = rigidbody.hideFlags;
-            rigidbody2D.interpolation = (RigidbodyInterpolation2D)rigidbody.interpolation;
-            rigidbody2D.mass = Mathf.Min(rigidbody.mass, 1000000f);
-            rigidbody2D.sleepMode = RigidbodySleepMode2D.StartAwake;
-            rigidbody2D.useAutoMass = false;
-            rigidbody2D.velocity = rigidbody.velocity;
-
-            rigidbody2D.constraints = rigidbody.constraints.ToRigidbodyConstraints2D();
-        }
-
-        /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Rigidbody2D/*'/>
-        public static void ToRigidbody(this Rigidbody2D rigidbody2D, Rigidbody rigidbody)
-        {
-            // Carry over the Rigidbody2D settings to its 3D equivalent.
-            rigidbody.angularDrag = rigidbody2D.angularDrag;
-            rigidbody.angularVelocity = Vector3.forward * rigidbody2D.angularVelocity * Mathf.Deg2Rad;
-            rigidbody.drag = rigidbody2D.drag;
-            rigidbody.hideFlags = rigidbody2D.hideFlags;
-            rigidbody.interpolation = (RigidbodyInterpolation)rigidbody2D.interpolation;
-            rigidbody.isKinematic = rigidbody2D.bodyType != RigidbodyType2D.Dynamic;
-            rigidbody.mass = rigidbody2D.mass;
-            rigidbody.useGravity = rigidbody2D.gravityScale > float.Epsilon;
-            rigidbody.velocity = rigidbody2D.velocity;
-
-            rigidbody.constraints = rigidbody2D.constraints.ToRigidbodyConstraints(rigidbody.constraints);
-        }
-
-        public static RigidbodyConstraints2D ToRigidbodyConstraints2D(this RigidbodyConstraints constraints)
-        {
-            RigidbodyConstraints2D constraints2D = RigidbodyConstraints2D.None;
-
-            if(constraints.HasFlag(RigidbodyConstraints.FreezePositionX))
-            {
-                constraints2D |= RigidbodyConstraints2D.FreezePositionX;
-            }
-
-            if(constraints.HasFlag(RigidbodyConstraints.FreezePositionY))
-            {
-                constraints2D |= RigidbodyConstraints2D.FreezePositionY;
-            }
-
-            if(constraints.HasFlag(RigidbodyConstraints.FreezeRotationZ))
-            {
-                constraints2D |= RigidbodyConstraints2D.FreezeRotation;
-            }
-
-            return constraints2D;
-        }
-
-        public static RigidbodyConstraints ToRigidbodyConstraints(this RigidbodyConstraints2D constraints2D, RigidbodyConstraints constraints)
-        {
-            if(constraints2D.HasFlag(RigidbodyConstraints2D.FreezePositionX))
-            {
-                constraints |= RigidbodyConstraints.FreezePositionX;
-            }
-            else
-            {
-                constraints &= ~RigidbodyConstraints.FreezePositionX;
-            }
-
-            if(constraints2D.HasFlag(RigidbodyConstraints2D.FreezePositionY))
-            {
-                constraints |= RigidbodyConstraints.FreezePositionY;
-            }
-            else
-            {
-                constraints &= ~RigidbodyConstraints.FreezePositionY;
-            }
-
-            if(constraints2D.HasFlag(RigidbodyConstraints2D.FreezeRotation))
-            {
-                constraints |= RigidbodyConstraints.FreezeRotationZ;
-            }
-            else
-            {
-                constraints &= ~RigidbodyConstraints.FreezeRotationZ;
-            }
-
-            return constraints;
+            var relativeVector3 = component2D.transform.rotation * vector2;
+            relativeVector3.z = (component.transform.rotation * vector3).z;
+            return Quaternion.Inverse(component.transform.rotation) * relativeVector3;
         }
         #endregion
 
@@ -180,23 +28,11 @@ namespace DimensionConverter.Utilities
             collider2D.sharedMaterial = collider.sharedMaterial.AsPhysicsMaterial2D();
         }
 
-        private static Vector2 CenterToOffset(Transform transform, Vector3 center, Transform transform2D)
-        {
-            return Quaternion.Inverse(transform2D.rotation) * transform.rotation * center;
-        }
-
         private static void GenericPropertiesToCollider(this Collider2D collider2D, Collider collider)
         {
             collider.enabled = collider2D.enabled;
             collider.hideFlags = collider2D.hideFlags;
             collider.sharedMaterial = collider2D.sharedMaterial.AsPhysicMaterial();
-        }
-
-        private static Vector3 OffsetToCenter(Transform transform2D, Vector2 offset, Transform transform, Vector3 center)
-        {
-            var relativeOffset = transform2D.rotation * offset;
-            relativeOffset.z = (transform.rotation * center).z;
-            return Quaternion.Inverse(transform.rotation) * relativeOffset;
         }
 
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Collider/*'/>
@@ -263,7 +99,7 @@ namespace DimensionConverter.Utilities
 
             // Set the CircleCollider2D settings.
             circleCollider2D.isTrigger = sphereCollider.isTrigger;
-            circleCollider2D.offset = CenterToOffset(sphereCollider.transform, sphereCollider.center, circleCollider2D.transform);
+            circleCollider2D.offset = sphereCollider.center.ToVector2D(sphereCollider, circleCollider2D);
             circleCollider2D.radius = sphereCollider.radius;
         }
 
@@ -274,7 +110,7 @@ namespace DimensionConverter.Utilities
 
             // Set the SphereCollider settings.
             sphereCollider.isTrigger = circleCollider2D.isTrigger;
-            sphereCollider.center = OffsetToCenter(circleCollider2D.transform, circleCollider2D.offset, sphereCollider.transform, sphereCollider.center);
+            sphereCollider.center = circleCollider2D.offset.ToVector(circleCollider2D, sphereCollider, sphereCollider.center);
             sphereCollider.radius = circleCollider2D.radius;
         }
 
@@ -285,7 +121,7 @@ namespace DimensionConverter.Utilities
 
             // Set the CapsuleCollider2D settings.
             capsuleCollider2D.isTrigger = capsuleCollider.isTrigger;
-            capsuleCollider2D.offset = CenterToOffset(capsuleCollider.transform, capsuleCollider.center, capsuleCollider2D.transform);
+            capsuleCollider2D.offset = capsuleCollider.center.ToVector2D(capsuleCollider, capsuleCollider2D);
 
             // Determine if and in what direction to convert the CapsuleCollider2D size and direction.
             Vector3 direction;
@@ -333,7 +169,7 @@ namespace DimensionConverter.Utilities
 
             // Set the CapsuleCollider settings.
             capsuleCollider.isTrigger = capsuleCollider2D.isTrigger;
-            capsuleCollider.center = OffsetToCenter(capsuleCollider2D.transform, capsuleCollider2D.offset, capsuleCollider.transform, capsuleCollider.center);
+            capsuleCollider.center = capsuleCollider2D.offset.ToVector(capsuleCollider2D, capsuleCollider, capsuleCollider.center);
 
             // Determine if the CapsuleCollider can be converted to.
             if(capsuleCollider.direction == 2)
@@ -484,7 +320,7 @@ namespace DimensionConverter.Utilities
             polygonCollider2D.GenericPropertiesToCollider(boxCollider);
 
             boxCollider.isTrigger = polygonCollider2D.isTrigger;
-            boxCollider.center = OffsetToCenter(polygonCollider2D.transform, polygonCollider2D.offset, boxCollider.transform, boxCollider.center);
+            boxCollider.center = polygonCollider2D.offset.ToVector(polygonCollider2D, boxCollider, boxCollider.center);
 
             Vector2 relativeRight = boxCollider.transform.right;
             Vector2 relativeUp = boxCollider.transform.up;
@@ -765,6 +601,202 @@ namespace DimensionConverter.Utilities
             polygonColliderMeshCreatorGO.SetActive(false);
             Object.DontDestroyOnLoad(polygonColliderMeshCreatorGO);
             polygonColliderMeshCreator = polygonColliderMeshCreatorGO.AddComponent<PolygonCollider2D>();
+        }
+        #endregion
+
+        #region PhysicMaterial
+        private static Dictionary<PhysicMaterial, PhysicsMaterial2D> physicMaterialPairs = new Dictionary<PhysicMaterial, PhysicsMaterial2D>();
+        private static Dictionary<PhysicsMaterial2D, PhysicMaterial> physicsMaterial2DPairs = new Dictionary<PhysicsMaterial2D, PhysicMaterial>();
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void InitPhysicMaterialPairs()
+        {
+            physicMaterialPairs = new Dictionary<PhysicMaterial, PhysicsMaterial2D>();
+            physicsMaterial2DPairs = new Dictionary<PhysicsMaterial2D, PhysicMaterial>();
+        }
+
+        /// <include file='../Documentation.xml' path='docs/PhysicsConverter/PhysicMaterial/*'/>
+        public static PhysicsMaterial2D AsPhysicsMaterial2D(this PhysicMaterial physicMaterial)
+        {
+            if(!physicMaterial)
+            {
+                return null;
+            }
+
+            // If there is no 2D equivalent of the physicMaterial, create a new one.
+            if(!physicMaterialPairs.TryGetValue(physicMaterial, out var physicsMaterial2D))
+            {
+                physicsMaterial2D = new PhysicsMaterial2D();
+
+                physicMaterialPairs.Add(physicMaterial, physicsMaterial2D);
+                physicsMaterial2DPairs.Add(physicsMaterial2D, physicMaterial);
+            }
+
+            // Carry over the physicMaterial settings to its 2D equivalent.
+            physicsMaterial2D.name = physicMaterial.name;
+            physicsMaterial2D.hideFlags = physicMaterial.hideFlags;
+            physicsMaterial2D.bounciness = physicMaterial.bounciness;
+            physicsMaterial2D.friction = physicMaterial.dynamicFriction;
+
+            return physicsMaterial2D;
+        }
+
+        /// <include file='../Documentation.xml' path='docs/PhysicsConverter/PhysicsMaterial2D/*'/>
+        public static PhysicMaterial AsPhysicMaterial(this PhysicsMaterial2D physicsMaterial2D)
+        {
+            if(!physicsMaterial2D)
+            {
+                return null;
+            }
+
+            // If there is no 3D equivalent of the physicsMaterial2D, create a new one.
+            if(!physicsMaterial2DPairs.TryGetValue(physicsMaterial2D, out var physicMaterial))
+            {
+                physicMaterial = new PhysicMaterial();
+
+                physicsMaterial2DPairs.Add(physicsMaterial2D, physicMaterial);
+                physicMaterialPairs.Add(physicMaterial, physicsMaterial2D);
+            }
+
+            // Carry over the physicsMaterial2D settings to its 3D equivalent.
+            physicMaterial.name = physicsMaterial2D.name;
+            physicMaterial.hideFlags = physicsMaterial2D.hideFlags;
+            physicMaterial.bounciness = physicsMaterial2D.bounciness;
+            physicMaterial.dynamicFriction = physicsMaterial2D.friction;
+
+            return physicMaterial;
+        }
+        #endregion
+
+        #region Rigidbody
+        /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Rigidbody/*'/>
+        public static void ToRigidbody2D(this Rigidbody rigidbody, Rigidbody2D rigidbody2D)
+        {
+            // Carry over the Rigidbody settings to its 2D equivalent.
+            rigidbody2D.angularDrag = Mathf.Min(rigidbody.angularDrag, 1000000f);
+            rigidbody2D.angularVelocity = rigidbody.angularVelocity.z * Mathf.Rad2Deg;
+            rigidbody2D.bodyType =
+                rigidbody.isKinematic
+                ? RigidbodyType2D.Kinematic
+                : RigidbodyType2D.Dynamic;
+            rigidbody2D.collisionDetectionMode =
+                (rigidbody.collisionDetectionMode == CollisionDetectionMode.Discrete)
+                ? CollisionDetectionMode2D.Discrete
+                : CollisionDetectionMode2D.Continuous;
+            rigidbody2D.drag = Mathf.Min(rigidbody.drag, 1000000f);
+            rigidbody2D.gravityScale =
+                rigidbody.useGravity
+                ? 1f
+                : 0f;
+            rigidbody2D.hideFlags = rigidbody.hideFlags;
+            rigidbody2D.interpolation = (RigidbodyInterpolation2D)rigidbody.interpolation;
+            rigidbody2D.mass = Mathf.Min(rigidbody.mass, 1000000f);
+            rigidbody2D.sleepMode = RigidbodySleepMode2D.StartAwake;
+            rigidbody2D.useAutoMass = false;
+            rigidbody2D.velocity = rigidbody.velocity;
+
+            rigidbody2D.constraints = rigidbody.constraints.ToRigidbodyConstraints2D();
+        }
+
+        /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Rigidbody2D/*'/>
+        public static void ToRigidbody(this Rigidbody2D rigidbody2D, Rigidbody rigidbody)
+        {
+            // Carry over the Rigidbody2D settings to its 3D equivalent.
+            rigidbody.angularDrag = rigidbody2D.angularDrag;
+            rigidbody.angularVelocity = Vector3.forward * rigidbody2D.angularVelocity * Mathf.Deg2Rad;
+            rigidbody.drag = rigidbody2D.drag;
+            rigidbody.hideFlags = rigidbody2D.hideFlags;
+            rigidbody.interpolation = (RigidbodyInterpolation)rigidbody2D.interpolation;
+            rigidbody.isKinematic = rigidbody2D.bodyType != RigidbodyType2D.Dynamic;
+            rigidbody.mass = rigidbody2D.mass;
+            rigidbody.useGravity = rigidbody2D.gravityScale > float.Epsilon;
+            rigidbody.velocity = rigidbody2D.velocity;
+
+            rigidbody.constraints = rigidbody2D.constraints.ToRigidbodyConstraints(rigidbody.constraints);
+        }
+
+        public static RigidbodyConstraints2D ToRigidbodyConstraints2D(this RigidbodyConstraints constraints)
+        {
+            RigidbodyConstraints2D constraints2D = RigidbodyConstraints2D.None;
+
+            if(constraints.HasFlag(RigidbodyConstraints.FreezePositionX))
+            {
+                constraints2D |= RigidbodyConstraints2D.FreezePositionX;
+            }
+
+            if(constraints.HasFlag(RigidbodyConstraints.FreezePositionY))
+            {
+                constraints2D |= RigidbodyConstraints2D.FreezePositionY;
+            }
+
+            if(constraints.HasFlag(RigidbodyConstraints.FreezeRotationZ))
+            {
+                constraints2D |= RigidbodyConstraints2D.FreezeRotation;
+            }
+
+            return constraints2D;
+        }
+
+        public static RigidbodyConstraints ToRigidbodyConstraints(this RigidbodyConstraints2D constraints2D, RigidbodyConstraints constraints)
+        {
+            if(constraints2D.HasFlag(RigidbodyConstraints2D.FreezePositionX))
+            {
+                constraints |= RigidbodyConstraints.FreezePositionX;
+            }
+            else
+            {
+                constraints &= ~RigidbodyConstraints.FreezePositionX;
+            }
+
+            if(constraints2D.HasFlag(RigidbodyConstraints2D.FreezePositionY))
+            {
+                constraints |= RigidbodyConstraints.FreezePositionY;
+            }
+            else
+            {
+                constraints &= ~RigidbodyConstraints.FreezePositionY;
+            }
+
+            if(constraints2D.HasFlag(RigidbodyConstraints2D.FreezeRotation))
+            {
+                constraints |= RigidbodyConstraints.FreezeRotationZ;
+            }
+            else
+            {
+                constraints &= ~RigidbodyConstraints.FreezeRotationZ;
+            }
+
+            return constraints;
+        }
+        #endregion
+
+        #region ConstantForce
+        public static void ToConstantForce2D(this ConstantForce constantForce, ConstantForce2D constantForce2D)
+        {
+            constantForce2D.force = constantForce.force;
+            constantForce2D.relativeForce = constantForce.relativeForce.ToVector2D(constantForce, constantForce2D);
+
+            var normalizedRelativeTorque = constantForce.transform.rotation * constantForce.relativeTorque;
+            constantForce2D.torque = (constantForce.torque.z + normalizedRelativeTorque.z) * Mathf.Rad2Deg;
+        }
+
+        public static void ToConstantForce(this ConstantForce2D constantForce2D, ConstantForce constantForce)
+        {
+            Vector3 force = constantForce2D.force;
+            force.z = constantForce.force.z;
+            
+            constantForce.force = force;
+            constantForce.relativeForce = constantForce2D.relativeForce.ToVector(constantForce2D, constantForce, constantForce.relativeForce);
+
+            var normalizedRelativeTorque = constantForce.transform.rotation * constantForce.relativeTorque;
+            var weightedTorque2D = 1 / (Mathf.Abs(normalizedRelativeTorque.z) + Mathf.Abs(constantForce.torque.z)) * constantForce2D.torque * Mathf.Deg2Rad;
+
+            Vector3 torque = constantForce.torque;
+            torque.z *= weightedTorque2D;
+            constantForce.torque = torque;
+
+            normalizedRelativeTorque.z *= weightedTorque2D;
+            constantForce.relativeTorque = Quaternion.Inverse(constantForce.transform.rotation) * normalizedRelativeTorque;
         }
         #endregion
     }
