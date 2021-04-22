@@ -117,6 +117,8 @@ namespace UnityEngine
             get => waitForConversionTime.waitTime;
             set => waitForConversionTime.waitTime = value;
         }
+        /// <include file='./Documentation.xml' path='docs/Dimension/conversionTimeScale/*' />
+        public static float conversionTimeScale { get; set; }
 
         /// <include file='./Documentation.xml' path='docs/Dimension/isConverting/*' />
         public static bool isConverting { get; private set; }
@@ -128,11 +130,15 @@ namespace UnityEngine
 
         private static IEnumerator UpdateIsConverting(bool to2Dnot3D)
         {
+            var timeScale = Time.timeScale;
+
             onBeforeConvert?.Invoke(to2Dnot3D);
 
+            Time.timeScale = conversionTimeScale;
             isConverting = true;
             yield return waitForConversionTime;
             isConverting = false;
+            Time.timeScale = timeScale;
 
             _is2DNot3D = to2Dnot3D;
             onAfterConvert?.Invoke(to2Dnot3D);
@@ -294,7 +300,7 @@ namespace UnityEngine
         #endregion
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void Init()
+        private static void SubsystemRegistration()
         {
             onBeforeConvert = onAfterConvert = default;
 
@@ -302,6 +308,7 @@ namespace UnityEngine
             _is2DNot3D = settings.is2DNot3D;
             isConverting = false;
             conversionTime = settings.conversionTime;
+            conversionTimeScale = settings.conversionTimeScale;
             batchConversion = settings.batchConversion;
 
             convertersLength = settings.convertersSettings.Length;

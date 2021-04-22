@@ -80,6 +80,7 @@ namespace DimensionConverter.Editor
         private SerializedProperty is2DNot3D;
         private SerializedProperty defaultOutliner;
         private SerializedProperty conversionTime;
+        private SerializedProperty conversionTimeScale;
         private SerializedProperty batchConversion;
         private SerializedProperty convertersSettings;
         private ReorderableList reorderableList;
@@ -93,6 +94,7 @@ namespace DimensionConverter.Editor
             is2DNot3D = customSettings.FindProperty(nameof(is2DNot3D));
             defaultOutliner = customSettings.FindProperty(nameof(defaultOutliner));
             conversionTime = customSettings.FindProperty(nameof(conversionTime));
+            conversionTimeScale = customSettings.FindProperty(nameof(conversionTimeScale));
             batchConversion = customSettings.FindProperty(nameof(batchConversion));
             convertersSettings = customSettings.FindProperty(nameof(convertersSettings));
 
@@ -142,38 +144,54 @@ namespace DimensionConverter.Editor
                     int index;
                     switch(converterType.Name)
                     {
-                        case nameof(SplitterConverter):
-                            batchSize3D.intValue = batchSize2D.intValue = 1000;
-                            convertersSettings.MoveArrayElement(arraySize, Math.Min(0, arraySize));
-                            break;
                         case nameof(SphereConverter):
                             batchSize3D.intValue = batchSize2D.intValue = 100;
-                            index = FindIndex(convertersSettings, element => element.FindPropertyRelative("typeName").stringValue == typeof(SplitterConverter).AssemblyQualifiedName) + 1;
-                            convertersSettings.MoveArrayElement(arraySize, Math.Min(index, arraySize));
+                            convertersSettings.MoveArrayElement(arraySize, Math.Min(0, arraySize));
                             break;
                         case nameof(CapsuleConverter):
                             batchSize3D.intValue = batchSize2D.intValue = 100;
-                            index = FindIndex(convertersSettings, element => element.FindPropertyRelative("typeName").stringValue == typeof(SphereConverter).AssemblyQualifiedName) + 1;
+                            index = FindConverterIndex(typeof(SphereConverter));
                             convertersSettings.MoveArrayElement(arraySize, Math.Min(index, arraySize));
                             break;
                         case nameof(BoxConverter):
                             batchSize3D.intValue = batchSize2D.intValue = 50;
-                            index = FindIndex(convertersSettings, element => element.FindPropertyRelative("typeName").stringValue == typeof(CapsuleConverter).AssemblyQualifiedName) + 1;
+                            index = FindConverterIndex(typeof(CapsuleConverter), typeof(SphereConverter));
                             convertersSettings.MoveArrayElement(arraySize, Math.Min(index, arraySize));
                             break;
                         case nameof(MeshConverter):
                             batchSize3D.intValue = batchSize2D.intValue = 20;
-                            index = FindIndex(convertersSettings, element => element.FindPropertyRelative("typeName").stringValue == typeof(BoxConverter).AssemblyQualifiedName) + 1;
+                            index = FindConverterIndex(typeof(BoxConverter), typeof(CapsuleConverter), typeof(SphereConverter));
+                            convertersSettings.MoveArrayElement(arraySize, Math.Min(index, arraySize));
+                            break;
+                        case nameof(ConstantForceConverter):
+                            batchSize3D.intValue = batchSize2D.intValue = 100;
+                            index = FindConverterIndex(typeof(MeshConverter), typeof(BoxConverter), typeof(CapsuleConverter), typeof(SphereConverter));
                             convertersSettings.MoveArrayElement(arraySize, Math.Min(index, arraySize));
                             break;
                         case nameof(RigidbodyConverter):
                             batchSize3D.intValue = batchSize2D.intValue = 50;
-                            index = FindIndex(convertersSettings, element => element.FindPropertyRelative("typeName").stringValue == typeof(MeshConverter).AssemblyQualifiedName) + 1;
+                            index = FindConverterIndex(typeof(ConstantForceConverter), typeof(MeshConverter), typeof(BoxConverter), typeof(CapsuleConverter), typeof(SphereConverter));
                             convertersSettings.MoveArrayElement(arraySize, Math.Min(index, arraySize));
                             break;
                         default:
                             batchSize3D.intValue = batchSize2D.intValue = 100;
                             break;
+                    }
+
+                    int FindConverterIndex(params Type[] converterTypes) 
+                    {
+                        for(int i = 0; i < converterTypes.Length; i++)
+                        {
+                            var converterType = converterTypes[i];
+                            var index = FindIndex(convertersSettings, element => element.FindPropertyRelative("typeName").stringValue == converterType.AssemblyQualifiedName) + 1;
+
+                            if(index > 0)
+                            {
+                                return index;
+                            }
+                        }
+
+                        return 0;
                     }
                 }
             }
@@ -250,6 +268,7 @@ namespace DimensionConverter.Editor
             EditorGUILayout.PropertyField(is2DNot3D);
             EditorGUILayout.PropertyField(defaultOutliner);
             EditorGUILayout.PropertyField(conversionTime);
+            EditorGUILayout.PropertyField(conversionTimeScale);
             EditorGUILayout.PropertyField(batchConversion);
 
             if(Event.current.type == EventType.MouseUp)

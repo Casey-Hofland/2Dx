@@ -12,6 +12,9 @@
         <conversionTime>
             <summary>The time it takes for the dimension to convert.</summary>
         </conversionTime>
+        <conversionTimeScale>
+            <summary>The time scale when the dimension is converting.</summary>
+        </conversionTimeScale>
         <waitForConversionTime>
             <summary>Suspends the coroutine execution for the amount of conversionTime.</summary>
         </waitForConversionTime>

@@ -18,6 +18,9 @@ namespace DimensionConverter
         [Tooltip("The time it takes for the dimension to convert.")] 
         public float conversionTime = 0.6666667f;
 
+        [Tooltip("The time scale when the dimension is converting.")]
+        public float conversionTimeScale = 0f;
+
         [Tooltip("If enabled, the conversion is batched and converted over multiple frames, but never longer than the conversionTime.")] 
         public bool batchConversion = true;
 
