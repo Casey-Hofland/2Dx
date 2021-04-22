@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace DimensionConverter
 {
@@ -243,6 +241,7 @@ namespace DimensionConverter
         }
 
         // Make sure the required gameObjects are always at the same position, (2D) rotation and scale as the parent transform.
+        [ContextMenu("Update Transforms")]
         public void UpdateTransforms()
         {
             if(!transform.hasChanged)
@@ -277,6 +276,7 @@ namespace DimensionConverter
                 transform2D.SetParent(transform, false);
                 transform2D.SetPositionAndRotation(transform.position, Quaternion.LookRotation(Vector3.forward, upwards2D));
                 transform2D.localScale = Vector3.one;
+                Vector2 newScale = upwards2D;
                 transform2D.hasChanged = false;
             }
         }
