@@ -28,6 +28,7 @@ namespace DimensionConverter
         #endregion
 
         #region Add Methods
+        /// <include file='../Documentation.xml' path='docs/ConstantForceConverter/AddConstantForce/*' />
         public ConstantForce AddConstantForce()
         {
             if(!rigidbodyConverter.rigidbody)
@@ -39,6 +40,7 @@ namespace DimensionConverter
             return constantForce;
         }
 
+        /// <include file='../Documentation.xml' path='docs/ConstantForceConverter/AddConstantForce2D/*' />
         public ConstantForce2D AddConstantForce2D()
         {
             if(!rigidbodyConverter.rigidbody2D)
@@ -50,6 +52,7 @@ namespace DimensionConverter
             return constantForce2D;
         }
 
+        /// <include file='../Documentation.xml' path='docs/ConstantForceConverter/AddConstantForce/*' />
         public ConstantForce AddConstantForce(ConstantForce copyOf)
         {
             AddConstantForce();
@@ -58,6 +61,7 @@ namespace DimensionConverter
             return constantForce;
         }
 
+        /// <include file='../Documentation.xml' path='docs/ConstantForceConverter/AddConstantForce2D/*' />
         public ConstantForce2D AddConstantForce2D(ConstantForce2D copyOf)
         {
             AddConstantForce2D();

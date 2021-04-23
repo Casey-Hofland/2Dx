@@ -7,15 +7,17 @@ namespace DimensionConverter.Utilities
     public static class PhysicsConverter
     {
         #region Vector
-        public static Vector2 ToVector2D(this Vector3 vector3, Component component, Component component2D)
+        /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Vector/*'/>
+        public static Vector2 ToVector2D(this Vector3 direction, Component component, Component component2D)
         {
-            return Quaternion.Inverse(component2D.transform.rotation) * component.transform.rotation * vector3;
+            return Quaternion.Inverse(component2D.transform.rotation) * component.transform.rotation * direction;
         }
 
-        public static Vector3 ToVector(this Vector2 vector2, Component component2D, Component component, Vector3 vector3)
+        /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Vector2D/*'/>
+        public static Vector3 ToVector(this Vector2 direction, Component component2D, Component component, Vector3 original)
         {
-            var relativeVector3 = component2D.transform.rotation * vector2;
-            relativeVector3.z = (component.transform.rotation * vector3).z;
+            var relativeVector3 = component2D.transform.rotation * direction;
+            relativeVector3.z = (component.transform.rotation * original).z;
             return Quaternion.Inverse(component.transform.rotation) * relativeVector3;
         }
         #endregion
@@ -771,6 +773,7 @@ namespace DimensionConverter.Utilities
         #endregion
 
         #region ConstantForce
+        /// <include file='../Documentation.xml' path='docs/PhysicsConverter/ConstantForce/*'/>
         public static void ToConstantForce2D(this ConstantForce constantForce, ConstantForce2D constantForce2D)
         {
             constantForce2D.force = constantForce.force;
@@ -780,6 +783,7 @@ namespace DimensionConverter.Utilities
             constantForce2D.torque = (constantForce.torque.z + normalizedRelativeTorque.z) * Mathf.Rad2Deg;
         }
 
+        /// <include file='../Documentation.xml' path='docs/PhysicsConverter/ConstantForce2D/*'/>
         public static void ToConstantForce(this ConstantForce2D constantForce2D, ConstantForce constantForce)
         {
             Vector3 force = constantForce2D.force;

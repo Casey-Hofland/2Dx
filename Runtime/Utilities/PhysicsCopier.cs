@@ -244,6 +244,7 @@ namespace DimensionConverter.Utilities
         #endregion
 
         #region ConstantForce
+        /// <include file='../Documentation.xml' path='docs/PhysicsCopier/ConstantForce/*'/>
         public static void ToConstantForce(this ConstantForce constantForce, ConstantForce other)
         {
             other.hideFlags = constantForce.hideFlags;
@@ -254,6 +255,7 @@ namespace DimensionConverter.Utilities
             other.relativeTorque = constantForce.relativeTorque;
         }
 
+        /// <include file='../Documentation.xml' path='docs/PhysicsCopier/ConstantForce2D/*'/>
         public static void ToConstantForce2D(this ConstantForce2D constantForce2D, ConstantForce2D other)
         {
             other.hideFlags = constantForce2D.hideFlags;

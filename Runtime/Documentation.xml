@@ -38,6 +38,21 @@
         </ConvertConverters>
     </Dimension>
     <PhysicsConverter>
+        <Vector>
+            <summary>Transforms a 3D direction to a 2D direction from one Component to another.</summary>
+            <param name="direction">The 3D direction to transform.</param>
+            <param name="component">The 3D Component to use for rotation.</param>
+            <param name="component2D">The 2D Component to use for rotation.</param>
+            <returns>The relative 2D direction.</returns>
+        </Vector>
+        <Vector2D>
+            <summary>Transforms a 2D direction to a 3D direction from one Component to another.</summary>
+            <param name="direction">The 2D direction to transform.</param>
+            <param name="component2D">The 2D Component to use for rotation.</param>
+            <param name="component">The 3D Component to use for rotation.</param>
+            <param name="original">The original 3D direction. Used to determine the z outcome.</param>
+            <returns>The relative 3D direction.</returns>
+        </Vector2D>
         <PhysicMaterial>
             <summary>Converts a PhysicMaterial to its PhysicsMaterial2D equivalent.</summary>
             <param name="physicMaterial">The PhysicMaterial to convert.</param>
@@ -115,6 +130,16 @@
             <param name="meshCollider">The MeshCollider to convert to.</param>
             <param name="converstionOptions">Options used to determine how to convert the PolygonCollider2D.</param>
         </Polygon2D>
+        <ConstantForce>
+            <summary>Converts a ConstantForce to its ConstantForce2D equivalent.</summary>
+            <param name="constantForce">The ConstantForce to convert.</param>
+            <param name="constantForce2D">The ConstantForce2D to convert to.</param>
+        </ConstantForce>
+        <ConstantForce2D>
+            <summary>Converts a ConstantForce2D to its ConstantForce equivalent.</summary>
+            <param name="constantForce2D">The ConstantForce2D to convert.</param>
+            <param name="constantForce">The ConstantForce to convert to.</param>
+        </ConstantForce2D>
     </PhysicsConverter>
     <PhysicsCopier>
         <Rigidbody>
@@ -181,6 +206,16 @@
             <param name="polygonCollider2D">The PolygonCollider2D to copy from.</param>
             <param name="other">The PolygonCollider2D to copy to.</param>
         </Polygon2D>
+        <ConstantForce>
+            <summary>Copies a ConstantForce to another ConstantForce.</summary>
+            <param name="constantForce">The ConstantForce to copy from.</param>
+            <param name="other">The ConstantForce to copy to.</param>
+        </ConstantForce>
+        <ConstantForce2D>
+            <summary>Copies a ConstantForce2D to another ConstantForce2D.</summary>
+            <param name="constantForce2D">The ConstantForce2D to copy from.</param>
+            <param name="other">The ConstantForce2D to copy to.</param>
+        </ConstantForce2D>
     </PhysicsCopier>
     <ContourTracer>
         <pathCount>
@@ -385,6 +420,16 @@
             <summary>Calls WakeUp on the currenty rigidbody.</summary>
         </WakeUp>
     </RigidbodyConverter>
+    <ConstantForceConverter>
+        <AddConstantForce>
+            <summary>Add a ConstantForce and cache it to the converter.</summary>
+            <param name="copyOf">The ConstantForce to copy from.</param>
+        </AddConstantForce>
+        <AddConstantForce2D>
+            <summary>Add a ConstantForce2D and cache it to the converter.</summary>
+            <param name="copyOf">The ConstantForce2D to copy from.</param>
+        </AddConstantForce2D>
+    </ConstantForceConverter>
     <CameraConverter>
         <SetView>
             <summary>Set the camera's view projection.</summary>
