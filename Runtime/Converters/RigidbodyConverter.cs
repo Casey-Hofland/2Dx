@@ -160,19 +160,14 @@ namespace DimensionConverter
 
         private void OnDestroy()
         {
-#if UNITY_EDITOR
-            if(rigidbodyCopy.gameObject)
+            if(_rigidbodyCopy)
             {
-                Destroy(rigidbodyCopy.gameObject);
+                Destroy(_rigidbodyCopy.gameObject);
             }
-            if(rigidbody2DCopy.gameObject)
+            if(_rigidbody2DCopy)
             {
-                Destroy(rigidbody2DCopy.gameObject);
+                Destroy(_rigidbody2DCopy.gameObject);
             }
-#else
-            Destroy(rigidbodyCopy.gameObject);
-            Destroy(rigidbody2DCopy.gameObject);
-#endif
         }
         #endregion
 
