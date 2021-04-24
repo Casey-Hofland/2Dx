@@ -4,10 +4,29 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [0.1.4]
+## [0.2.0-pre] - 2021-04-22
+### Added
+- ConstantForce2Dx Component added.
+- Utility methods to Convert and Copy between ConstantForces and ConstantForce2Ds added.
+- Added Dark mode Icons.
+
 ### Changed
-- TransformSplitter now has a bool "convert" to replace the Component "SplitterConverter".
-- TransformSplitter can now be given an UpdateMode to specify how often the transforms need to be updated.
+- Completely changed the package name, from Dimension Converter to the much more streamlined name 2Dx. The namespace is called Unity2Dx since namespaces can't start with a number.
+- The Dimension class has been moved from the UnityEngine namespace into the main namespace, now Unity2Dx.
+- Core functionality and Physics functionality has been split into different namespaces. Unity2Dx is the core, Unity2Dx.Physics is the Physics namespace.
+- Changed the names of 2Dx Components. Instead of "RigidbodyConverter", it is now "Rigidbody2Dx". The Collider Components have been renamed to "SphereCollider2Dx" and otherwise, and "TransformSplitter" is now also "Transform2Dx". It is believed that this naming gives a stronger identity to the 2Dx package and provides an easy naming convention for extensions to follow.
+- Utility namespaces have been removed since these were redundant.
+- Transform2Dx now has a bool "convert" to replace the Component "SplitterConverter".
+- Transform2Dx can now be given an UpdateMode to specify how often the transforms need to be updated.
+- Transform2Dx now has a context menu "Update Transforms" that can be used in editor for when the UpdateMode is Custom.
+- You can now specify the time scale when converting in the Dimension Converter Settings. This is important when converting over a period of time.
+- Utility methods ToVector2D and ToVector have been made public. These can be used to transpose a Vector3 to a Vector2 on a game object with different rotation and the other way around.
+
+### Removed
+- DimensionOverrider Component removed.
+- TimeStopper Component removed.
+- SplitterConverter Component removed.
+- BoolEvent Component removed.
 
 ## [0.1.3-1] - 2020-12-20
 ### Changed

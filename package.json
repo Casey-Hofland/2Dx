@@ -1,7 +1,7 @@
 {
-  "name": "com.caseydecoder.dimensionconverter",
-  "version": "0.1.4",
-  "displayName": "Dimension Converter",
+  "name": "com.caseydecoder.2dx",
+  "version": "0.1.5-pre",
+  "displayName": "2Dx",
   "description": "A system for Unity that converts 2D Components to 3D Components and the other way round.",
   "unity": "2019.3",
   "keywords": [

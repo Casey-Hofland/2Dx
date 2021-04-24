@@ -1,0 +1,87 @@
+﻿<docs>
+    <Dimension>
+        <is2DNot3D>
+            <summary>Returns if the dimension is currently 2D instead of 3D.</summary>
+        </is2DNot3D>
+        <Convert>
+            <summary>Converts the current dimension.</summary>
+        </Convert>
+        <onConvert>
+            <summary>Invoked whenever the dimension is converted.</summary>
+        </onConvert>
+        <conversionTime>
+            <summary>The time it takes for the dimension to convert.</summary>
+        </conversionTime>
+        <conversionTimeScale>
+            <summary>The time scale when the dimension is converting.</summary>
+        </conversionTimeScale>
+        <waitForConversionTime>
+            <summary>Suspends the coroutine execution for the amount of conversionTime.</summary>
+        </waitForConversionTime>
+        <isConverting>
+            <summary>Returns if the dimension is converting or not.</summary>
+        </isConverting>
+        <waitWhileConverting>
+            <summary>Suspends the coroutine execution until the dimension has stopped converting.</summary>
+        </waitWhileConverting>
+        <batchConversion>
+            <summary>If enabled, the conversion is batched and converted over multiple frames, but never longer than the conversionTime.</summary>
+        </batchConversion>
+        <AddConverter>
+            <summary>Add a Converter to the conversion set.</summary>
+        </AddConverter>
+        <RemoveConverter>
+            <summary>Remove a Converter from the conversion set.</summary>
+        </RemoveConverter>
+        <ConvertConverters>
+            <summary>Convert all Converters in the conversion set.</summary>
+        </ConvertConverters>
+    </Dimension>
+    <Converter>
+        <Convert>
+            <summary>Converts this Converter to the current specified dimension.</summary>
+        </Convert>
+        <ConvertTo2D>
+            <summary>Converts this Converter to its 2D form.</summary>
+        </ConvertTo2D>
+        <ConvertTo3D>
+            <summary>Converts this Converter to its 3D form.</summary>
+        </ConvertTo3D>
+    </Converter>
+    <Transform2Dx>
+        <gameObject3D>
+            <summary>The 3D GameObject of the split Transform.</summary>
+        </gameObject3D>
+        <transform3D>
+            <summary>The 3D Transform of the split Transform.</summary>
+        </transform3D>
+        <gameObject2D>
+            <summary>The 2D GameObject of the split Transform.</summary>
+        </gameObject2D>
+        <transform2D>
+            <summary>The 2D Transform of the split Transform.</summary>
+        </transform2D>
+        <updateMode>
+            <summary>Controls when the transforms will be updated.</summary>
+        </updateMode>
+        <direction2D>
+            <summary>Determines the axis to align in 2D space. If Horizontal, X axis will be aligned, and if vertical, the Y axis.</summary>
+        </direction2D>
+        <convert>
+            <summary>Activate and deactivate the split transforms on a dimension convert.</summary>
+        </convert>
+        <UpdateTransforms>
+            <summary>Updates the 2D and 3D Transform to have the same position, 2D rotation / rotation and scale as the parent transform.</summary>
+        </UpdateTransforms>
+    </Transform2Dx>
+    <Camera2Dx>
+        <SetView>
+            <summary>Set the camera's view projection.</summary>
+            <param name="toOrthographicNotPerspective">If the view projection should be set to orthographic or perspective.</param>
+        </SetView>
+        <ChangeView>
+            <summary>Change the camera's view projection over the conversion time.</summary>
+            <param name="toOrthographicNotPerspective">If the view projection should be set to orthographic or perspective.</param>
+        </ChangeView>
+    </Camera2Dx>
+</docs>
