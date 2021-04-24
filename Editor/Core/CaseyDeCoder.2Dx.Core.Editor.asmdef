@@ -1,0 +1,19 @@
+{
+    "name": "CaseyDeCoder.2Dx.Core.Editor",
+    "rootNamespace": "Unity2Dx.Editor",
+    "references": [
+        "GUID:725987cc13018944694259f3a192f49e",
+        "GUID:e59523ba841987d49afefd017932546f"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

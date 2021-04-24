@@ -1,0 +1,16 @@
+{
+    "name": "CaseyDeCoder.2Dx.Core.Tests",
+    "rootNamespace": "Unity2Dx.Tests",
+    "references": [
+        "GUID:025e56738c6512b41b7f2446eb7a52d8"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
