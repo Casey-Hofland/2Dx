@@ -13,7 +13,7 @@ namespace Unity2Dx.Physics
 
         #region Properties
         [Header("Convert to 3D")]
-        [Tooltip("If enabled, PolygonCollider2D to BoxCollider will go through a safety check to make sure the PolygonCollider2D is in an appropriate BoxCollider shape.")] [SerializeField] private bool _skipSafetyCheck;
+        [Tooltip("If enabled, converting from PolygonCollider2D to BoxCollider skips a safety check to make sure the PolygonCollider2D is in an appropriate BoxCollider shape.")] [SerializeField] private bool _skipSafetyCheck;
 
         public bool skipSafetyCheck
         {
