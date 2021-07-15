@@ -84,4 +84,20 @@
             <param name="toOrthographicNotPerspective">If the view projection should be set to orthographic or perspective.</param>
         </ChangeView>
     </Camera2Dx>
+    <AudioTransform2Dx>
+        <audioGameObject>
+            <summary>The Audio GameObject.</summary>
+        </audioGameObject>
+        <audioTransform>
+            <summary>The Audio Transform.</summary>
+        </audioTransform>
+        <SetDepth>
+            <summary>Set the audio transform's depth.</summary>
+            <param name="toAudioListenerNotSelf">If the depth should be set to the audio listener or to self.</param>
+        </SetDepth>
+        <ChangeDepth>
+            <summary>Change the audio transform's depth over the conversion time.</summary>
+            <param name="toAudioListenerNotSelf">If the depth should be set to the audio listener or to self.</param>
+        </ChangeDepth>
+    </AudioTransform2Dx>
 </docs>

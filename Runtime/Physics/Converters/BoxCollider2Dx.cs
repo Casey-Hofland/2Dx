@@ -6,11 +6,6 @@ namespace Unity2Dx.Physics
     [DisallowMultipleComponent]
     public sealed class BoxCollider2Dx : ColliderConverter<BoxCollider, PolygonCollider2D>
     {
-        private void OnValidate()
-        {
-            Debug.LogWarning($"Note that {nameof(BoxCollider2Dx)} is still untested!");
-        }
-
         #region Properties
         [Header("Convert to 3D")]
         [Tooltip("If enabled, converting from PolygonCollider2D to BoxCollider skips a safety check to make sure the PolygonCollider2D is in an appropriate BoxCollider shape.")] [SerializeField] private bool _skipSafetyCheck;
