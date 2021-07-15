@@ -234,7 +234,7 @@ namespace Unity2Dx.Physics
             polygonCollider2D.pathCount = 1;
 
             // Check if this Box is directly facing the front from any angle.
-            if(relativeRight == Vector2.zero)
+            if (relativeRight == Vector2.zero)
             {
                 boxPoints4[0] = (relativeForward + relativeUp) * 0.5f;
                 boxPoints4[1] = boxPoints4[0] - relativeForward;
@@ -243,7 +243,7 @@ namespace Unity2Dx.Physics
 
                 polygonCollider2D.SetPath(0, boxPoints4);
             }
-            else if(relativeUp == Vector2.zero)
+            else if (relativeUp == Vector2.zero)
             {
                 boxPoints4[0] = (relativeForward + relativeRight) * 0.5f;
                 boxPoints4[1] = boxPoints4[0] - relativeForward;
@@ -252,7 +252,7 @@ namespace Unity2Dx.Physics
 
                 polygonCollider2D.SetPath(0, boxPoints4);
             }
-            else if(relativeForward == Vector2.zero)
+            else if (relativeForward == Vector2.zero)
             {
                 boxPoints4[0] = (relativeRight + relativeUp) * 0.5f;
                 boxPoints4[1] = boxPoints4[0] - relativeRight;
