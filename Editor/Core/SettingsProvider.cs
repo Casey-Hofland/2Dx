@@ -15,6 +15,7 @@ namespace Unity2Dx.Editor
     internal class SettingsProvider : UnityEditor.SettingsProvider
     {
         private const string customPath = "Project/2Dx";
+        private const string typeNamePropertyPath = "typeName";
 
         #region Asset Reference
         private static readonly string settingsAssetPath = $"Packages/com.caseydecoder.2dx/Runtime/Core/Settings/Resources/{nameof(Settings)}.asset";
@@ -104,9 +105,9 @@ namespace Unity2Dx.Editor
             for(int i = convertersSettings.arraySize - 1; i >= 0; i--)
             {
                 var converterSettings = convertersSettings.GetArrayElementAtIndex(i);
-                var typeName = converterSettings.FindPropertyRelative("typeName").stringValue;
+                var typeName = converterSettings.FindPropertyRelative(typeNamePropertyPath).stringValue;
                 var type = Type.GetType(typeName);
-                if(type == null || type != typeof(Converter) || convertersTypes.Contains(type))
+                if(type == null || !type.IsSubclassOf(typeof(Converter)) || convertersTypes.Contains(type))
                 {
                     convertersSettings.DeleteArrayElementAtIndex(i);
                 }
@@ -131,9 +132,9 @@ namespace Unity2Dx.Editor
                     var arraySize = convertersSettings.arraySize;
                     convertersSettings.arraySize++;
                     var converterSettings = convertersSettings.GetArrayElementAtIndex(arraySize);
-                    converterSettings.FindPropertyRelative("typeName").stringValue = converterType.AssemblyQualifiedName;
-                    var batchSize3D = converterSettings.FindPropertyRelative("batchSize3D");
-                    var batchSize2D = converterSettings.FindPropertyRelative("batchSize2D");
+                    converterSettings.FindPropertyRelative(typeNamePropertyPath).stringValue = converterType.AssemblyQualifiedName;
+                    var batchSize3D = converterSettings.FindPropertyRelative(nameof(ConverterSettings.batchSize3D));
+                    var batchSize2D = converterSettings.FindPropertyRelative(nameof(ConverterSettings.batchSize2D));
 
                     int index;
                     switch(converterType.Name)
@@ -177,7 +178,7 @@ namespace Unity2Dx.Editor
                         for(int i = 0; i < converterTypes.Length; i++)
                         {
                             var converterType = converterTypes[i];
-                            var index = FindIndex(convertersSettings, element => element.FindPropertyRelative("typeName").stringValue == converterType.AssemblyQualifiedName) + 1;
+                            var index = FindIndex(convertersSettings, element => element.FindPropertyRelative(typeNamePropertyPath).stringValue == converterType.AssemblyQualifiedName) + 1;
 
                             if(index > 0)
                             {
