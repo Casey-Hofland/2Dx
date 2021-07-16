@@ -217,22 +217,39 @@ namespace Unity2Dx.Physics
         /// <include file='../Documentation.xml' path='docs/Rigidbody2Dx/IgnoreOverlap/*' />
         public void IgnoreOverlap()
         {
-            if(rigidbody2D.Cast(Vector2.zero, castHits) == 0)
+            if (rigidbody2D.attachedColliderCount == 0)
             {
                 return;
             }
 
-            foreach(var raycastHit2D in castHits)
+            var contactFilter2D = new ContactFilter2D();
+            var trackedColliderCount = rigidbody2D.OverlapCollider(contactFilter2D, trackedColliders);
+            if (trackedColliderCount == 0)
             {
-                trackedColliders.Add(raycastHit2D.collider);
+                return;
             }
 
-            rigidbody2D.GetAttachedColliders(attachedColliders);
-            foreach(var attachedCollider in attachedColliders)
+            var attachedColliderCount = rigidbody2D.GetAttachedColliders(attachedColliders);
+            var ignoreOverlapDistance = Physics2D.defaultContactOffset * -2f - Vector2.kEpsilon;
+            for (int i = 0; i < trackedColliderCount; i++)
             {
-                foreach(var trackedCollider in trackedColliders)
+                var trackedCollider = trackedColliders[i];
+
+                for (int i2 = 0; i2 < attachedColliderCount; i2++)
                 {
-                    Physics2D.IgnoreCollision(attachedCollider, trackedCollider, true);
+                    var attachedCollider = attachedColliders[i2];
+
+                    var colliderDistance = attachedCollider.Distance(trackedCollider);
+                    if (colliderDistance.distance <= ignoreOverlapDistance)
+                    {
+                        for (int i3 = 0; i3 < attachedColliderCount; i3++)
+                        {
+                            attachedCollider = attachedColliders[i3];
+
+                            Physics2D.IgnoreCollision(trackedCollider, attachedCollider);
+                        }
+                        break;
+                    }
                 }
             }
         }
@@ -240,11 +257,15 @@ namespace Unity2Dx.Physics
         /// <include file='../Documentation.xml' path='docs/Rigidbody2Dx/ClearOverlap/*' />
         public void ClearOverlap()
         {
-            foreach(var attachedCollider in attachedColliders)
+            for (int i = 0; i < trackedColliders.Count; i++)
             {
-                foreach(var trackedCollider in trackedColliders)
+                var trackedCollider = trackedColliders[i];
+
+                for (int i2 = 0; i2 < attachedColliders.Count; i2++)
                 {
-                    Physics2D.IgnoreCollision(attachedCollider, trackedCollider, false);
+                    var attachedCollider = attachedColliders[i2];
+
+                    Physics2D.IgnoreCollision(trackedCollider, attachedCollider, false);
                 }
             }
 
