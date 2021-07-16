@@ -235,12 +235,12 @@
             <param name="other">The Collider2D to copy to.</param>
         </Collider2DToCollider2D>
         <AddCollider>
-            <summary>Add a <typeparamref name="C"/> and create and pair it with a <typeparamref name="C2D"/>.</summary>
-            <param name="copyOf">The Collider to copy from.</param>
+            <summary>Add a <typeparamref name="Collider"/> and create and pair it with a <typeparamref name="Collider2D"/>.</summary>
+            <param name="copyOf">The <typeparamref name="Collider"/> to copy from.</param>
         </AddCollider>
         <AddCollider2D>
-            <summary>Add a <typeparamref name="C2D"/> and create and pair it with a <typeparamref name="C"/>.</summary>
-            <param name="copyOf">The Collider2D to copy from.</param>
+            <summary>Add a <typeparamref name="Collider2D"/> and create and pair it with a <typeparamref name="Collider"/>.</summary>
+            <param name="copyOf">The <typeparamref name="Collider2D"/> to copy from.</param>
         </AddCollider2D>
         <DestroyPairedColliders>
             <summary>Destroy a Collider Collider2D pair.</summary>
@@ -252,13 +252,13 @@
             <summary>Update the paired Colliders to remove any destroyed Colliders or recreate any destroyed Collider2Ds.</summary>
         </UpdateColliders>
         <CacheColliders>
-            <summary>Iterate through all <typeparamref name="C"/> on the ColliderConverter and the Transform3D and add them if they weren't already added.</summary>
+            <summary>Iterate through all <typeparamref name="Collider"/> on the ColliderConverter and the Transform3D and add them if they weren't already added.</summary>
         </CacheColliders>
         <UpdateCollider2Ds>
             <summary>Update the paired Collider2Ds to remove any destroyed Collider2Ds or recreate any destroyed Colliders.</summary>
         </UpdateCollider2Ds>
         <CacheCollider2Ds>
-            <summary>Iterate through all <typeparamref name="C2D"/> on the ColliderConverter and the Transform2D and add them if they weren't already added.</summary>
+            <summary>Iterate through all <typeparamref name="Collider2D"/> on the ColliderConverter and the Transform2D and add them if they weren't already added.</summary>
         </CacheCollider2Ds>
         <ColliderToCollider2D>
             <summary>Converts a Collider to a Collider2D.</summary>
@@ -371,14 +371,34 @@
             <summary>Calls WakeUp on the currenty rigidbody.</summary>
         </WakeUp>
     </Rigidbody2Dx>
-    <ConstantForce2Dx>
-        <AddConstantForce>
-            <summary>Add a ConstantForce and cache it to the converter.</summary>
-            <param name="copyOf">The ConstantForce to copy from.</param>
-        </AddConstantForce>
-        <AddConstantForce2D>
-            <summary>Add a ConstantForce2D and cache it to the converter.</summary>
-            <param name="copyOf">The ConstantForce2D to copy from.</param>
-        </AddConstantForce2D>
-    </ConstantForce2Dx>
+    <RequireRigidbodyConverter>
+        <AddComponent>
+            <summary>Add a <typeparamref name="Component"/> and cache it to the converter.</summary>
+            <param name="copyOf">The <typeparamref name="Component"/> to copy from.</param>
+        </AddComponent>
+        <AddComponent2D>
+            <summary>Add a <typeparamref name="Component2D"/> and cache it to the converter.</summary>
+            <param name="copyOf">The <typeparamref name="Component2D"/> to copy from.</param>
+        </AddComponent2D>
+        <ComponentToComponent>
+            <summary>Copies one Components properties to another.</summary>
+            <param name="component">The Component to copy from.</param>
+            <param name="other">The Component to copy to.</param>
+        </ComponentToComponent>
+        <Component2DToComponent2D>
+            <summary>Copies one Component2Ds properties to another.</summary>
+            <param name="component2D">The Component2D to copy from.</param>
+            <param name="other">The Component2D to copy to.</param>
+        </Component2DToComponent2D>
+        <ComponentToComponent2D>
+            <summary>Converts a Component to a Component2D.</summary>
+            <param name="component">The Component to convert.</param>
+            <param name="component2D">The Component2D to convert to.</param>
+        </ComponentToComponent2D>
+        <Component2DToComponent>
+            <summary>Converts a Component2D to a Component.</summary>
+            <param name="component2D">The Component2D to convert.</param>
+            <param name="component">The Component to convert to.</param>
+        </Component2DToComponent>
+    </RequireRigidbodyConverter>
 </docs>
