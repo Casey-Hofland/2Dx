@@ -4,6 +4,18 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [0.2.1-pre.3] - 2021-07-17
+### Added
+- RequireRigidbodyConverter<> abstract Component added. This is a specialized Converter that takes care of converting components that rely on Rigidbody and Rigidbody2D to work. This requires some special care, since these components need to be destroyed before the Rigidbody, but added after the Rigidbody is created, and this converter handles it nicely.
+
+### Changed
+- Rigidbody2Dx Ignore Overlap feature now uses for loops instead of foreach loops as to not create unnecessary garbage.
+- ConstantForce2Dx inherits from RequireRigidbodyConverter<ConstantForce, ConstantForce2D>. This change has no bearing on any existing code. In the background it works completely the same.
+
+### Fixed
+- Rigidbody2Dx Ignore Overlap now respects Physics2D contact offset. Previously this would make colliders with a very small distance, such as 0, return as overlapping.
+- If ConstantForce2D was converted to ConstantForce with a torque of 0 it would return NAN values.
+
 ## [0.2.1-pre.2] - 2021-07-16
 ### Fixed
 - Conversion Order wasn't saving.

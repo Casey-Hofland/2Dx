@@ -793,7 +793,11 @@ namespace Unity2Dx.Physics
             constantForce.relativeForce = constantForce2D.relativeForce.ToVector(constantForce2D, constantForce, constantForce.relativeForce);
 
             var normalizedRelativeTorque = constantForce.transform.rotation * constantForce.relativeTorque;
-            var weightedTorque2D = 1 / (Mathf.Abs(normalizedRelativeTorque.z) + Mathf.Abs(constantForce.torque.z)) * constantForce2D.torque * Mathf.Deg2Rad;
+            var weightedTorque2D = (Mathf.Abs(normalizedRelativeTorque.z) + Mathf.Abs(constantForce.torque.z)) * constantForce2D.torque;
+            if (weightedTorque2D != 0f)
+            {
+                weightedTorque2D = 1f / weightedTorque2D * Mathf.Deg2Rad;
+            }
 
             Vector3 torque = constantForce.torque;
             torque.z *= weightedTorque2D;
