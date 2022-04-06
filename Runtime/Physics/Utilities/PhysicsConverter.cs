@@ -542,46 +542,50 @@ namespace Unity2Dx.Physics
         private static List<Vector2> points = new List<Vector2>();
         private static List<Vector2> path = new List<Vector2>();
 
-        private static Outliner? defaultOutliner;
-        private static Texture2D? texture2D;
+        private static Outliner? _defaultOutliner;
+        private static Outliner defaultOutliner => _defaultOutliner ? _defaultOutliner! : (_defaultOutliner = ScriptableObject.CreateInstance<Outliner>());
+
+        private static Texture2D? _texture2D;
+        private static Texture2D texture2D => _texture2D ??= new Texture2D(0, 0, TextureFormat.R8, false);
+
+
         private static Rect rect = new Rect();
         private static readonly Vector2 centerPivot = new Vector2(0.5f, 0.5f);
 
-        private static Camera? renderCamera;
-        private static MeshFilter? renderFilter;
-        private static MeshRenderer? renderRenderer;
-
-        private static PolygonCollider2D? polygonColliderMeshCreator;
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void InitColliderConversion()
+        private static Camera? _renderCamera;
+        private static Camera renderCamera
         {
-            defaultOutliner = ScriptableObject.CreateInstance<Outliner>();
-            texture2D = new Texture2D(0, 0, TextureFormat.R8, false);
+            get
+            {
+                if (!_renderCamera)
+                {
+                    var renderCameraGO = new GameObject(nameof(renderCamera));
+                    renderCameraGO.SetActive(false);
 
-            // Create renderCamera GameObject.
-            var renderCameraGO = new GameObject(nameof(renderCamera));
-            renderCameraGO.SetActive(false);
-            Object.DontDestroyOnLoad(renderCameraGO);
+#if UNITY_EDITOR
+                    // We cannot use DontDestroyOnLoad during edit mode, so instead we destroy the copy the next frame.
+                    if (!Application.IsPlaying(renderCameraGO))
+                    {
+                        UnityEditor.EditorApplication.delayCall += () => Object.DestroyImmediate(renderCameraGO);
+                    }
+                    else
+#endif
+                    {
+                        Object.DontDestroyOnLoad(renderCameraGO);
+                    }
 
-            // Create rendering GameObject.
-            var renderingGO = new GameObject(nameof(renderFilter));
-            renderingGO.transform.SetParent(renderCameraGO.transform, false);
-            renderingGO.layer = 31;
+                    _renderCamera = renderCameraGO.AddComponent<Camera>();
 
-            // Create renderCamera.
-            renderCamera = renderCameraGO.AddComponent<Camera>();
-
-            renderCamera.clearFlags = CameraClearFlags.SolidColor;
-            renderCamera.backgroundColor = Color.clear;
-            renderCamera.cullingMask = 1 << 31;
-            renderCamera.orthographic = true;
-            renderCamera.nearClipPlane = 0f;
-            renderCamera.renderingPath = RenderingPath.Forward;
-            renderCamera.useOcclusionCulling =
-                renderCamera.allowHDR =
-                renderCamera.allowMSAA =
-                renderCamera.allowDynamicResolution = false;
+                    _renderCamera.clearFlags = CameraClearFlags.SolidColor;
+                    _renderCamera.backgroundColor = Color.clear;
+                    _renderCamera.cullingMask = 1 << 31;
+                    _renderCamera.orthographic = true;
+                    _renderCamera.nearClipPlane = 0f;
+                    _renderCamera.renderingPath = RenderingPath.Forward;
+                    _renderCamera.useOcclusionCulling =
+                        _renderCamera.allowHDR =
+                        _renderCamera.allowMSAA =
+                        _renderCamera.allowDynamicResolution = false;
 
 #if HDRP_7_0_OR_NEWER
             var hdData = renderCameraGO.AddComponent<UnityEngine.Rendering.HighDefinition.HDAdditionalCameraData>();
@@ -590,22 +594,77 @@ namespace Unity2Dx.Physics
             hdData.clearColorMode = UnityEngine.Rendering.HighDefinition.HDAdditionalCameraData.ClearColorMode.Color;
             hdData.backgroundColorHDR = Color.clear;
 #endif
+                }
 
-            // Create rendering Objects.
-            renderFilter = renderingGO.AddComponent<MeshFilter>();
+                return _renderCamera!;
+            }
+        }
 
-            renderRenderer = renderingGO.AddComponent<MeshRenderer>();
-            renderRenderer.receiveShadows = false;
-            renderRenderer.shadowCastingMode = ShadowCastingMode.Off;
-            renderRenderer.lightProbeUsage = LightProbeUsage.Off;
-            renderRenderer.motionVectorGenerationMode = MotionVectorGenerationMode.ForceNoMotion;
-            renderRenderer.allowOcclusionWhenDynamic = false;
+        private static GameObject? _renderingGO;
+        private static GameObject renderingGO
+        {
+            get
+            {
+                if (!_renderingGO)
+                {
+                    _renderingGO = new GameObject(nameof(renderFilter));
+                    _renderingGO.transform.SetParent(renderCamera.transform, false);
+                    _renderingGO.layer = 31;
+                }
 
-            // Create the polygonCollider2D dummy.
-            var polygonColliderMeshCreatorGO = new GameObject(nameof(polygonColliderMeshCreator));
-            polygonColliderMeshCreatorGO.SetActive(false);
-            Object.DontDestroyOnLoad(polygonColliderMeshCreatorGO);
-            polygonColliderMeshCreator = polygonColliderMeshCreatorGO.AddComponent<PolygonCollider2D>();
+                return _renderingGO!;
+            }
+        }
+
+        private static MeshFilter? _renderFilter;
+        private static MeshFilter renderFilter => _renderFilter ? _renderFilter! : (_renderFilter = renderingGO.AddComponent<MeshFilter>());
+
+        private static MeshRenderer? _renderRenderer;
+        private static MeshRenderer renderRenderer
+        {
+            get
+            {
+                if (!_renderRenderer)
+                {
+                    _renderRenderer = renderingGO.AddComponent<MeshRenderer>();
+                    _renderRenderer.receiveShadows = false;
+                    _renderRenderer.shadowCastingMode = ShadowCastingMode.Off;
+                    _renderRenderer.lightProbeUsage = LightProbeUsage.Off;
+                    _renderRenderer.motionVectorGenerationMode = MotionVectorGenerationMode.ForceNoMotion;
+                    _renderRenderer.allowOcclusionWhenDynamic = false;
+                }
+
+                return _renderRenderer!;
+            }
+        }
+
+        private static PolygonCollider2D? _polygonColliderMeshCreator;
+        private static PolygonCollider2D polygonColliderMeshCreator
+        {
+            get
+            {
+                if (!_polygonColliderMeshCreator)
+                {
+                    var polygonColliderMeshCreatorGO = new GameObject(nameof(polygonColliderMeshCreator));
+                    polygonColliderMeshCreatorGO.SetActive(false);
+
+#if UNITY_EDITOR
+                    // We cannot use DontDestroyOnLoad during edit mode, so instead we destroy the copy the next frame.
+                    if (!Application.IsPlaying(polygonColliderMeshCreatorGO))
+                    {
+                        UnityEditor.EditorApplication.delayCall += () => Object.DestroyImmediate(polygonColliderMeshCreatorGO);
+                    }
+                    else
+#endif
+                    {
+                        Object.DontDestroyOnLoad(polygonColliderMeshCreatorGO);
+                    }
+
+                    _polygonColliderMeshCreator = polygonColliderMeshCreatorGO.AddComponent<PolygonCollider2D>();
+                }
+
+                return _polygonColliderMeshCreator!;
+            }
         }
         #endregion
 
