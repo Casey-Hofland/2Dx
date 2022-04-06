@@ -177,12 +177,15 @@ namespace Unity2Dx
         protected virtual void OnValidate()
         {
 #if UNITY_EDITOR
-            // Convert in editor. We delay this call because Unity throws errors when DestroyImmediate is used inside of an OnValidate call.
-            UnityEditor.EditorApplication.delayCall += () =>
+            if (!Application.IsPlaying(this))
             {
-                Convert(_is2DNot3D);
-                is2DNot3D = _is2DNot3D;
-            };
+                // Convert in editor. We delay this call because Unity throws errors when DestroyImmediate is used inside of an OnValidate call.
+                UnityEditor.EditorApplication.delayCall += () =>
+                {
+                    Convert(_is2DNot3D);
+                    is2DNot3D = _is2DNot3D;
+                };
+            }
 #endif
         }
 
