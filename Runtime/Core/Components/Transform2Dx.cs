@@ -97,10 +97,8 @@ namespace Unity2Dx
             }
         }
 
-        protected override void OnValidate()
+        private void OnValidate()
         {
-            base.OnValidate();
-
             // Validation check because of warning "SendMessage cannot be called during Awake, CheckConsistency, or OnValidate"
             if (_transform2D != null)
             {

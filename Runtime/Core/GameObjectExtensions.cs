@@ -14,6 +14,10 @@ namespace Unity2Dx
         {
             return gameObject.TryGetComponent(type, out Component component)
                 ? component
+//#if UNITY_EDITOR
+//                : !Application.IsPlaying(gameObject)
+//                ? UnityEditor.Undo.AddComponent(gameObject, componentType)
+//#endif
                 : gameObject.AddComponent(componentType);
         }
 
@@ -31,7 +35,16 @@ namespace Unity2Dx
                 var componentTypeIndex = Array.IndexOf(componentTypes, result.GetType(), 0, missingComponentTypesCount);
                 if (componentTypeIndex == -1)
                 {
-                    Object.DestroyImmediate(result);
+//#if UNITY_EDITOR
+//                    if (!Application.IsPlaying(gameObject))
+//                    {
+//                        UnityEditor.Undo.DestroyObjectImmediate(result);
+//                    }
+//                    else
+//#endif
+                    {
+                        Object.DestroyImmediate(result);
+                    }
                     results.RemoveAt(i);
                 }
                 else
@@ -46,7 +59,12 @@ namespace Unity2Dx
             for (int i = 0; i < missingComponentTypesCount; i++)
             {
                 var componentType = componentTypes[i];
-                var component = gameObject.AddComponent(componentType);
+                var component =
+//#if UNITY_EDITOR
+//                    !Application.IsPlaying(gameObject) ?
+//                    UnityEditor.Undo.AddComponent(gameObject, componentType) :
+//#endif
+                    gameObject.AddComponent(componentType);
                 results.Add((T)component);
             }
         }
