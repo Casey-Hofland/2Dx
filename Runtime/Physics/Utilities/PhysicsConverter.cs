@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#nullable enable
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -40,7 +41,7 @@ namespace Unity2Dx.Physics
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Collider/*'/>
         public static void ToCollider2D(this Collider collider, Collider2D collider2D) => collider.ToCollider2D(collider2D, default);
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Collider/*'/>
-        public static void ToCollider2D(this Collider collider, Collider2D collider2D, ConversionSettings conversionSettings)
+        public static void ToCollider2D(this Collider collider, Collider2D collider2D, Outliner? outliner)
         {
             switch(collider)
             {
@@ -54,7 +55,7 @@ namespace Unity2Dx.Physics
                     boxCollider.ToPolygonCollider2D(polygonCollider2D);
                     break;
                 case MeshCollider meshCollider when collider2D is PolygonCollider2D polygonCollider2D:
-                    meshCollider.ToPolygonCollider2D(polygonCollider2D, conversionSettings.outliner);
+                    meshCollider.ToPolygonCollider2D(polygonCollider2D, outliner);
                     break;
                 default:
                     collider.GenericPropertiesToCollider2D(collider2D);
@@ -63,9 +64,9 @@ namespace Unity2Dx.Physics
         }
 
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Collider2D/*'/>
-        public static void ToCollider(this Collider2D collider2D, Collider collider) => collider2D.ToCollider(collider, default);
+        public static void ToCollider(this Collider2D collider2D, Collider collider) => collider2D.ToCollider(collider, default, default);
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Collider2D/*'/>
-        public static void ToCollider(this Collider2D collider2D, Collider collider, Conversion2DSettings conversion2DSettings)
+        public static void ToCollider(this Collider2D collider2D, Collider collider, bool toBoxColliderSkipSafetyCheck, PolygonCollider2DConversionOptions polygonCollider2DConversionOptions)
         {
             switch(collider2D)
             {
@@ -76,7 +77,7 @@ namespace Unity2Dx.Physics
                     capsuleCollider2D.ToCapsuleCollider(capsuleCollider);
                     break;
                 case PolygonCollider2D polygonCollider2D when collider is BoxCollider boxCollider:
-                    if(conversion2DSettings.toBoxColliderSkipSafetyCheck)
+                    if(toBoxColliderSkipSafetyCheck)
                     {
                         polygonCollider2D.ToBoxCollider(boxCollider);
                     }
@@ -86,7 +87,7 @@ namespace Unity2Dx.Physics
                     }
                     break;
                 case PolygonCollider2D polygonCollider2D when collider is MeshCollider meshCollider:
-                    polygonCollider2D.ToMeshCollider(meshCollider, conversion2DSettings.polygonCollider2DConversionOptions);
+                    polygonCollider2D.ToMeshCollider(meshCollider, polygonCollider2DConversionOptions);
                     break;
                 default:
                     collider2D.GenericPropertiesToCollider(collider);
@@ -371,13 +372,13 @@ namespace Unity2Dx.Physics
         public static void ToPolygonCollider2D(this MeshCollider meshCollider, PolygonCollider2D polygonCollider2D) => meshCollider.ToPolygonCollider2D(polygonCollider2D, default);
 
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/Mesh/*'/>
-        public static void ToPolygonCollider2D(this MeshCollider meshCollider, PolygonCollider2D polygonCollider2D, Outliner outliner)
+        public static void ToPolygonCollider2D(this MeshCollider meshCollider, PolygonCollider2D polygonCollider2D, Outliner? outliner)
         {
             meshCollider.GenericPropertiesToCollider2D(polygonCollider2D);
             polygonCollider2D.isTrigger = meshCollider.convex && meshCollider.isTrigger;
 
             // Setup the renderer and camera for the render shot.
-            if(!(renderFilter.sharedMesh = meshCollider.sharedMesh))
+            if(renderFilter == null || !(renderFilter.sharedMesh = meshCollider.sharedMesh))
             {
                 polygonCollider2D.pathCount = 0;
                 polygonCollider2D.offset = Vector2.zero;
@@ -387,7 +388,7 @@ namespace Unity2Dx.Physics
             // Rotate the transform so the bounds get updated correctly.
             renderFilter.transform.rotation = Quaternion.Inverse(polygonCollider2D.transform.rotation) * meshCollider.transform.rotation;
             //renderFilter.transform.localScale = meshCollider.transform.localScale;
-            var bounds = renderRenderer.bounds;
+            var bounds = renderRenderer?.bounds ?? default;
             if(bounds.size.x == 0f || bounds.size.y == 0f)
             {
                 return;
@@ -397,6 +398,10 @@ namespace Unity2Dx.Physics
             renderFilter.transform.position -= bounds.center - Vector3.forward * bounds.extents.z;
 
             outliner = outliner ? outliner : defaultOutliner;
+            if (outliner == null || renderCamera == null || texture2D == null)
+            {
+                return;
+            }
 
             // Set the pixel and camera size.
             int pixelWidth, pixelHeight;
@@ -483,7 +488,7 @@ namespace Unity2Dx.Physics
 #endif
             }
 
-            if(conversionOptions.HasFlag(PolygonCollider2DConversionOptions.CreateMesh))
+            if(conversionOptions.HasFlag(PolygonCollider2DConversionOptions.CreateMesh) && polygonColliderMeshCreator != null)
             {
                 // Copy the polygonCollider2D paths to the polygonCollider2D dummy.
                 var pathCount = polygonColliderMeshCreator.pathCount = polygonCollider2D.pathCount;
@@ -537,23 +542,21 @@ namespace Unity2Dx.Physics
         private static List<Vector2> points = new List<Vector2>();
         private static List<Vector2> path = new List<Vector2>();
 
-        private static Outliner defaultOutliner;
-        private static Texture2D texture2D;
+        private static Outliner? defaultOutliner;
+        private static Texture2D? texture2D;
         private static Rect rect = new Rect();
         private static readonly Vector2 centerPivot = new Vector2(0.5f, 0.5f);
 
-        private static Camera renderCamera;
-        private static MeshFilter renderFilter;
-        private static MeshRenderer renderRenderer;
+        private static Camera? renderCamera;
+        private static MeshFilter? renderFilter;
+        private static MeshRenderer? renderRenderer;
 
-        private static PolygonCollider2D polygonColliderMeshCreator;
+        private static PolygonCollider2D? polygonColliderMeshCreator;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void InitColliderConversion()
         {
-            var settings = Settings.GetSettings;
-
-            defaultOutliner = settings.defaultOutliner ? settings.defaultOutliner : ScriptableObject.CreateInstance<Outliner>();
+            defaultOutliner = ScriptableObject.CreateInstance<Outliner>();
             texture2D = new Texture2D(0, 0, TextureFormat.R8, false);
 
             // Create renderCamera GameObject.
@@ -618,7 +621,7 @@ namespace Unity2Dx.Physics
         }
 
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/PhysicMaterial/*'/>
-        public static PhysicsMaterial2D AsPhysicsMaterial2D(this PhysicMaterial physicMaterial)
+        public static PhysicsMaterial2D? AsPhysicsMaterial2D(this PhysicMaterial physicMaterial)
         {
             if(!physicMaterial)
             {
@@ -644,7 +647,7 @@ namespace Unity2Dx.Physics
         }
 
         /// <include file='../Documentation.xml' path='docs/PhysicsConverter/PhysicsMaterial2D/*'/>
-        public static PhysicMaterial AsPhysicMaterial(this PhysicsMaterial2D physicsMaterial2D)
+        public static PhysicMaterial? AsPhysicMaterial(this PhysicsMaterial2D physicsMaterial2D)
         {
             if(!physicsMaterial2D)
             {
@@ -805,6 +808,107 @@ namespace Unity2Dx.Physics
 
             normalizedRelativeTorque.z *= weightedTorque2D;
             constantForce.relativeTorque = Quaternion.Inverse(constantForce.transform.rotation) * normalizedRelativeTorque;
+        }
+        #endregion
+
+        #region Joints
+        private static void GenericPropertiesToJoint2D(this Joint joint, Joint2D joint2D)
+        {
+            joint2D.breakForce = joint.breakForce;
+            joint2D.breakTorque = joint.breakTorque;
+            //joint2D.connectedBody
+            joint2D.enableCollision = joint.enableCollision;
+        }
+
+        private static void GenericPropertiesToJoint(this Joint2D joint2D, Joint joint)
+        {
+            joint.breakForce = joint2D.breakForce;
+            joint.breakTorque = joint2D.breakTorque;
+            //joint.connectedBody = 
+            joint.enableCollision = joint2D.enableCollision;
+        }
+
+        private static void GenericPropertiesToAnchoredJoint2D(this Joint joint, AnchoredJoint2D anchoredJoint2D)
+        {
+            joint.GenericPropertiesToJoint2D(anchoredJoint2D);
+
+            //anchoredJoint2D.anchor = 
+            anchoredJoint2D.autoConfigureConnectedAnchor = joint.autoConfigureConnectedAnchor;
+            //anchoredJoint2D.connectedAnchor = 
+        }
+
+        private static void GenericPropertiesToJoint(this AnchoredJoint2D anchoredJoint2D, Joint joint)
+        {
+            ((Joint2D)anchoredJoint2D).GenericPropertiesToJoint(joint);
+
+            //joint.anchor = 
+            joint.autoConfigureConnectedAnchor = anchoredJoint2D.autoConfigureConnectedAnchor;
+            //joint.connectedAnchor = 
+        }
+
+        public static void ToJoint2D(this Joint joint, Joint2D joint2D)
+        {
+            switch (joint)
+            {
+                case FixedJoint fixedJoint when joint2D is FixedJoint2D fixedJoint2D:
+                    fixedJoint.ToFixedJoint2D(fixedJoint2D);
+                    break;
+                case SpringJoint springJoint when joint2D is SpringJoint2D springJoint2D:
+                    springJoint.ToSpringJoint2D(springJoint2D);
+                    break;
+                default:
+                    joint.GenericPropertiesToJoint2D(joint2D);
+                    break;
+            }
+        }
+
+        public static void ToJoint(this Joint2D joint2D, Joint joint)
+        {
+            switch (joint2D)
+            {
+                case FixedJoint2D fixedJoint2D when joint is FixedJoint fixedJoint:
+                    fixedJoint2D.ToFixedJoint(fixedJoint);
+                    break;
+                case SpringJoint2D springJoint2D when joint is SpringJoint springJoint:
+                    springJoint2D.ToSpringJoint(springJoint);
+                    break;
+                default:
+                    joint2D.GenericPropertiesToJoint(joint);
+                    break;
+            }
+        }
+
+        public static void ToFixedJoint2D(this FixedJoint fixedJoint, FixedJoint2D fixedJoint2D)
+        {
+            fixedJoint.GenericPropertiesToAnchoredJoint2D(fixedJoint2D);
+
+            //fixedJoint2D.dampingRatio = 
+            //fixedJoint2D.frequency = 
+        }
+
+        public static void ToFixedJoint(this FixedJoint2D fixedJoint2D, FixedJoint fixedJoint)
+        {
+            fixedJoint2D.GenericPropertiesToJoint(fixedJoint);
+        }
+
+        public static void ToSpringJoint2D(this SpringJoint springJoint, SpringJoint2D springJoint2D)
+        {
+            springJoint.GenericPropertiesToAnchoredJoint2D(springJoint2D);
+
+            springJoint2D.distance = springJoint.maxDistance;
+            //springJoint2D.dampingRatio = 
+            //springJoint2D.frequency = 
+        }
+
+        public static void ToSpringJoint(this SpringJoint2D springJoint2D, SpringJoint springJoint)
+        {
+            springJoint2D.GenericPropertiesToJoint(springJoint);
+
+            //springJoint.spring = 
+            //springJoint.damper = 
+
+            springJoint.maxDistance = springJoint2D.distance;
+            springJoint.minDistance = Mathf.Min(springJoint.minDistance, springJoint.maxDistance);
         }
         #endregion
     }

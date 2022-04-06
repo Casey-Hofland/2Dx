@@ -1,47 +1,44 @@
-﻿using UnityEngine;
+#nullable enable
+using UnityEngine;
 
 namespace Unity2Dx
 {
-    public abstract class Converter : MonoBehaviour
+    [ExecuteAlways]
+    public abstract class Converter<TConverter> : ConverterBase
+        where TConverter : Component, IConverter
     {
-        private bool started = false;
+        private TConverter? _converter;
+        public override IConverter converter => _converter ? _converter! : (_converter = GetComponent<TConverter>());
 
-        protected virtual void OnEnable()
-        {
-            Dimension.AddConverter(this);
-            if(started)
-            {
-                Convert(Dimension.is2DNot3D);
-            }
-        }
+        protected virtual void OnValidate() => Debug.Log("Check if Execute Always can be removed from Converter.");
 
-        protected virtual void Start()
-        {
-            Convert(Dimension.is2DNot3D);
-            started = true;
-        }
+        protected virtual void Awake() => this.Awake(Convert);
+        protected virtual void OnDestroy() => this.OnDestroy(Convert);
+    }
 
-        protected virtual void OnDisable()
-        {
-            Dimension.RemoveConverter(this);
-        }
+    [ExecuteAlways]
+    public abstract class Converter<TConverter, TComponent, TComponent2D> : ConverterBase<TComponent, TComponent2D>
+        where TConverter : Component, IConverter
+        where TComponent : Component
+        where TComponent2D : Component
+    {
+        private TConverter? _converter;
+        public override IConverter converter => _converter ? _converter! : (_converter = GetComponent<TConverter>());
 
-        /// <include file='../Documentation.xml' path='docs/Converter/Convert/*'/>
-        public void Convert(bool to2DNot3D)
-        {
-            if(to2DNot3D)
-            {
-                ConvertTo2D();
-            }
-            else
-            {
-                ConvertTo3D();
-            }
-        }
+        protected virtual void Awake() => this.Awake(Convert);
+        protected virtual void OnDestroy() => this.OnDestroy(Convert);
+    }
 
-        /// <include file='../Documentation.xml' path='docs/Converter/ConvertTo2D/*'/>
-        public abstract void ConvertTo2D();
-        /// <include file='../Documentation.xml' path='docs/Converter/ConvertTo3D/*'/>
-        public abstract void ConvertTo3D();
+    [ExecuteAlways]
+    public abstract class CopyConverter<TConverter, TComponent, TComponent2D> : CopyConverterBase<TComponent, TComponent2D>
+        where TConverter : Component, ICopyConverter
+        where TComponent : Component
+        where TComponent2D : Component
+    {
+        private TConverter? _converter;
+        public override ICopyConverter copyConverter => _converter ? _converter! : (_converter = GetComponent<TConverter>());
+
+        protected virtual void Awake() => this.Awake(Convert, Copy);
+        protected virtual void OnDestroy() => this.OnDestroy(Convert, Copy);
     }
 }

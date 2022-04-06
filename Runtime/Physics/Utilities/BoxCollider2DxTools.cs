@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using UnityEngine;
 
 namespace Unity2Dx.Physics

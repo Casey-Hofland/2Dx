@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#nullable enable
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Unity2Dx.Physics
@@ -263,6 +264,115 @@ namespace Unity2Dx.Physics
             other.force = constantForce2D.force;
             other.relativeForce = constantForce2D.relativeForce;
             other.torque = constantForce2D.torque;
+        }
+        #endregion
+
+        #region Joints
+        private static void GenericPropertiesToJoint(this Joint joint, Joint other)
+        {
+            other.hideFlags = joint.hideFlags;
+
+            other.anchor = joint.anchor;
+            other.autoConfigureConnectedAnchor = joint.autoConfigureConnectedAnchor;
+            other.axis = joint.axis;
+            other.breakForce = joint.breakForce;
+            other.breakTorque = joint.breakTorque;
+            other.connectedAnchor = joint.connectedAnchor;
+            other.connectedArticulationBody = joint.connectedArticulationBody;
+            other.connectedBody = joint.connectedBody;
+            other.connectedMassScale = joint.connectedMassScale;
+            other.enableCollision = joint.enableCollision;
+            other.enablePreprocessing = joint.enablePreprocessing;
+            other.massScale = joint.massScale;
+        }
+
+        private static void GenericPropertiesToJoint2D(this Joint2D joint2D, Joint2D other)
+        {
+            other.enabled = joint2D.enabled;
+            other.hideFlags = joint2D.hideFlags;
+
+            other.breakForce = joint2D.breakForce;
+            other.breakTorque = joint2D.breakTorque;
+            other.connectedBody = joint2D.connectedBody;
+            other.enableCollision = joint2D.enableCollision;
+        }
+
+        private static void GenericPropertiesToAnchoredJoint2D(this AnchoredJoint2D anchoredJoint2D, AnchoredJoint2D other)
+        {
+            anchoredJoint2D.GenericPropertiesToJoint2D(other);
+
+            other.anchor = anchoredJoint2D.anchor;
+            other.autoConfigureConnectedAnchor = anchoredJoint2D.autoConfigureConnectedAnchor;
+            other.connectedAnchor = anchoredJoint2D.connectedAnchor;
+        }
+
+        public static void ToJoint(this Joint joint, Joint other)
+        {
+            switch (joint)
+            {
+                case FixedJoint fixedJoint when other is FixedJoint @fixed:
+                    fixedJoint.ToFixedJoint(@fixed);
+                    break;
+                case SpringJoint springJoint when other is SpringJoint spring:
+                    springJoint.ToSpringJoint(spring);
+                    break;
+                default:
+                    joint.GenericPropertiesToJoint(other);
+                    break;
+            }
+        }
+
+        public static void ToJoint2D(this Joint2D joint2D, Joint2D other)
+        {
+            switch (joint2D)
+            {
+                case FixedJoint2D fixedJoint2D when other is FixedJoint2D @fixed:
+                    fixedJoint2D.ToFixedJoint2D(@fixed);
+                    break;
+                case SpringJoint2D springJoint2D when other is SpringJoint2D spring:
+                    springJoint2D.ToSpringJoint2D(spring);
+                    break;
+                case AnchoredJoint2D anchoredJoint2D when other is AnchoredJoint2D anchored:
+                    anchoredJoint2D.GenericPropertiesToAnchoredJoint2D(anchored);
+                    break;
+                default:
+                    joint2D.GenericPropertiesToJoint2D(other);
+                    break;
+            }
+        }
+
+        public static void ToFixedJoint(this FixedJoint fixedJoint, FixedJoint other)
+        {
+            fixedJoint.GenericPropertiesToJoint(other);
+        }
+
+        public static void ToFixedJoint2D(this FixedJoint2D fixedJoint2D, FixedJoint2D other)
+        {
+            fixedJoint2D.GenericPropertiesToAnchoredJoint2D(other);
+
+            other.dampingRatio = fixedJoint2D.dampingRatio;
+            other.frequency = fixedJoint2D.frequency;
+        }
+
+        public static void ToSpringJoint(this SpringJoint springJoint, SpringJoint other)
+        {
+            springJoint.GenericPropertiesToJoint(other);
+
+            other.damper = springJoint.damper;
+            other.maxDistance = springJoint.maxDistance;
+            other.minDistance = springJoint.minDistance;
+            other.spring = springJoint.spring;
+            other.tolerance = springJoint.tolerance;
+        }
+
+        public static void ToSpringJoint2D(this SpringJoint2D springJoint2D, SpringJoint2D other)
+        {
+            springJoint2D.GenericPropertiesToAnchoredJoint2D(other);
+
+            other.autoConfigureDistance = springJoint2D.autoConfigureDistance;
+            other.dampingRatio = springJoint2D.dampingRatio;
+            other.distance = springJoint2D.distance;
+            other.frequency = springJoint2D.frequency;
         }
         #endregion
     }
