@@ -1,0 +1,102 @@
+﻿<docs>
+    <PhysicsConvert>
+        <PhysicMaterial>
+            <summary>Converts a PhysicMaterial to its PhysicsMaterial2D equivalent.</summary>
+            <param name="physicMaterial">The PhysicMaterial to convert.</param>
+            <returns>The PhysicsMaterial2D equivalent.</returns>
+        </PhysicMaterial>
+        <PhysicsMaterial2D>
+            <summary>Converts a PhysicsMaterial2D to its PhysicMaterial equivalent.</summary>
+            <param name="physicsMaterial2D">The PhysicsMaterial2D to convert.</param>
+            <returns>The PhysicMaterial equivalent.</returns>
+        </PhysicsMaterial2D>
+        <Rigidbody>
+            <summary>Converts a Rigidbody to its Rigidbody2D equivalent.</summary>
+            <param name="rigidbody">The Rigidbody to convert.</param>
+            <param name="rigidbody2D">The Rigidbody2D to convert to.</param>
+        </Rigidbody>
+        <Rigidbody2D>
+            <summary>Converts a Rigidbody2D to its Rigidbody equivalent.</summary>
+            <param name="rigidbody2D">The Rigidbody2D to convert.</param>
+            <param name="rigidbody">The Rigidbody to convert to.</param>
+        </Rigidbody2D>
+        <RigidbodyConstraints>
+            <summary>Converts RigidbodyConstraints to their RigidbodyConstraints2D equivalent.</summary>
+            <param name="constraints">The RigidbodyConstraints to convert.</param>
+            <returns>The RigidbodyConstraints2D equivalent.</returns>
+        </RigidbodyConstraints>
+        <RigidbodyConstraints2D>
+            <summary>Converts RigidbodyConstraints2D to their RigidbodyConstraints equivalent.</summary>
+            <param name="constraints2D">The RigidbodyConstraints2D to convert.</param>
+            <param name="constraints">The RigidbodyConstraints to convert to.</param>
+            <returns>The RigidbodyConstraints equivalent.</returns>
+        </RigidbodyConstraints2D>
+        <CharacterController>
+            <summary>Converts a CharacterController to its CharacterController2D equivalent.</summary>
+            <param name="characterController">The CharacterController to convert.</param>
+            <param name="characterController2D">The CharacterController2D to convert to.</param>
+        </CharacterController>
+        <CharacterController2D>
+            <summary>Converts a CharacterController2D to its CharacterController equivalent.</summary>
+            <param name="characterController2D">The CharacterController2D to convert.</param>
+            <param name="characterController">The CharacterController to convert to.</param>
+        </CharacterController2D>
+        <Sphere>
+            <summary>Converts a SphereCollider to its CircleCollider2D equivalent.</summary>
+            <param name="sphereCollider">The SphereCollider to convert.</param>
+            <param name="circleCollider2D">The CircleCollider2D to convert to.</param>
+        </Sphere>
+        <Circle2D>
+            <summary>Converts a CircleCollider2D to its SphereCollider equivalent.</summary>
+            <param name="circleCollider2D">The CircleCollider2D to convert.</param>
+            <param name="sphereCollider">The SphereCollider to convert to.</param>
+        </Circle2D>
+        <Capsule>
+            <summary>Converts a CapsuleCollider to its CapsuleCollider2D equivalent.</summary>
+            <param name="capsuleCollider">The CapsuleCollider to convert.</param>
+            <param name="capsuleCollider2D">The CapsuleCollider2D to convert to.</param>
+        </Capsule>
+        <Capsule2D>
+            <summary>Converts a CapsuleCollider2D to its CapsuleCollider equivalent.</summary>
+            <param name="capsuleCollider2D">The CapsuleCollider2D to convert.</param>
+            <param name="capsuleCollider">The CapsuleCollider to convert to.</param>
+        </Capsule2D>
+        <Box>
+            <summary>Converts a BoxCollider to its PolygonCollider2D equivalent.</summary>
+            <param name="boxCollider">The BoxCollider to convert.</param>
+            <param name="polygonCollider2D">The PolygonCollider2D to convert to.</param>
+        </Box>
+        <Box2D>
+            <summary>Converts a PolygonCollider2D to its BoxCollider equivalent.</summary>
+            <param name="polygonCollider2D">The PolygonCollider2D to convert.</param>
+            <param name="boxCollider">The BoxCollider to convert to.</param>
+        </Box2D>
+        <Box2DSafe>
+            <summary>Converts a PolygonCollider2D to its BoxCollider equivalent if the PolygonCollider2D is an appropriate BoxCollider.</summary>
+            <param name="polygonCollider2D">The BoxCollider2D to convert.</param>
+            <param name="boxCollider">The BoxCollider to convert to.</param>
+        </Box2DSafe>
+        <Mesh>
+            <summary>Converts a MeshCollider to its PolygonCollider2D equivalent.</summary>
+            <param name="meshCollider">The MeshCollider to convert.</param>
+            <param name="polygonCollider2D">The PolygonCollider2D to convert to.</param>
+            <param name="outliner">The outliner holding the settings for tracing a MeshCollider outline.</param>
+        </Mesh>
+        <Polygon2D>
+            <summary>Converts a PolygonCollider2D to its MeshCollider equivalent.</summary>
+            <param name="polygonCollider2D">The PolygonCollider2D to convert.</param>
+            <param name="meshCollider">The MeshCollider to convert to.</param>
+            <param name="converstionOptions">Options used to determine how to convert the PolygonCollider2D.</param>
+        </Polygon2D>
+        <ConstantForce>
+            <summary>Converts a ConstantForce to its ConstantForce2D equivalent.</summary>
+            <param name="constantForce">The ConstantForce to convert.</param>
+            <param name="constantForce2D">The ConstantForce2D to convert to.</param>
+        </ConstantForce>
+        <ConstantForce2D>
+            <summary>Converts a ConstantForce2D to its ConstantForce equivalent.</summary>
+            <param name="constantForce2D">The ConstantForce2D to convert.</param>
+            <param name="constantForce">The ConstantForce to convert to.</param>
+        </ConstantForce2D>
+    </PhysicsConvert>
+</docs>
