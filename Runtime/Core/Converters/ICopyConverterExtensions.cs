@@ -16,8 +16,11 @@ namespace Unity2Dx
 #if UNITY_EDITOR
             if (!Application.isPlaying)
             {
-                UnityEditor.Events.UnityEventTools.AddPersistentListener(copyConverter.copyConverter.copied, copy);
-                copyConverter.copyConverter.copied.SetPersistentListenerState(copyConverter.copyConverter.copied.GetPersistentEventCount() - 1, UnityEventCallState.EditorAndRuntime);
+                if (!copyConverter.copyConverter.copied.HasPersistentTarget((target, methodName) => target == (Object)copyConverter && methodName == copy.Method.Name))
+                {
+                    UnityEditor.Events.UnityEventTools.AddPersistentListener(copyConverter.copyConverter.copied, copy);
+                    copyConverter.copyConverter.copied.SetPersistentListenerState(copyConverter.copyConverter.copied.GetPersistentEventCount() - 1, UnityEventCallState.EditorAndRuntime);
+                }
             }
             else
 #endif
