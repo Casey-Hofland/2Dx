@@ -48,19 +48,19 @@ namespace Unity2Dx
         #region Internal
         internal static void Awake(this IConverter converter, UnityAction<bool> convert)
         {
-            if (converter.TryGetRootConvertible(out IConvertible? convertible))
-            {
-                convert(convertible!.is2DNot3D);
-            }
+            //if (converter.TryGetRootConvertible(out IConvertible? convertible))
+            //{
+            //    convert(convertible!.is2DNot3D);
+            //}
 
 #if UNITY_EDITOR
+            // Due to Undo operations or entering and exiting playmode, the persistent listener may remain, so we must make sure to remove it on awake as well.
+            UnityEditor.Events.UnityEventTools.RemovePersistentListener(converter.converter.converted, convert);
+
             if (!Application.isPlaying)
             {
-                if (!converter.converter.converted.HasPersistentTarget((target, methodName) => target == (UnityEngine.Object)converter && methodName == convert.Method.Name))
-                {
-                    UnityEditor.Events.UnityEventTools.AddPersistentListener(converter.converter.converted, convert);
-                    converter.converter.converted.SetPersistentListenerState(converter.converter.converted.GetPersistentEventCount() - 1, UnityEventCallState.EditorAndRuntime);
-                }
+                UnityEditor.Events.UnityEventTools.AddPersistentListener(converter.converter.converted, convert);
+                converter.converter.converted.SetPersistentListenerState(converter.converter.converted.GetPersistentEventCount() - 1, UnityEventCallState.EditorAndRuntime);
             }
             else
 #endif
@@ -82,24 +82,6 @@ namespace Unity2Dx
                 converter.converter.converted.RemoveListener(convert);
             }
         }
-
-        internal static int FindPersistentTarget(this UnityEventBase unityEvent, Func<UnityEngine.Object, string, bool> func)
-        {
-            for (int i = unityEvent.GetPersistentEventCount() - 1; i >= 0; i--)
-            {
-                var target = unityEvent.GetPersistentTarget(i);
-                var methodName = unityEvent.GetPersistentMethodName(i);
-
-                if (func(target, methodName))
-                {
-                    return i;
-                }
-            }
-
-            return -1;
-        }
-
-        internal static bool HasPersistentTarget(this UnityEventBase unityEvent, Func<UnityEngine.Object, string, bool> func) => unityEvent.FindPersistentTarget(func) != -1;
 
         //internal static Type[] ConvertTypeComponents<TComponent, TComponent2D>(this IConverter<TComponent, TComponent2D> converter, params Component[] components)
         //    where TComponent : Component
