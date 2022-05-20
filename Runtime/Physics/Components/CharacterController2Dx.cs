@@ -4,6 +4,8 @@ using UnityExtras;
 
 namespace Unity2Dx.Physics
 {
+    [AddComponentMenu("2Dx/CharacterController 2Dx")]
+    [DisallowMultipleComponent]
     public sealed class CharacterController2Dx : CopyConvertible<CharacterController, CharacterController2D>
     {
         protected override void ComponentToComponent(CharacterController component, CharacterController other)

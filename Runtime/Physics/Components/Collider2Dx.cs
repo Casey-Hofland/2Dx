@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Unity2Dx.Physics
 {
+    [AddComponentMenu("2Dx/Collider 2Dx")]
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Transform2Dx))]
     public sealed class Collider2Dx : Converter<Transform2Dx, Collider, Collider2D>

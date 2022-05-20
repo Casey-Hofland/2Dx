@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace Unity2Dx.Physics
 {
+    [AddComponentMenu("2Dx/Constant Force 2Dx")]
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Rigidbody2Dx))]
     [RequireComponent(typeof(Transform2Dx))]

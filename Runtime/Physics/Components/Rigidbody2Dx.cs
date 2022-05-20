@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace Unity2Dx.Physics
 {
+    [AddComponentMenu("2Dx/Rigidbody 2Dx")]
     [DisallowMultipleComponent]
     public sealed class Rigidbody2Dx : CopyConvertible<Rigidbody, Rigidbody2D>
     {

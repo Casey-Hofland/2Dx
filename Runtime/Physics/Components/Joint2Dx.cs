@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Unity2Dx.Physics
 {
+    [AddComponentMenu("2Dx/Joint 2Dx")]
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Rigidbody2Dx))]
     public sealed class Joint2Dx : CopyConverter<Rigidbody2Dx, Joint, Joint2D>
