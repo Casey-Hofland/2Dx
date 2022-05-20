@@ -7,7 +7,6 @@ namespace Unity2Dx
 {
     [AddComponentMenu("2Dx/Audio Transform 2Dx")]
     [DisallowMultipleComponent]
-    [RequireComponent(typeof(ChildLock))]
     [ExecuteAlways]
     public sealed class AudioTransform2Dx : Convertible
     {
@@ -27,11 +26,8 @@ namespace Unity2Dx
             }
         }
 
-        private ChildLock? _childLock;
-        public ChildLock childLock => _childLock ? _childLock! : (_childLock = GetComponent<ChildLock>());
-
-        private Transform? _audioTransform;
-        public Transform audioTransform => _audioTransform ? _audioTransform! : (_audioTransform = childLock.GetChild(this, "Audio Transform"));
+        [SerializeField][HideInInspector] private ChildLock _audioTransform = new ChildLock("Audio Transform");
+        public Transform audioTransform => _audioTransform.GetChild(transform);
 
         public override GameObject gameObject3D => gameObject;
         public override GameObject gameObject2D => audioTransform.gameObject;
@@ -55,7 +51,7 @@ namespace Unity2Dx
 
         private void OnDestroy()
         {
-            DestroyImmediate(audioTransform.gameObject);
+            DestroyImmediate(_audioTransform.gameObject);
         }
 
         protected override void OnConvert(bool convertTo2DNot3D)
