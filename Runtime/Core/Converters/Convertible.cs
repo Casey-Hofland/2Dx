@@ -10,22 +10,7 @@ namespace Unity2Dx
         public override abstract GameObject gameObject3D { get; }
         public override abstract GameObject gameObject2D { get; }
 
-        [field: SerializeField]
-        private bool _is2DNot3D;
-
-        public bool is2DNot3D { get; private set; }
-
-        protected virtual void OnValidate()
-        {
-#if UNITY_EDITOR
-            // Convert in editor. We delay this call because Unity throws errors when DestroyImmediate is used inside of an OnValidate call.
-            UnityEditor.EditorApplication.delayCall += () =>
-            {
-                Convert(_is2DNot3D);
-                is2DNot3D = _is2DNot3D;
-            };
-#endif
-        }
+        [field: SerializeField][field: ConvertibleSwitch] public bool is2DNot3D { get; private set; }
 
         public new void Convert(bool convertTo2DNot3D)
         {
@@ -35,7 +20,7 @@ namespace Unity2Dx
             }
 
             base.Convert(convertTo2DNot3D);
-            is2DNot3D = _is2DNot3D = convertTo2DNot3D;
+            is2DNot3D = convertTo2DNot3D;
         }
     }
 
@@ -48,22 +33,7 @@ namespace Unity2Dx
         public override abstract GameObject gameObject3D { get; }
         public override abstract GameObject gameObject2D { get; }
 
-        [field: SerializeField]
-        private bool _is2DNot3D;
-
-        public bool is2DNot3D { get; private set; }
-
-        protected virtual void OnValidate()
-        {
-#if UNITY_EDITOR
-            // Convert in editor. We delay this call because Unity throws errors when DestroyImmediate is used inside of an OnValidate call.
-            UnityEditor.EditorApplication.delayCall += () =>
-            {
-                Convert(_is2DNot3D);
-                is2DNot3D = _is2DNot3D;
-            };
-#endif
-        }
+        [field: SerializeField][field: ConvertibleSwitch] public bool is2DNot3D { get; private set; }
 
         public new void Convert(bool convertTo2DNot3D)
         {
@@ -73,7 +43,7 @@ namespace Unity2Dx
             }
 
             base.Convert(convertTo2DNot3D);
-            is2DNot3D = _is2DNot3D = convertTo2DNot3D;
+            is2DNot3D = convertTo2DNot3D;
         }
     }
 
@@ -169,22 +139,7 @@ namespace Unity2Dx
             DestroyImmediate(_copyGameObject2D);
         }
 
-        [field: SerializeField]
-        private bool _is2DNot3D;
-
-        public bool is2DNot3D { get; private set; }
-
-        protected virtual void OnValidate()
-        {
-#if UNITY_EDITOR
-            // Convert in editor. We delay this call because Unity throws errors when DestroyImmediate is used inside of an OnValidate call.
-            UnityEditor.EditorApplication.delayCall += () =>
-            {
-                Convert(_is2DNot3D);
-                is2DNot3D = _is2DNot3D;
-            };
-#endif
-        }
+        [field: SerializeField] [field: ConvertibleSwitch] public bool is2DNot3D { get; private set; }
 
         public new void Convert(bool convertTo2DNot3D)
         {
@@ -195,7 +150,7 @@ namespace Unity2Dx
 
             Copy(convertTo2DNot3D);
             base.Convert(convertTo2DNot3D);
-            is2DNot3D = _is2DNot3D = convertTo2DNot3D;
+            is2DNot3D = convertTo2DNot3D;
         }
     }
 }
