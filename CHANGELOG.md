@@ -4,8 +4,7 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [0.3.0-pre] - 2022-04-06
-
+## [0.3.0-exp] - 2022-05-21
 # New Workflow!
 The new workflow is finally component-based!!! Classes can now inherit from `Convertible` to turn into convertibles with their own is2DNot3D switch! The component is effectively 2D when this is true, and 3D when this is false.
 
@@ -17,9 +16,14 @@ And finally: 2Dx now offers a dead-easy way to write your own converters! Simply
 
 There's still a lot improvements left to make in 2Dx. However, the component-based workflow should make it easier for changes to affect separate parts of the codebase now, instead of the whole thing.
 
+### Added
+- Reliance on the UnityExtras package. This package holds common Unity Components that may be reused in other projects.
+
 ### Changed
 - Minimum Unity version changed to 2021.1.
 - nullable reference types enabled in all scripts.
+- Renamed PhysicsConverter to PhysicsConvert and made it a partial class for better organization.
+- Renamed PhysicsCopier to PhysicsCopy and made it a partial class for better organization.
 - Too much to count, if the library wasn't in experimental this would simply release as a whole new version.
 
 ## [0.2.1-pre.3] - 2021-07-17

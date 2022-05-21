@@ -48,12 +48,15 @@ namespace Unity2Dx
         #region Internal
         internal static void Awake(this IConverter converter, UnityAction<bool> convert)
         {
-            if (converter.TryGetRootConvertible(out IConvertible? convertible))
-            {
-                convert(convertible!.is2DNot3D);
-            }
+            //if (converter.TryGetRootConvertible(out IConvertible? convertible))
+            //{
+            //    convert(convertible!.is2DNot3D);
+            //}
 
 #if UNITY_EDITOR
+            // Due to Undo operations or entering and exiting playmode, the persistent listener may remain, so we must make sure to remove it on awake as well.
+            UnityEditor.Events.UnityEventTools.RemovePersistentListener(converter.converter.converted, convert);
+
             if (!Application.isPlaying)
             {
                 UnityEditor.Events.UnityEventTools.AddPersistentListener(converter.converter.converted, convert);

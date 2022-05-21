@@ -1,0 +1,23 @@
+﻿<docs>
+    <Convert>
+        <ToVector2D>
+            <summary>Transforms a 3D vector to a 2D vector from one rotation to another.</summary>
+            <param name="vector">The 3D vector to transform.</param>
+            <param name="rotation">The 3D rotation to transform to.</param>
+            <param name="rotation2D">The 2D rotation to transform from.</param>
+            <param name="component">The 3D Component to use for rotation.</param>
+            <param name="component2D">The 2D Component to use for rotation.</param>
+            <returns>The relative 2D vector.</returns>
+        </ToVector2D>
+        <ToVector>
+            <summary>Transforms a 2D vector to a 3D vector from one rotation to another.</summary>
+            <param name="vector2D">The 2D vector to transform.</param>
+            <param name="rotation2D">The 2D rotation to transform to.</param>
+            <param name="rotation">The 3D rotation to transform from.</param>
+            <param name="original">The original 3D vector. Used to determine the z outcome.</param>
+            <param name="component2D">The 2D Component to use for rotation.</param>
+            <param name="component">The 3D Component to use for rotation.</param>
+            <returns>The relative 3D vector.</returns>
+        </ToVector>
+    </Convert>
+</docs>

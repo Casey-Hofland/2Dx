@@ -1,7 +1,9 @@
 {
     "name": "CaseyDeCoder.2Dx",
     "rootNamespace": "Unity2Dx",
-    "references": [],
+    "references": [
+        "GUID:806b0a144ac65a74899d99f880ae9914"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

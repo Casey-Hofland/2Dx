@@ -3,7 +3,10 @@
     "rootNamespace": "Unity2Dx.Physics",
     "references": [
         "GUID:725987cc13018944694259f3a192f49e",
-        "GUID:457756d89b35d2941b3e7b37b4ece6f1"
+        "GUID:457756d89b35d2941b3e7b37b4ece6f1",
+        "GUID:806b0a144ac65a74899d99f880ae9914",
+        "GUID:282ac69ac28230b48b9be2db8cff7e7a",
+        "GUID:ac7fc7e75e5cd2f44899ef29162e2694"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

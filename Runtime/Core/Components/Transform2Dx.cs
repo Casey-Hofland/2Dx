@@ -5,24 +5,19 @@ namespace Unity2Dx
 {
     [AddComponentMenu("2Dx/Transform 2Dx")]
     [DisallowMultipleComponent]
-    [RequireComponent(typeof(ChildLock))]
     [ExecuteAlways]
     public sealed class Transform2Dx : Convertible
     {
         #region Properties
         private static readonly Quaternion zRotation90Deg = new Quaternion(0f, 0f, 0.7071068f, 0.7071068f);
 
-        private ChildLock? _childLock;
-        public ChildLock childLock => _childLock ? _childLock! : (_childLock = GetComponent<ChildLock>());
-
-        private Transform? _transform3D;
-        public Transform transform3D => _transform3D ? _transform3D! : (_transform3D = childLock.GetChild(this, "Transform 3D"));
+        [SerializeField][HideInInspector] private ChildLock _transform3D = new ChildLock("Transform 3D");
+        public Transform transform3D => _transform3D.GetChild(transform);
         public override GameObject gameObject3D => transform3D.gameObject;
 
-        private Transform? _transform2D;
-        public Transform transform2D => _transform2D ? _transform2D! : (_transform2D = childLock.GetChild(this, "Transform 2D"));
+        [SerializeField][HideInInspector] private ChildLock _transform2D = new ChildLock("Transform 2D");
+        public Transform transform2D => _transform2D.GetChild(transform);
         public override GameObject gameObject2D => transform2D.gameObject;
-
 
         [field: Tooltip("Controls when the transforms will be updated.")]
         [field: SerializeField]
@@ -74,8 +69,8 @@ namespace Unity2Dx
 
         private void OnDestroy()
         {
-            DestroyImmediate(gameObject3D);
-            DestroyImmediate(gameObject2D);
+            DestroyImmediate(_transform3D.gameObject);
+            DestroyImmediate(_transform2D.gameObject);
 
             //WorldLock.worldRotated -= WorldRotated;
         }
@@ -100,9 +95,9 @@ namespace Unity2Dx
         private void OnValidate()
         {
             // Validation check because of warning "SendMessage cannot be called during Awake, CheckConsistency, or OnValidate"
-            if (_transform2D != null)
+            if (_transform2D.child != null)
             {
-                _transform2D.hasChanged = true;
+                _transform2D.child.hasChanged = true;
             }
         }
 

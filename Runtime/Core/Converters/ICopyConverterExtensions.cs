@@ -14,6 +14,9 @@ namespace Unity2Dx
             copyConverter.Awake(convert);
 
 #if UNITY_EDITOR
+            // Due to Undo operations or entering and exiting playmode, the persistent listener may remain, so we must make sure to remove it on awake as well.
+            UnityEditor.Events.UnityEventTools.RemovePersistentListener(copyConverter.copyConverter.copied, copy);
+
             if (!Application.isPlaying)
             {
                 UnityEditor.Events.UnityEventTools.AddPersistentListener(copyConverter.copyConverter.copied, copy);
