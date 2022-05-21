@@ -487,7 +487,7 @@ namespace Unity2Dx.Physics
             renderCamera.gameObject.SetActive(true);
             renderCamera.Render();
 
-            texture2D.Resize(pixelWidth, pixelHeight);
+            texture2D.Reinitialize(pixelWidth, pixelHeight);
             rect.width = pixelWidth;
             rect.height = pixelHeight;
             texture2D.ReadPixels(rect, 0, 0, false);
