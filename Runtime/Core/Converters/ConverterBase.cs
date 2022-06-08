@@ -70,10 +70,13 @@ namespace Unity2Dx
         public List<TComponent> copyComponent3Ds { get; } = new List<TComponent>();
         public List<TComponent2D> copyComponent2Ds { get; } = new List<TComponent2D>();
 
+        public Dictionary<TComponent2D, TComponent> copyReference3Ds { get; } = new Dictionary<TComponent2D, TComponent>();
+        public Dictionary<TComponent, TComponent2D> copyReference2Ds { get; } = new Dictionary<TComponent, TComponent2D>();
+
         protected abstract void ComponentToComponent(TComponent component, TComponent other);
         protected abstract void Component2DToComponent2D(TComponent2D component2D, TComponent2D other);
 
-        protected override void OnConvert(bool convertTo2DNot3D) => this.OnConvert(convertTo2DNot3D, Component2DToComponent, ComponentToComponent2D);
+        protected override void OnConvert(bool convertTo2DNot3D) => this.OnConvert(convertTo2DNot3D, ComponentToComponent, Component2DToComponent, Component2DToComponent2D, ComponentToComponent2D);
         protected virtual void OnCopy(bool copy3DNot2D) => this.OnCopy(copy3DNot2D, ComponentToComponent, Component2DToComponent2D);
         protected virtual void OnCopied(bool copy3DNot2D) => ((ICopyConverter<TComponent, TComponent2D>)this).OnCopied(copy3DNot2D);
 

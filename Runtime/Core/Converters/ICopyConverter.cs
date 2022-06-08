@@ -21,5 +21,8 @@ namespace Unity2Dx
     {
         public List<TComponent> copyComponent3Ds { get; }
         public List<TComponent2D> copyComponent2Ds { get; }
+
+        public Dictionary<TComponent2D, TComponent> copyReference3Ds { get; }
+        public Dictionary<TComponent, TComponent2D> copyReference2Ds { get; }
     }
 }
