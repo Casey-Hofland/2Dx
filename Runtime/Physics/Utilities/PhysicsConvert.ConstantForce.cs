@@ -8,8 +8,10 @@ namespace Unity2Dx.Physics
         /// <include file='./PhysicsConvert.xml' path='docs/PhysicsConvert/ConstantForce/*'/>
         public static void ToConstantForce2D(this ConstantForce constantForce, ConstantForce2D constantForce2D)
         {
+            constantForce2D.enabled = constantForce.enabled;
+
             constantForce2D.force = constantForce.force;
-            constantForce2D.relativeForce = constantForce.relativeForce.ToVector2D(constantForce, constantForce2D);
+            constantForce2D.relativeForce = constantForce.relativeForce.ToVector2D(constantForce, constantForce2D, RotationSource.Rigidbody2D);
 
             var normalizedRelativeTorque = constantForce.transform.rotation * constantForce.relativeTorque;
             constantForce2D.torque = (constantForce.torque.z + normalizedRelativeTorque.z) * Mathf.Rad2Deg;
@@ -18,24 +20,29 @@ namespace Unity2Dx.Physics
         /// <include file='./PhysicsConvert.xml' path='docs/PhysicsConvert/ConstantForce2D/*'/>
         public static void ToConstantForce(this ConstantForce2D constantForce2D, ConstantForce constantForce)
         {
+            constantForce2D.enabled = constantForce.enabled;
+
             Vector3 force = constantForce2D.force;
             force.z = constantForce.force.z;
 
             constantForce.force = force;
-            constantForce.relativeForce = constantForce2D.relativeForce.ToVector(constantForce2D, constantForce, constantForce.relativeForce);
+            constantForce.relativeForce = constantForce2D.relativeForce.ToVector(constantForce2D, constantForce, constantForce.relativeForce, RotationSource.Rigidbody2D);
 
             var normalizedRelativeTorque = constantForce.transform.rotation * constantForce.relativeTorque;
-            var weightedTorque2D = (Mathf.Abs(normalizedRelativeTorque.z) + Mathf.Abs(constantForce.torque.z)) * constantForce2D.torque;
-            if (weightedTorque2D != 0f)
+
+            var torqueWeight = Mathf.Abs(constantForce.torque.z) + Mathf.Abs(normalizedRelativeTorque.z);
+            if (torqueWeight != 0f)
             {
-                weightedTorque2D = 1f / weightedTorque2D * Mathf.Deg2Rad;
+                torqueWeight = Mathf.Abs(constantForce.torque.z) / torqueWeight;
             }
 
-            Vector3 torque = constantForce.torque;
-            torque.z *= weightedTorque2D;
+            var torque2D = constantForce2D.torque * Mathf.Deg2Rad;
+
+            var torque = constantForce.torque;
+            torque.z = torque2D * torqueWeight;
             constantForce.torque = torque;
 
-            normalizedRelativeTorque.z *= weightedTorque2D;
+            normalizedRelativeTorque.z = torque2D * (1f - torqueWeight);
             constantForce.relativeTorque = Quaternion.Inverse(constantForce.transform.rotation) * normalizedRelativeTorque;
         }
     }

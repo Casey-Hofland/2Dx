@@ -9,8 +9,6 @@ namespace Unity2Dx
     public sealed class Transform2Dx : Convertible
     {
         #region Properties
-        private static readonly Quaternion zRotation90Deg = new Quaternion(0f, 0f, 0.7071068f, 0.7071068f);
-
         [SerializeField][HideInInspector] private ChildLock _transform3D = new ChildLock("Transform 3D");
         public Transform transform3D => _transform3D.GetChild(transform);
         public override GameObject gameObject3D => transform3D.gameObject;
@@ -35,22 +33,6 @@ namespace Unity2Dx
             {
                 _direction2D = value;
                 transform2D.hasChanged = true;
-            }
-        }
-
-        private Vector3 upwards2D
-        {
-            get
-            {
-                switch (direction2D)
-                {
-                    case CapsuleDirection2D.Vertical:
-                        return transform.up;
-                    case CapsuleDirection2D.Horizontal:
-                        return zRotation90Deg * transform.right;
-                    default:
-                        return default;
-                }
             }
         }
 
@@ -146,7 +128,7 @@ namespace Unity2Dx
             void UpdateTransform2D()
             {
                 transform2D.SetParent(transform, false);
-                transform2D.SetPositionAndRotation(transform.position, Quaternion.LookRotation(Vector3.forward, upwards2D));
+                transform2D.SetPositionAndRotation(transform.position, transform.rotation.ToQuaternion2D(direction2D));
                 transform2D.localScale = Vector3.one;
                 transform2D.hasChanged = false;
             }
