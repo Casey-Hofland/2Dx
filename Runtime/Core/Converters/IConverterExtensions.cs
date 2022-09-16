@@ -38,57 +38,45 @@ namespace Unity2Dx
             return Array.ConvertAll(components, component => converter.GetConversionType(component));
         }
 
-        //public static Type[] ConvertTypes<TComponent, TComponent2D>(this IConverter<TComponent, TComponent2D> converter, params Type[] componentTypes)
-        //    where TComponent : Component
-        //    where TComponent2D : Component
-        //{
-        //    return Array.ConvertAll(componentTypes, componentType => converter.ConvertType(componentType));
-        //}
-
         #region Internal
         internal static void Awake(this IConverter converter, UnityAction<bool> convert)
         {
-            //if (converter.TryGetRootConvertible(out IConvertible? convertible))
-            //{
-            //    convert(convertible!.is2DNot3D);
-            //}
+            converter.converter.converted.AddListener(convert);
+        }
 
+        internal static void OnDestroy(this IConverter converter, UnityAction<bool> convert)
+        {
+            converter.converter.converted.RemoveListener(convert);
+        }
+
+        internal static void OnValidate(this IConverter converter, UnityAction<bool> convert)
+        {
 #if UNITY_EDITOR
-            // Due to Undo operations or entering and exiting playmode, the persistent listener may remain, so we must make sure to remove it on awake as well.
             UnityEditor.Events.UnityEventTools.RemovePersistentListener(converter.converter.converted, convert);
+            UnityEditor.EditorApplication.update -= Update;
 
             if (!Application.isPlaying)
             {
                 UnityEditor.Events.UnityEventTools.AddPersistentListener(converter.converter.converted, convert);
                 converter.converter.converted.SetPersistentListenerState(converter.converter.converted.GetPersistentEventCount() - 1, UnityEventCallState.EditorAndRuntime);
+                UnityEditor.EditorApplication.update += Update;
             }
-            else
-#endif
-            {
-                converter.converter.converted.AddListener(convert);
-            }
-        }
 
-        internal static void OnDestroy(this IConverter converter, UnityAction<bool> convert)
-        {
-#if UNITY_EDITOR
-            if (!Application.isPlaying)
+            void Update()
             {
-                UnityEditor.Events.UnityEventTools.RemovePersistentListener(converter.converter.converted, convert);
-            }
-            else
-#endif
-            {
-                converter.converter.converted.RemoveListener(convert);
-            }
-        }
+                if (converter is UnityEngine.Object obj && !obj)
+                {
+                    try
+                    {
+                        UnityEditor.Events.UnityEventTools.RemovePersistentListener(converter.converter.converted, convert);
+                    }
+                    catch (MissingReferenceException) { }
 
-        //internal static Type[] ConvertTypeComponents<TComponent, TComponent2D>(this IConverter<TComponent, TComponent2D> converter, params Component[] components)
-        //    where TComponent : Component
-        //    where TComponent2D : Component
-        //{
-        //    return Array.ConvertAll(components, component => converter.ConvertType(component.GetType()));
-        //}
+                    UnityEditor.EditorApplication.update -= Update;
+                }
+            }
+#endif
+        }
 
         private static Type?[] GetConversionType3Ds<TComponent, TComponent2D>(this IConverter<TComponent, TComponent2D> converter)
             where TComponent : Component
