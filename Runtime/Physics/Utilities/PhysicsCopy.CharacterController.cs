@@ -11,6 +11,7 @@ namespace Unity2Dx.Physics
         {
             characterController.GenericPropertiesToCollider(other);
 
+            other.center = characterController.center;
             other.detectCollisions = characterController.detectCollisions;
             other.enableOverlapRecovery = characterController.enableOverlapRecovery;
             other.height = characterController.height;
@@ -37,6 +38,68 @@ namespace Unity2Dx.Physics
             other.skinWidth = characterController2D.skinWidth;
             other.slopeLimit = characterController2D.slopeLimit;
             other.stepOffset = characterController2D.stepOffset;
+        }
+
+        public static void ToCharacterMover(this CharacterMover characterMover, CharacterMover other)
+        {
+            other.enabled = characterMover.enabled;
+
+            other.coyoteTime = characterMover.coyoteTime;
+            other.fastFallRatio = characterMover.fastFallRatio;
+            other.gravityScale = characterMover.gravityScale;
+            other.jumpBuffer = characterMover.jumpBuffer;
+            other.jumpHeight = characterMover.jumpHeight;
+            other.motion = characterMover.motion;
+            other.moveSpeed = characterMover.moveSpeed;
+            other.peakTime = characterMover.peakTime;
+            other.rotationSpeed = characterMover.rotationSpeed;
+            other.speedChangeRate = characterMover.speedChangeRate;
+            other.sprintBoost = characterMover.sprintBoost;
+            other.targetMotion = characterMover.targetMotion;
+        }
+
+        public static void ToCharacterMover2D(this CharacterMover2D characterMover2D, CharacterMover2D other)
+        {
+            other.enabled = characterMover2D.enabled;
+
+            other.coyoteTime = characterMover2D.coyoteTime;
+            other.fastFallRatio = characterMover2D.fastFallRatio;
+            other.gravityScale = characterMover2D.gravityScale;
+            other.jumpBuffer = characterMover2D.jumpBuffer;
+            other.jumpHeight = characterMover2D.jumpHeight;
+            other.motion = characterMover2D.motion;
+            other.moveSpeed = characterMover2D.moveSpeed;
+            other.peakTime = characterMover2D.peakTime;
+            other.speedChangeRate = characterMover2D.speedChangeRate;
+            other.sprintBoost = characterMover2D.sprintBoost;
+            other.targetMotion = characterMover2D.targetMotion;
+        }
+
+        public static void ToFirstPersonCharacter(this FirstPersonCharacter firstPersonCharacter, FirstPersonCharacter other)
+        {
+            other.bottomClamp = firstPersonCharacter.bottomClamp;
+            other.topClamp = firstPersonCharacter.topClamp;
+            other.lookTransform = firstPersonCharacter.lookTransform;
+
+            other.enabled = false;
+
+            other.moveReaction = firstPersonCharacter.moveReaction;
+            other.lookReaction = firstPersonCharacter.lookReaction;
+            other.sprintReaction = firstPersonCharacter.sprintReaction;
+            other.jumpReaction = firstPersonCharacter.jumpReaction;
+
+            other.enabled = firstPersonCharacter.enabled;
+        }
+
+        public static void ToThirdPersonCharacter2D(this ThirdPersonCharacter2D thirdPersonCharacter2D, ThirdPersonCharacter2D other)
+        {
+            other.enabled = false;
+
+            other.moveReaction = thirdPersonCharacter2D.moveReaction;
+            other.sprintReaction = thirdPersonCharacter2D.sprintReaction;
+            other.jumpReaction = thirdPersonCharacter2D.jumpReaction;
+
+            other.enabled = thirdPersonCharacter2D.enabled;
         }
     }
 }
