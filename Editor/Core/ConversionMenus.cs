@@ -18,6 +18,22 @@ namespace Unity2Dx.Editor
             Conversion.ConvertAll(true);
         }
 
+        private const string debugConvertibleCopiesMenuPath = "Window/2Dx/" + CopyConvertible<Component, Component>.debugConvertibleCopiesPrefsKey;
+        [MenuItem(debugConvertibleCopiesMenuPath)]
+        private static void DebugConvertibleCopies()
+        {
+            var key = CopyConvertible<Component, Component>.debugConvertibleCopiesPrefsKey;
+            EditorPrefs.SetBool(key, !EditorPrefs.GetBool(key, false));
+            SetDebugConvertibleCopiesChecked();
+        }
+
+        [InitializeOnLoadMethod]
+        private static void SetDebugConvertibleCopiesChecked()
+        {
+            var key = CopyConvertible<Component, Component>.debugConvertibleCopiesPrefsKey;
+            Menu.SetChecked(debugConvertibleCopiesMenuPath, EditorPrefs.GetBool(key, false));
+        }
+
         [MenuItem("CONTEXT/Component/Convert Game Object to 3D")]
         private static void ConvertTo3D(MenuCommand command)
         {

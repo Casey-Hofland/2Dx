@@ -1,4 +1,6 @@
 #nullable enable
+using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 namespace Unity2Dx
@@ -47,10 +49,91 @@ namespace Unity2Dx
         }
     }
 
+    internal static class CopyGameObjectCache
+    {
+        private static Dictionary<GameObject, GameObject> copyGameObject3Ds = new();
+        private static Dictionary<GameObject, int> count3D = new();
+
+        private static Dictionary<GameObject, GameObject> copyGameObject2Ds = new();
+        private static Dictionary<GameObject, int> count2D = new();
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void SubsystemRegistration()
+        {
+            copyGameObject3Ds = new();
+            count3D = new();
+
+            copyGameObject2Ds = new();
+            count2D = new();
+        }
+
+        public static void Add(GameObject gameObject, GameObject copyGameObject)
+        {
+            copyGameObject3Ds.Add(gameObject, copyGameObject);
+            count3D.Add(gameObject, 1);
+        }
+
+        public static void Add2D(GameObject gameObject, GameObject copyGameObject2D)
+        {
+            copyGameObject2Ds.Add(gameObject, copyGameObject2D);
+            count2D.Add(gameObject, 1);
+        }
+
+        public static bool Remove(GameObject gameObject)
+        {
+            if (!count3D.ContainsKey(gameObject)
+                || --count3D[gameObject] > 0)
+            {
+                return false;
+            }
+
+            copyGameObject3Ds.Remove(gameObject);
+            count3D.Remove(gameObject);
+            return true;
+        }
+
+        public static bool Remove2D(GameObject gameObject)
+        {
+            if (!count2D.ContainsKey(gameObject)
+                || --count2D[gameObject] > 0)
+            {
+                return false;
+            }
+
+            copyGameObject2Ds.Remove(gameObject);
+            count2D.Remove(gameObject);
+            return true;
+        }
+
+        public static bool TryGetCopy(GameObject gameObject, out GameObject copyGameObject)
+        {
+            if (copyGameObject3Ds.TryGetValue(gameObject, out copyGameObject))
+            {
+                count3D[gameObject]++;
+                return true;
+            }
+
+            return false;
+        }
+
+        public static bool TryGetCopy2D(GameObject gameObject, out GameObject copyGameObject2D)
+        {
+            if (copyGameObject2Ds.TryGetValue(gameObject, out copyGameObject2D))
+            {
+                count2D[gameObject]++;
+                return true;
+            }
+
+            return false;
+        }
+    }
+
     public abstract class CopyConvertible<TComponent, TComponent2D> : CopyConverterBase<TComponent, TComponent2D>, IConvertible
         where TComponent : Component
         where TComponent2D : Component
     {
+        internal const string debugConvertibleCopiesPrefsKey = "Debug Convertible Copies";
+
         public override ICopyConverter copyConverter => this;
 
         public override GameObject gameObject3D => gameObject;
@@ -61,37 +144,19 @@ namespace Unity2Dx
         {
             get
             {
-                if (!_copyGameObject3D)
+                if (!_copyGameObject3D && !CopyGameObjectCache.TryGetCopy(gameObject, out _copyGameObject3D))
                 {
                     _copyGameObject3D = new GameObject($"{name} {nameof(copyGameObject3D)}");
                     _copyGameObject3D.SetActive(false);
-
+                    _copyGameObject3D.hideFlags =
 #if UNITY_EDITOR
-                    // We cannot use DontDestroyOnLoad during edit mode, so instead we destroy the copy the next frame.
-                    if (!Application.IsPlaying(_copyGameObject3D))
-                    {
-                        UnityEditor.EditorApplication.delayCall += () => DestroyImmediate(_copyGameObject3D);
-                    }
-                    else
+                        EditorPrefs.GetBool(debugConvertibleCopiesPrefsKey, false) ?
+                        HideFlags.DontSave :
 #endif
-                    {
-                        DontDestroyOnLoad(_copyGameObject3D);
-                    }
+                        HideFlags.HideAndDontSave;
+
+                    CopyGameObjectCache.Add(gameObject, _copyGameObject3D);
                 }
-
-                //var _copyGameObject3DFieldInfo = typeof(CopyConvertible<,>).GetField(nameof(_copyGameObject3D));
-                //var copyConvertibles = from component in GetComponents<INewConvertible>()
-                //                       where (Component)component != this
-                //                       let type = component.GetType()
-                //                       where type.GetGenericTypeDefinition() == typeof(CopyConvertible<,>)
-                //                       select type;
-
-                //Debug.Log("Does this actually work?");
-                //foreach (var copyConvertible in copyConvertibles)
-                //{
-                //    Debug.Log("Yeah it does!");
-                //    _copyGameObject3DFieldInfo.SetValue(copyConvertible, _copyGameObject3D);
-                //}
 
                 return _copyGameObject3D!;
             }
@@ -102,30 +167,19 @@ namespace Unity2Dx
         {
             get
             {
-                if (!_copyGameObject2D)
+                if (!_copyGameObject2D && !CopyGameObjectCache.TryGetCopy2D(gameObject, out _copyGameObject2D))
                 {
                     _copyGameObject2D = new GameObject($"{name} {nameof(copyGameObject2D)}");
                     _copyGameObject2D.SetActive(false);
-
+                    _copyGameObject2D.hideFlags =
 #if UNITY_EDITOR
-                    // We cannot use DontDestroyOnLoad during edit mode, so instead we destroy the copy the next frame.
-                    if (!Application.IsPlaying(_copyGameObject2D))
-                    {
-                        UnityEditor.EditorApplication.delayCall += () => DestroyImmediate(_copyGameObject2D);
-                    }
-                    else
+                        EditorPrefs.GetBool(debugConvertibleCopiesPrefsKey, false) ?
+                        HideFlags.DontSave :
 #endif
-                    {
-                        DontDestroyOnLoad(_copyGameObject2D);
-                    }
+                        HideFlags.HideAndDontSave;
+                    
+                    CopyGameObjectCache.Add2D(gameObject, _copyGameObject2D);
                 }
-
-                //Debug.Log("Does this actually work?");
-                //foreach (var copyConvertible in GetComponents<CopyConvertible<Component, Component>>())
-                //{
-                //    Debug.Log("Yeah it does!");
-                //    copyConvertible._copyGameObject2D = _copyGameObject2D;
-                //}
 
                 return _copyGameObject2D!;
             }
@@ -133,10 +187,15 @@ namespace Unity2Dx
 
         protected virtual void OnDestroy()
         {
-            Debug.LogWarning("Optimize for multiple Convertibles on the same Game Object!");
+            if (CopyGameObjectCache.Remove(gameObject))
+            {
+                DestroyImmediate(_copyGameObject3D);
+            }
 
-            DestroyImmediate(_copyGameObject3D);
-            DestroyImmediate(_copyGameObject2D);
+            if (CopyGameObjectCache.Remove2D(gameObject))
+            {
+                DestroyImmediate(_copyGameObject2D);
+            }
         }
 
         [field: SerializeField] [field: ConvertibleSwitch] public bool is2DNot3D { get; private set; }
