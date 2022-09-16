@@ -63,7 +63,7 @@ namespace Unity2Dx.Physics
                 CapsuleCollider2D _ => typeof(CapsuleCollider),
                 BoxCollider _ => typeof(PolygonCollider2D),
                 MeshCollider _ => typeof(PolygonCollider2D),
-                PolygonCollider2D polygonCollider2D => polygonCollider2D.IsBoxCollider(transform2Dx.transform3D.rotation) ? typeof(BoxCollider) : typeof(MeshCollider),
+                PolygonCollider2D polygonCollider2D => polygonCollider2D.IsBoxCollider(/*transform2Dx.transform3D.rotation*/) ? typeof(BoxCollider) : typeof(MeshCollider),
                 _ => base.GetConversionType(component),
             };
         }

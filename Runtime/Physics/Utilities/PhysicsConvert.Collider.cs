@@ -296,7 +296,7 @@ namespace Unity2Dx.Physics
         /// <include file='./PhysicsConvert.xml' path='docs/PhysicsConvert/Box2DSafe/*'/>
         public static void ToBoxColliderSafe(this PolygonCollider2D polygonCollider2D, BoxCollider boxCollider)
         {
-            if (polygonCollider2D.IsBoxCollider(boxCollider.transform.rotation))
+            if (polygonCollider2D.IsBoxCollider(/*boxCollider.transform.rotation*/))
             {
                 polygonCollider2D.ToBoxCollider(boxCollider);
             }

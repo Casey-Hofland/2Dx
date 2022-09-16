@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Unity2Dx.Physics
@@ -7,67 +8,84 @@ namespace Unity2Dx.Physics
     public static class BoxCollider2DxTools
     {
         /// <include file='../Documentation.xml' path='docs/BoxCollider2DxTools/IsBox/*'/>
-        public static bool IsBoxCollider(this PolygonCollider2D polygonCollider2D, Quaternion rotation)
+        public static bool IsBoxCollider(this PolygonCollider2D polygonCollider2D/*, out Quaternion rotation*/)
         {
-            if(polygonCollider2D.pathCount == 1)
+            // Box consists of 1 path.
+            if (polygonCollider2D.pathCount != 1)
             {
-                var pointCount = polygonCollider2D.GetTotalPointCount();
+                return false;
+            }
 
-                if(pointCount == 4)
+            // Ensure the polygon collider 2D is active and enabled so we can get the shape count.
+            var enabled = polygonCollider2D.enabled;
+            polygonCollider2D.enabled = true;
+
+            var gameObject = polygonCollider2D.gameObject;
+            Queue<bool> actives = new();
+            while (!polygonCollider2D.isActiveAndEnabled)
+            {
+                actives.Enqueue(gameObject.activeInHierarchy);
+                gameObject.SetActive(true);
+
+                if (gameObject.transform.parent == null)
                 {
-                    return
-                        polygonCollider2D.points[0].x >= 0
-                        && polygonCollider2D.points[0].y >= 0
-                        && polygonCollider2D.points[0] == -polygonCollider2D.points[2]
-                        && polygonCollider2D.points[1] == -polygonCollider2D.points[3]
-                        && polygonCollider2D.points[0].x == -polygonCollider2D.points[1].x
-                        && polygonCollider2D.points[0].y == polygonCollider2D.points[1].y
-                        && ((Vector2)(rotation * Vector3.right) == Vector2.zero
-                            || (Vector2)(rotation * Vector3.up) == Vector2.zero
-                            || (Vector2)(rotation * Vector3.forward) == Vector2.zero);
+                    break;
                 }
-                else if(pointCount == 6)
+                gameObject = gameObject.transform.parent.gameObject;
+            }
+            var shapeCount = polygonCollider2D.shapeCount;
+
+            gameObject = polygonCollider2D.gameObject;
+            while (actives.TryDequeue(out bool active))
+            {
+                gameObject.SetActive(active);
+
+                if (gameObject.transform.parent == null)
                 {
-                    if(polygonCollider2D.points[0] == -polygonCollider2D.points[3]
-                        && polygonCollider2D.points[1] == -polygonCollider2D.points[4]
-                        && polygonCollider2D.points[2] == -polygonCollider2D.points[5])
-                    {
-                        Vector2 right = rotation * Vector3.right;
-                        Vector2 up = rotation * Vector3.up;
-                        Vector2 forward = rotation * Vector3.forward;
+                    break;
+                }
+                gameObject = gameObject.transform.parent.gameObject;
+            }
 
-                        var relativeRotation = polygonCollider2D.transform.rotation;
-                        Vector2 relativeRight = relativeRotation * (polygonCollider2D.points[0] - polygonCollider2D.points[1]);
-                        Vector2 relativeUp = relativeRotation * (polygonCollider2D.points[1] - polygonCollider2D.points[2]);
-                        Vector2 relativeForward = relativeRotation * (polygonCollider2D.points[2] - polygonCollider2D.points[3]);
+            polygonCollider2D.enabled = enabled;
 
-                        if(right == relativeRight)
-                        {
-                            if(up == relativeUp)
-                            {
-                                return forward == relativeForward;
-                            }
-                            else if(up == -relativeUp)
-                            {
-                                return forward == -relativeForward;
-                            }
-                        }
-                        else if(right == -relativeRight)
-                        {
-                            if(up == relativeUp)
-                            {
-                                return forward == -relativeForward;
-                            }
-                            else if(up == -relativeUp)
-                            {
-                                return forward == relativeForward;
-                            }
-                        }
-                    }
+            // Boxes consist of 1 shape.
+            if (shapeCount != 1)
+            {
+                return false;
+            }
+
+            // Boxes consist of either 4 points for a 2D representation, or 6 points for a 3D representation.
+            var pointCount = polygonCollider2D.GetTotalPointCount();
+            if (pointCount != 4 && pointCount != 6)
+            {
+                return false;
+            }
+
+            // Boxes have opposite vertexes from their center.
+            for (int i = 0, j = pointCount / 2; i < j; i++)
+            {
+                if (polygonCollider2D.points[i] != -polygonCollider2D.points[i + j])
+                {
+                    return false;
                 }
             }
 
-            return false;
+            // If there are 6 points in the polygon collider we implicitely know it is a box shape because:
+            //  - The first 3 points are opposite the last 3 points AND
+            //  - The collider creates only 1 shape.
+            // The first points proves the shape is parallel.
+            // The second point proves no angles exceed 180 degrees.
+            // These facts combined prove that the shape must be a 3D representation of a Box.
+            if (pointCount == 6)
+            {
+                return true;
+            }
+
+            // If there are 4 points, check if the polygon collider is right angled.
+            // We can skip a Dot operation by checking (1x, 1y) == -(0x, 2y) instead.
+            return polygonCollider2D.points[1].x == -polygonCollider2D.points[0].x
+                && polygonCollider2D.points[1].y == -polygonCollider2D.points[2].y;
         }
 
         /// <include file='../Documentation.xml' path='docs/BoxCollider2DxTools/CreateBox/*'/>
