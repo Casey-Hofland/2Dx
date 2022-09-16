@@ -12,8 +12,6 @@ namespace Unity2Dx.Physics
         /// <include file='./PhysicsCopy.xml' path='docs/PhysicsCopy/Rigidbody/*'/>
         public static void ToRigidbody(this Rigidbody rigidbody, Rigidbody other, bool setPosition, bool setRotation)
         {
-            other.hideFlags = rigidbody.hideFlags;
-
             other.angularDrag = rigidbody.angularDrag;
             other.angularVelocity = rigidbody.angularVelocity;
             other.centerOfMass = rigidbody.centerOfMass;
@@ -21,8 +19,9 @@ namespace Unity2Dx.Physics
             other.constraints = rigidbody.constraints;
             other.detectCollisions = rigidbody.detectCollisions;
             other.drag = rigidbody.drag;
-            other.inertiaTensor = rigidbody.inertiaTensor;
-            other.inertiaTensorRotation = rigidbody.inertiaTensorRotation;
+            //other.inertiaTensor = rigidbody.inertiaTensor;
+            //other.inertiaTensorRotation = rigidbody.inertiaTensorRotation;
+            //other.ResetInertiaTensor();
             other.interpolation = rigidbody.interpolation;
             other.isKinematic = rigidbody.isKinematic;
             other.mass = rigidbody.mass;
@@ -40,6 +39,7 @@ namespace Unity2Dx.Physics
             other.solverIterations = rigidbody.solverIterations;
             other.useGravity = rigidbody.useGravity;
             other.velocity = rigidbody.velocity;
+
         }
 
         /// <include file='./PhysicsCopy.xml' path='docs/PhysicsCopy/Rigidbody2D/*'/>
@@ -49,8 +49,6 @@ namespace Unity2Dx.Physics
         /// <include file='./PhysicsCopy.xml' path='docs/PhysicsCopy/Rigidbody2D/*'/>
         public static void ToRigidbody2D(this Rigidbody2D rigidbody2D, Rigidbody2D other, bool setPosition, bool setRotation)
         {
-            other.hideFlags = rigidbody2D.hideFlags;
-
             other.angularDrag = rigidbody2D.angularDrag;
             other.angularVelocity = rigidbody2D.angularVelocity;
             other.bodyType = rigidbody2D.bodyType;
@@ -59,7 +57,7 @@ namespace Unity2Dx.Physics
             other.constraints = rigidbody2D.constraints;
             other.drag = rigidbody2D.drag;
             other.gravityScale = rigidbody2D.gravityScale;
-            other.inertia = rigidbody2D.inertia;
+            //other.inertia = rigidbody2D.inertia;
             other.interpolation = rigidbody2D.interpolation;
             other.isKinematic = rigidbody2D.isKinematic;
             if (!(other.useAutoMass = rigidbody2D.useAutoMass))

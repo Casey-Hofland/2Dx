@@ -105,7 +105,6 @@ namespace Unity2Dx.Physics
         public static void ToPolygonCollider2D(this BoxCollider2D boxCollider2D, PolygonCollider2D polygonCollider2D)
         {
             polygonCollider2D.enabled = boxCollider2D.enabled;
-            polygonCollider2D.hideFlags = boxCollider2D.hideFlags;
             if(polygonCollider2D.attachedRigidbody && polygonCollider2D.attachedRigidbody.useAutoMass)
             {
                 polygonCollider2D.density = boxCollider2D.density;

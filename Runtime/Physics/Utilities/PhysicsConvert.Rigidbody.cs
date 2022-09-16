@@ -24,7 +24,6 @@ namespace Unity2Dx.Physics
                 rigidbody.useGravity
                 ? 1f
                 : 0f;
-            rigidbody2D.hideFlags = rigidbody.hideFlags;
             rigidbody2D.interpolation = (RigidbodyInterpolation2D)rigidbody.interpolation;
             rigidbody2D.mass = Mathf.Min(rigidbody.mass, 1000000f);
             rigidbody2D.sleepMode = RigidbodySleepMode2D.StartAwake;
@@ -41,7 +40,6 @@ namespace Unity2Dx.Physics
             rigidbody.angularDrag = rigidbody2D.angularDrag;
             rigidbody.angularVelocity = Vector3.forward * rigidbody2D.angularVelocity * Mathf.Deg2Rad;
             rigidbody.drag = rigidbody2D.drag;
-            rigidbody.hideFlags = rigidbody2D.hideFlags;
             rigidbody.interpolation = (RigidbodyInterpolation)rigidbody2D.interpolation;
             rigidbody.isKinematic = rigidbody2D.bodyType != RigidbodyType2D.Dynamic;
             rigidbody.mass = rigidbody2D.mass;

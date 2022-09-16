@@ -9,7 +9,6 @@ namespace Unity2Dx.Physics
         private static void GenericPropertiesToCollider(this Collider collider, Collider other)
         {
             other.enabled = collider.enabled;
-            other.hideFlags = collider.hideFlags;
 
             other.contactOffset = collider.contactOffset;
             other.sharedMaterial = collider.sharedMaterial;
@@ -18,7 +17,6 @@ namespace Unity2Dx.Physics
         private static void GenericPropertiesToCollider2D(this Collider2D collider2D, Collider2D other)
         {
             other.enabled = collider2D.enabled;
-            other.hideFlags = collider2D.hideFlags;
 
             if (other.attachedRigidbody && other.attachedRigidbody.useAutoMass)
             {

@@ -9,14 +9,10 @@ namespace Unity2Dx.Physics
         /// <include file='./PhysicsConvert.xml' path='docs/PhysicsConvert/CharacterController/*'/>
         public static void ToCharacterController2D(this CharacterController characterController, CharacterController2D characterController2D)
         {
-            var capsuleCollider2DEnabled = characterController2D.capsuleCollider2D.enabled;
-            var capsuleCollider2DHideFlags = characterController2D.capsuleCollider2D.hideFlags;
             characterController.GenericPropertiesToCollider2D(characterController2D);
-            characterController2D.capsuleCollider2D.enabled = capsuleCollider2DEnabled;
-            characterController2D.capsuleCollider2D.hideFlags = capsuleCollider2DHideFlags;
+            ((IAuthor)characterController2D).Serialize();
 
             characterController2D.enabled = characterController.enabled;
-            characterController2D.hideFlags = characterController.hideFlags;
 
             characterController2D.detectCollisions = characterController.detectCollisions;
             characterController2D.enableOverlapRecovery = characterController.enableOverlapRecovery;
@@ -34,7 +30,6 @@ namespace Unity2Dx.Physics
             characterController2D.capsuleCollider2D.GenericPropertiesToCollider(characterController);
 
             characterController.enabled = characterController2D.enabled;
-            characterController.hideFlags = characterController2D.hideFlags;
 
             characterController.detectCollisions = characterController2D.detectCollisions;
             characterController.enableOverlapRecovery = characterController2D.enableOverlapRecovery;

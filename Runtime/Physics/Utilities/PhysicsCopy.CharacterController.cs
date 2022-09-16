@@ -25,8 +25,8 @@ namespace Unity2Dx.Physics
         public static void ToCharacterController2D(this CharacterController2D characterController2D, CharacterController2D other)
         {
             characterController2D.capsuleCollider2D.GenericPropertiesToCollider2D(other);
+            ((IAuthor)other).Serialize();
 
-            other.hideFlags = characterController2D.hideFlags;
             other.enabled = characterController2D.enabled;
 
             other.detectCollisions = characterController2D.detectCollisions;

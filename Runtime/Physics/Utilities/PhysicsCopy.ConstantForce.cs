@@ -9,7 +9,6 @@ namespace Unity2Dx.Physics
         public static void ToConstantForce(this ConstantForce constantForce, ConstantForce other)
         {
             other.enabled = constantForce.enabled;
-            other.hideFlags = constantForce.hideFlags;
 
             other.force = constantForce.force;
             other.relativeForce = constantForce.relativeForce;
@@ -21,7 +20,6 @@ namespace Unity2Dx.Physics
         public static void ToConstantForce2D(this ConstantForce2D constantForce2D, ConstantForce2D other)
         {
             other.enabled = constantForce2D.enabled;
-            other.hideFlags = constantForce2D.hideFlags;
 
             other.force = constantForce2D.force;
             other.relativeForce = constantForce2D.relativeForce;

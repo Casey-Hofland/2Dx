@@ -35,7 +35,6 @@ namespace Unity2Dx.Physics
 
             // Carry over the physicMaterial settings to its 2D equivalent.
             physicsMaterial2D.name = physicMaterial.name;
-            physicsMaterial2D.hideFlags = physicMaterial.hideFlags;
             physicsMaterial2D.bounciness = physicMaterial.bounciness;
             physicsMaterial2D.friction = physicMaterial.dynamicFriction;
 
@@ -61,7 +60,6 @@ namespace Unity2Dx.Physics
 
             // Carry over the physicsMaterial2D settings to its 3D equivalent.
             physicMaterial.name = physicsMaterial2D.name;
-            physicMaterial.hideFlags = physicsMaterial2D.hideFlags;
             physicMaterial.bounciness = physicsMaterial2D.bounciness;
             physicMaterial.dynamicFriction = physicsMaterial2D.friction;
 

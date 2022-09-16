@@ -7,8 +7,6 @@ namespace Unity2Dx.Physics
     {
         private static void GenericPropertiesToJoint(this Joint joint, Joint other)
         {
-            other.hideFlags = joint.hideFlags;
-
             other.anchor = joint.anchor;
             other.autoConfigureConnectedAnchor = joint.autoConfigureConnectedAnchor;
             other.axis = joint.axis;
@@ -26,7 +24,6 @@ namespace Unity2Dx.Physics
         private static void GenericPropertiesToJoint2D(this Joint2D joint2D, Joint2D other)
         {
             other.enabled = joint2D.enabled;
-            other.hideFlags = joint2D.hideFlags;
 
             other.breakForce = joint2D.breakForce;
             other.breakTorque = joint2D.breakTorque;

@@ -10,7 +10,6 @@ namespace Unity2Dx.Physics
         private static void GenericPropertiesToCollider2D(this Collider collider, Collider2D collider2D)
         {
             collider2D.enabled = collider.enabled;
-            collider2D.hideFlags = collider.hideFlags;
 
             collider2D.sharedMaterial = collider.sharedMaterial.AsPhysicsMaterial2D();
         }
@@ -18,7 +17,6 @@ namespace Unity2Dx.Physics
         private static void GenericPropertiesToCollider(this Collider2D collider2D, Collider collider)
         {
             collider.enabled = collider2D.enabled;
-            collider.hideFlags = collider2D.hideFlags;
 
             collider.sharedMaterial = collider2D.sharedMaterial.AsPhysicMaterial();
         }
