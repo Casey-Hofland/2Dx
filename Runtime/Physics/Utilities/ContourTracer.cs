@@ -97,7 +97,7 @@ namespace Unity2Dx.Physics
             bool IsBorder(int _x, int _y)
             {
                 int pixelIndex = _y * texture.width + _x;
-                return pixels[pixelIndex].r != 0f;
+                return pixels?[pixelIndex].r != 0f;
             }
             bool IsBorderSafe(int _x, int _y) => _y >= 0 && _y < texture.height && _x >= 0 && _x < texture.width && IsBorder(_x, _y);
 

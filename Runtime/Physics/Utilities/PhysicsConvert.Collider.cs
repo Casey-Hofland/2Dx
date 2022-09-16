@@ -304,13 +304,22 @@ namespace Unity2Dx.Physics
         #endregion
 
         #region MeshCollider & PolygonCollider2D
-        private static List<Vector2> points = new List<Vector2>();
-        private static List<Vector2> path = new List<Vector2>();
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void RegisterOutliner()
+        {
+            points = new();
+            path = new();
 
-        private static readonly Outliner defaultOutliner = ScriptableObject.CreateInstance<Outliner>();
-        private static Texture2D texture2D = new Texture2D(0, 0, TextureFormat.R8, false);
-        private static Rect rect = new Rect();
-        private static readonly Vector2 centerPivot = new Vector2(0.5f, 0.5f);
+            defaultOutliner = ScriptableObject.CreateInstance<Outliner>();
+            rect = new();
+        }
+
+        private static List<Vector2> points = new();
+        private static List<Vector2> path = new();
+
+        private static Outliner defaultOutliner = ScriptableObject.CreateInstance<Outliner>();
+        private static Rect rect = new();
+        private static readonly Vector2 centerPivot = new(0.5f, 0.5f);
 
         private static Camera? _renderCamera;
         private static Camera renderCamera
@@ -478,14 +487,15 @@ namespace Unity2Dx.Physics
             renderCamera.farClipPlane = Mathf.Max(bounds.size.z, 0.01f); // We assume the nearClipPlane to be 0, otherwise we would need to do renderCamera.nearClipPlane + 0.01f.
 
             // Render the camera and read it to a Texture2D.
-            var renderTexture = RenderTexture.GetTemporary(pixelWidth, pixelHeight, 0, RenderTextureFormat.R8, RenderTextureReadWrite.Default, 1, RenderTextureMemoryless.Color);
+            //var renderTexture = RenderTexture.GetTemporary(pixelWidth, pixelHeight, 0, RenderTextureFormat.R8, RenderTextureReadWrite.Default, 1, RenderTextureMemoryless.Color);
+            var renderTexture = RenderTexture.GetTemporary(pixelWidth, pixelHeight, 16, RenderTextureFormat.R8, RenderTextureReadWrite.Default, 1, RenderTextureMemoryless.Color | RenderTextureMemoryless.Depth);
             var activeRenderTexture = RenderTexture.active;
             RenderTexture.active = renderCamera.targetTexture = renderTexture;
 
             renderCamera.gameObject.SetActive(true);
             renderCamera.Render();
 
-            texture2D.Reinitialize(pixelWidth, pixelHeight);
+            var texture2D = new Texture2D(pixelWidth, pixelHeight, TextureFormat.R8, false);
             rect.width = pixelWidth;
             rect.height = pixelHeight;
             texture2D.ReadPixels(rect, 0, 0, false);
