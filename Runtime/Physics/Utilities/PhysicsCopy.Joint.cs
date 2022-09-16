@@ -1,5 +1,6 @@
 #nullable enable
 using UnityEngine;
+using UnityExtras;
 
 namespace Unity2Dx.Physics
 {
@@ -19,6 +20,11 @@ namespace Unity2Dx.Physics
             other.enableCollision = joint.enableCollision;
             other.enablePreprocessing = joint.enablePreprocessing;
             other.massScale = joint.massScale;
+
+            if (PhysicsConvert.connectedBodies.Remove(joint, out var connectedBody))
+            {
+                ConnectedBodyManager.Disconnect(connectedBody);
+            }
         }
 
         private static void GenericPropertiesToJoint2D(this Joint2D joint2D, Joint2D other)
@@ -29,6 +35,11 @@ namespace Unity2Dx.Physics
             other.breakTorque = joint2D.breakTorque;
             other.connectedBody = joint2D.connectedBody;
             other.enableCollision = joint2D.enableCollision;
+
+            if (PhysicsConvert.connectedBody2Ds.Remove(joint2D, out var connectedBody))
+            {
+                ConnectedBodyManager.Disconnect(connectedBody);
+            }
         }
 
         private static void GenericPropertiesToJoint2D(this AnchoredJoint2D anchoredJoint2D, AnchoredJoint2D other)
@@ -76,6 +87,75 @@ namespace Unity2Dx.Physics
             other.dampingRatio = springJoint2D.dampingRatio;
             other.distance = springJoint2D.distance;
             other.frequency = springJoint2D.frequency;
+        }
+
+        public static void ToSliderJoint(this SliderJoint sliderJoint, SliderJoint other)
+        {
+            sliderJoint.configurableJoint.GenericPropertiesToJoint(other.configurableJoint);
+            ((IAuthor)other).Serialize();
+
+            other.angle = sliderJoint.angle;
+            other.bounciness = sliderJoint.bounciness;
+            other.contactDistance = sliderJoint.contactDistance;
+            other.maxDistance = sliderJoint.maxDistance;
+            other.minDistance = sliderJoint.minDistance;
+            other.revolving = sliderJoint.revolving;
+            other.useLimits = sliderJoint.useLimits;
+        }
+
+        public static void ToSliderJoint2D(this SliderJoint2D sliderJoint2D, SliderJoint2D other)
+        {
+            sliderJoint2D.GenericPropertiesToJoint2D(other);
+
+            other.angle = sliderJoint2D.angle;
+            other.autoConfigureAngle = sliderJoint2D.autoConfigureAngle;
+            other.limits = sliderJoint2D.limits;
+            other.motor = sliderJoint2D.motor;
+            other.useLimits = sliderJoint2D.useLimits;
+            other.useMotor = sliderJoint2D.useMotor;
+        }
+
+        public static void ToConfigurableJoint(this ConfigurableJoint configurableJoint, ConfigurableJoint other)
+        {
+            configurableJoint.GenericPropertiesToJoint(other);
+
+            other.angularXDrive = configurableJoint.angularXDrive;
+            other.angularXLimitSpring = configurableJoint.angularXLimitSpring;
+            other.angularXMotion = configurableJoint.angularXMotion;
+            other.angularYLimit = configurableJoint.angularYLimit;
+            other.angularYMotion = configurableJoint.angularYMotion;
+            other.angularYZDrive = configurableJoint.angularYZDrive;
+            other.angularYZLimitSpring = configurableJoint.angularYZLimitSpring;
+            other.angularZLimit = configurableJoint.angularZLimit;
+            other.angularZMotion = configurableJoint.angularZMotion;
+
+            other.configuredInWorldSpace = configurableJoint.configuredInWorldSpace;
+            other.rotationDriveMode = configurableJoint.rotationDriveMode;
+            other.secondaryAxis = configurableJoint.secondaryAxis;
+            other.slerpDrive = configurableJoint.slerpDrive;
+            other.swapBodies = configurableJoint.swapBodies;
+
+            other.lowAngularXLimit = configurableJoint.lowAngularXLimit;
+            other.highAngularXLimit = configurableJoint.highAngularXLimit;
+
+            other.linearLimit = configurableJoint.linearLimit;
+            other.linearLimitSpring = configurableJoint.linearLimitSpring;
+
+            other.projectionAngle = configurableJoint.projectionAngle;
+            other.projectionDistance = configurableJoint.projectionDistance;
+            other.projectionMode = configurableJoint.projectionMode;
+
+            other.targetAngularVelocity = configurableJoint.targetAngularVelocity;
+            other.targetPosition = configurableJoint.targetPosition;
+            other.targetRotation = configurableJoint.targetRotation;
+            other.targetVelocity = configurableJoint.targetVelocity;
+
+            other.xDrive = configurableJoint.xDrive;
+            other.xMotion = configurableJoint.xMotion;
+            other.yDrive = configurableJoint.yDrive;
+            other.yMotion = configurableJoint.yMotion;
+            other.zDrive = configurableJoint.zDrive;
+            other.zMotion = configurableJoint.zMotion;
         }
     }
 }
