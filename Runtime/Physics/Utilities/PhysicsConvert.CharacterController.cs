@@ -47,36 +47,12 @@ namespace Unity2Dx.Physics
 
         public static void ToCharacterMover2D(this CharacterMover characterMover, CharacterMover2D characterMover2D)
         {
-            characterMover2D.enabled = characterMover.enabled;
-
-            characterMover2D.coyoteTime = characterMover.coyoteTime;
-            characterMover2D.fastFallRatio = characterMover.fastFallRatio;
-            characterMover2D.gravityScale = characterMover.gravityScale;
-            characterMover2D.jumpBuffer = characterMover.jumpBuffer;
-            characterMover2D.jumpHeight = characterMover.jumpHeight;
-            characterMover2D.motion = characterMover.motion;
-            characterMover2D.moveSpeed = characterMover.moveSpeed;
-            characterMover2D.peakTime = characterMover.peakTime;
-            characterMover2D.speedChangeRate = characterMover.speedChangeRate;
-            characterMover2D.sprintBoost = characterMover.sprintBoost;
-            characterMover2D.targetMotion = characterMover.targetMotion;
+            characterMover.ToCharacterMoverBase(characterMover2D);
         }
 
         public static void ToCharacterMover(this CharacterMover2D characterMover2D, CharacterMover characterMover)
         {
-            characterMover.enabled = characterMover2D.enabled;
-
-            characterMover.coyoteTime = characterMover2D.coyoteTime;
-            characterMover.fastFallRatio = characterMover2D.fastFallRatio;
-            characterMover.gravityScale = characterMover2D.gravityScale;
-            characterMover.jumpBuffer = characterMover2D.jumpBuffer;
-            characterMover.jumpHeight = characterMover2D.jumpHeight;
-            characterMover.motion = characterMover2D.motion;
-            characterMover.moveSpeed = characterMover2D.moveSpeed;
-            characterMover.peakTime = characterMover2D.peakTime;
-            characterMover.speedChangeRate = characterMover2D.speedChangeRate;
-            characterMover.sprintBoost = characterMover2D.sprintBoost;
-            characterMover.targetMotion = characterMover2D.targetMotion;
+            characterMover2D.ToCharacterMoverBase(characterMover);
         }
     }
 }

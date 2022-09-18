@@ -40,39 +40,34 @@ namespace Unity2Dx.Physics
             other.stepOffset = characterController2D.stepOffset;
         }
 
+        public static void ToCharacterMoverBase(this CharacterMoverBase characterMoverBase, CharacterMoverBase other)
+        {
+            other.enabled = characterMoverBase.enabled;
+
+            other.allowPerpetualJump = characterMoverBase.allowPerpetualJump;
+            other.coyoteTime = characterMoverBase.coyoteTime;
+            other.fastFallRatio = characterMoverBase.fastFallRatio;
+            other.gravityScale = characterMoverBase.gravityScale;
+            other.jumpBuffer = characterMoverBase.jumpBuffer;
+            other.jumpHeight = characterMoverBase.jumpHeight;
+            other.motion = characterMoverBase.motion;
+            other.moveSpeed = characterMoverBase.moveSpeed;
+            other.peakTime = characterMoverBase.peakTime;
+            other.speedChangeRate = characterMoverBase.speedChangeRate;
+            other.sprintBoost = characterMoverBase.sprintBoost;
+            other.targetMotion = characterMoverBase.targetMotion;
+        }
+
         public static void ToCharacterMover(this CharacterMover characterMover, CharacterMover other)
         {
-            other.enabled = characterMover.enabled;
+            characterMover.ToCharacterMoverBase(other);
 
-            other.coyoteTime = characterMover.coyoteTime;
-            other.fastFallRatio = characterMover.fastFallRatio;
-            other.gravityScale = characterMover.gravityScale;
-            other.jumpBuffer = characterMover.jumpBuffer;
-            other.jumpHeight = characterMover.jumpHeight;
-            other.motion = characterMover.motion;
-            other.moveSpeed = characterMover.moveSpeed;
-            other.peakTime = characterMover.peakTime;
             other.rotationSpeed = characterMover.rotationSpeed;
-            other.speedChangeRate = characterMover.speedChangeRate;
-            other.sprintBoost = characterMover.sprintBoost;
-            other.targetMotion = characterMover.targetMotion;
         }
 
         public static void ToCharacterMover2D(this CharacterMover2D characterMover2D, CharacterMover2D other)
         {
-            other.enabled = characterMover2D.enabled;
-
-            other.coyoteTime = characterMover2D.coyoteTime;
-            other.fastFallRatio = characterMover2D.fastFallRatio;
-            other.gravityScale = characterMover2D.gravityScale;
-            other.jumpBuffer = characterMover2D.jumpBuffer;
-            other.jumpHeight = characterMover2D.jumpHeight;
-            other.motion = characterMover2D.motion;
-            other.moveSpeed = characterMover2D.moveSpeed;
-            other.peakTime = characterMover2D.peakTime;
-            other.speedChangeRate = characterMover2D.speedChangeRate;
-            other.sprintBoost = characterMover2D.sprintBoost;
-            other.targetMotion = characterMover2D.targetMotion;
+            characterMover2D.ToCharacterMoverBase(other);
         }
 
         public static void ToFirstPersonCharacter(this FirstPersonCharacter firstPersonCharacter, FirstPersonCharacter other)
