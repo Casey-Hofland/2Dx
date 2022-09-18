@@ -40,9 +40,9 @@ namespace Unity2Dx.Physics
             anchoredJoint2D.autoConfigureConnectedAnchor = joint.autoConfigureConnectedAnchor;
 
             Debug.LogWarning($"TODO: in the special case that either only {nameof(joint)} or {nameof(anchoredJoint2D)} has a connected body, the single connected body is used to calculate the connected anchor. This is a hotfix for 2Dx conversion but, for all intends and purposes, is an issue, for example in the case that a {nameof(Joint)} is converted to a {nameof(AnchoredJoint2D)} that is not (about to be) part of the same game object.");
-            Component connectedBody = joint.connectedBody ? joint.connectedBody : anchoredJoint2D.connectedBody;
-            Component connectedBody2D = anchoredJoint2D.connectedBody ? anchoredJoint2D.connectedBody : joint.connectedBody;
-            if (connectedBody && connectedBody2D)
+            Component? connectedBody = joint.connectedBody ? joint.connectedBody : anchoredJoint2D.connectedBody;
+            Component? connectedBody2D = anchoredJoint2D.connectedBody ? anchoredJoint2D.connectedBody : joint.connectedBody;
+            if (connectedBody != null && connectedBody2D != null)
             {
                 anchoredJoint2D.connectedAnchor = joint.connectedAnchor.ToVector2D(connectedBody, connectedBody2D, RotationSource.ZOnly);
             }
@@ -73,9 +73,9 @@ namespace Unity2Dx.Physics
             joint.autoConfigureConnectedAnchor = anchoredJoint2D.autoConfigureConnectedAnchor;
 
             Debug.LogWarning($"TODO: in the special case that either only {nameof(joint)} or {nameof(anchoredJoint2D)} has a connected body, the single connected body is used to calculate the connected anchor. This is a hotfix for 2Dx conversion but, for all intends and purposes, is an issue, for example in the case that a {nameof(Joint)} is converted to a {nameof(AnchoredJoint2D)} that is not (about to be) part of the same game object.");
-            Component connectedBody2D = anchoredJoint2D.connectedBody ? anchoredJoint2D.connectedBody : joint.connectedBody;
-            Component connectedBody = joint.connectedBody ? joint.connectedBody : anchoredJoint2D.connectedBody;
-            if (connectedBody2D && connectedBody)
+            Component? connectedBody2D = anchoredJoint2D.connectedBody ? anchoredJoint2D.connectedBody : joint.connectedBody;
+            Component? connectedBody = joint.connectedBody ? joint.connectedBody : anchoredJoint2D.connectedBody;
+            if (connectedBody2D != null && connectedBody != null)
             {
                 joint.connectedAnchor = anchoredJoint2D.connectedAnchor.ToVector(connectedBody2D, connectedBody, joint.connectedAnchor, RotationSource.ZOnly);
             }
@@ -92,6 +92,18 @@ namespace Unity2Dx.Physics
         {
             sliderJoint.configurableJoint.GenericPropertiesToJoint2D(sliderJoint2D);
 
+            Debug.LogWarning($"TODO: in the special case that either only {nameof(sliderJoint)} or {nameof(sliderJoint2D)} has a connected body, the single connected body is used to calculate the connected anchor. This is a hotfix for 2Dx conversion but, for all intends and purposes, is an issue, for example in the case that a {nameof(Joint)} is converted to a {nameof(AnchoredJoint2D)} that is not (about to be) part of the same game object.");
+            Component? connectedBody = sliderJoint.connectedBody ? sliderJoint.connectedBody : sliderJoint2D.connectedBody;
+            Component? connectedBody2D = sliderJoint2D.connectedBody ? sliderJoint2D.connectedBody : sliderJoint.connectedBody;
+            if (connectedBody != null && connectedBody2D != null)
+            {
+                sliderJoint2D.connectedAnchor = sliderJoint.connectedAnchor.ToVector2D(connectedBody, connectedBody2D, RotationSource.ZOnly);
+            }
+            else
+            {
+                sliderJoint2D.connectedAnchor = sliderJoint.connectedAnchor;
+            }
+
             sliderJoint2D.autoConfigureAngle = false;
             sliderJoint2D.angle = sliderJoint.angle.eulerAngles.z;
             var limits = sliderJoint2D.limits;
@@ -105,6 +117,20 @@ namespace Unity2Dx.Physics
         {
             sliderJoint2D.GenericPropertiesToJoint(sliderJoint.configurableJoint);
             ((IAuthor)sliderJoint).Serialize();
+
+            Debug.LogWarning($"TODO: in the special case that either only {nameof(sliderJoint)} or {nameof(sliderJoint2D)} has a connected body, the single connected body is used to calculate the connected anchor. This is a hotfix for 2Dx conversion but, for all intends and purposes, is an issue, for example in the case that a {nameof(Joint)} is converted to a {nameof(AnchoredJoint2D)} that is not (about to be) part of the same game object.");
+            Component? connectedBody2D = sliderJoint2D.connectedBody ? sliderJoint2D.connectedBody : sliderJoint.connectedBody;
+            Component? connectedBody = sliderJoint.connectedBody ? sliderJoint.connectedBody : sliderJoint2D.connectedBody;
+            if (connectedBody2D != null && connectedBody != null)
+            {
+                sliderJoint.connectedAnchor = sliderJoint2D.connectedAnchor.ToVector(connectedBody2D, connectedBody, sliderJoint.connectedAnchor, RotationSource.ZOnly);
+            }
+            else
+            {
+                Vector3 connectedAnchor = sliderJoint2D.connectedAnchor;
+                connectedAnchor.z = sliderJoint.connectedAnchor.z;
+                sliderJoint.connectedAnchor = connectedAnchor;
+            }
 
             sliderJoint.angle = Quaternion.Euler(0f, 0f, sliderJoint2D.angle);
             ((IAuthor)sliderJoint).Serialize();
